@@ -5,7 +5,6 @@
 ##' 
 ##' @return a vector with cloud amount estimatives
 ##' @author Roilan Hernandez, Guilherme Goergen and Jonatan Tatsch
-##' @references 
     CQB <- function(data){
         a <- maxlim(with(data,0.34^2 + 4 * 0.458 * (0.803-K)),max_ = Inf)
         maxlim( ( 0.34-sqrt(a) ) / (-2 * 0.458))
@@ -30,7 +29,7 @@
 ##' Amount of cloud estimatives functions.
 ##' 
 ##' @param data a data frame with all atmospherics variables
-##' 
+##' @param alt Site sea level heigth
 ##' @return a vector with cloud amount estimatives
 ##' @author Roilan Hernandez, Guilherme Goergen and Jonatan Tatsch
     CKZ <- function(data, alt = 88.){ 
@@ -231,7 +230,7 @@ EBR <- function(data,func){ with(data,maxlim( 0.51 + 0.066*sqrt(es) )) }        
     maxlim <- function(i,max_=1,min_=0){ sapply(i,function(i) min(max(i,min_),max_) )  }
     
     kloudines <- function(Rg,lon=-53.76,lat=-29.72,timezone=-4){
-        require(REddyProc)
+        # require(REddyProc)
         
         if(!("date" %in% names(Rg))) 
             return(message("Need Date and Global Radiation column only"))
@@ -240,29 +239,29 @@ EBR <- function(data,func){ with(data,maxlim( 0.51 + 0.066*sqrt(es) )) }        
         
         Rg <- 
             Rg %>%
-            mutate(Rpot = fCalcPotRadiation(DoY.V.n = format(date,"%j") %>% as.numeric,
-                                            Hour.V.n = format(date,"%H") %>% as.numeric,
-                                            Lat_deg.n = lat,
-                                            Long_deg.n = lon,
-                                            TimeZone_h.n = -4,
-                                            useSolartime.b = TRUE)
+            dplyr::mutate(Rpot = REddyProc::fCalcPotRadiation(DoY.V.n = format(date,"%j") %>% as.numeric,
+                                                              Hour.V.n = format(date,"%H") %>% as.numeric,
+                                                              Lat_deg.n = lat,
+                                                              Long_deg.n = lon,
+                                                              TimeZone_h.n = -4,
+                                                              useSolartime.b = TRUE)
             )  %>%
-            mutate(K = Rg/Rpot) %>%
-            mutate(K = ifelse(Rpot < 0.01,0.0,K)) %>%
-            mutate(K = maxlim(K)) %>%
-            mutate(K = ifelse(is.na(K), 0.0,K)) %>%
-            select(date,K)
+            dplyr::mutate(K = Rg/Rpot) %>%
+            dplyr::mutate(K = ifelse(Rpot < 0.01,0.0,K)) %>%
+            dplyr::mutate(K = maxlim(K)) %>%
+            dplyr::mutate(K = ifelse(is.na(K), 0.0,K)) %>%
+            dplyr::select(date,K)
             
         return(Rg)
     }
 
     Rg_Rpot <- function(date,lon=-53.76,lat=-29.72,timezone=-4){
-        require(REddyProc)
+        # require(REddyProc)
         
          if(lon==-53.76 & lat==-29.72) 
             warning("Latitude e Longitude de Santa Maria",immediate. = TRUE)
         
-        fCalcPotRadiation(DoY.V.n = format(date,"%j") %>% as.numeric,
+        REddyProc::fCalcPotRadiation(DoY.V.n = format(date,"%j") %>% as.numeric,
                                      Hour.V.n = format(date,"%H") %>% as.numeric,
                                      Lat_deg.n = lat,
                                      Long_deg.n = lon,
@@ -277,62 +276,80 @@ EBR <- function(data,func){ with(data,maxlim( 0.51 + 0.066*sqrt(es) )) }        
         roli_est <-  with(data, emis_*sigma*Ta^4)   
         out_rol <- data.frame(ROL = roli_est) 
         names(out_rol) <- paste(E_fun,C_fun,sep = "_")
-        # with(data, data_frame(date = date, 
-        #                       roli_obs = Li, 
-        #                       roli_est = roli_est))
         out_rol
     }
 
     
+    to.daylight <- 
+        function(date,lon = -47.63,lat = -21.61, timezone = -3){
+
+            
+            if(lon == -47.63 & lat == -21.61 & timezone == -3) 
+                message("Warning: This data are only valid for PdG site. RHV")
+            
+            date1 = format(date, "%j") %>% as.numeric()
+            date2 = format(date, "%H") %>% as.numeric()
+            
+            ifelse(REddyProc::fCalcPotRadiation(DoY.V.n = date1,
+                                     Hour.V.n = date2,  
+                                     Lat_deg.n = lat,
+                                     Long_deg.n = lon,
+                                     TimeZone_h.n = timezone,    
+                                     useSolartime.b = TRUE ) > 0 , 
+                   "day","night")
+            
+        }
+    
+    
     eval.params <- function(data_){
         
         data_ <-  
-            cutData(x = data_,type = "season",hemisphere = "southern") %>%
-            mutate(daytime = to.daylight(date,lon=-53.76,lat=-29.72,timezone=-4))
+            openair::cutData(x = data_,type = "season",hemisphere = "southern") %>%
+            dplyr::mutate(daytime = to.daylight(date,lon=-53.76,lat=-29.72,timezone=-4))
         
         lapply(unique(data_$season) %>% as.vector, function(j){ 
             # j <- unique(data_$season)[2] %>% as.vector
             # 
             season.data <-  data_ %>%
-                filter(season == j)
+                dplyr::filter(season == j)
             
             lapply(unique(season.data$daytime), function(k){
                 # k <- unique(season.data$daytime)[1]
-                in.data <- season.data %>% filter(daytime == k) 
+                in.data <- season.data %>% dplyr::filter(daytime == k) 
                 
                 estats.roli <- 
                     lapply(unique(in.data$params), function(i){ # i = "FBM_CQB"
                         
                         tdy.roli.filt <- 
                             in.data %>%
-                            filter(params == i)
+                            dplyr::filter(params == i)
                         
                         gof.data <- 
-                            gof(sim = tdy.roli.filt$value,
-                                obs = tdy.roli.filt$Li,
-                                na.rm = TRUE) %>% 
+                            hydroGOF::gof(sim = tdy.roli.filt$value,
+                                          obs = tdy.roli.filt$Li,
+                                          na.rm = TRUE) %>% 
                             as.data.frame() %>%
-                            set_names(i) 
+                            magrittr::set_names(i) 
                         
                     }) %>% bind_cols() 
                 
                 estats.roli$stats <- rownames(gof(1:10,10:1))
                 
                 estats.roli %<>% 
-                    gather(params,value,-stats) %>%
-                    arrange(stats)
+                    tidyr::gather(params,value,-stats) %>%
+                    dplyr::arrange(stats)
                 
                 estats.roli.arrange <- 
                     estats.roli %>% 
-                    separate(params,sep = "_",into = c("emis","aten")) %>% 
-                    spread(emis,value) 
+                    tidyr::separate(params,sep = "_",into = c("emis","aten")) %>% 
+                    tidyr::spread(emis,value) 
                 
                 estats.roli.arrange
                 
-            }) %>% set_names(unique(data_$daytime))
+            }) %>% magrittr::set_names(unique(data_$daytime))
             
             
-        }) %>% set_names(unique(data_$season) %>% as.vector)
+        }) %>% magrittr::set_names(unique(data_$season) %>% as.vector)
         
         
     }

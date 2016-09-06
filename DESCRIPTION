@@ -1,0 +1,20 @@
+Package: ROLi
+Title: Evaluate various downward longwave parametrizations
+Version: 0.0.1
+Authors@R: person("Roilan", "Hernández", email = "roylanhv@gmail.com", role = c("aut", "cre"))
+Description: Evaluate various downward longwave parametrizations. Determine the best schemes
+        for clear and cloudy skies.
+Depends:
+    R (>= 3.2.4)
+License: GPL-3
+LazyData: true
+Imports:
+    dplyr,
+    magrittr,
+    tidyr,
+    REddyProc
+RoxygenNote: 5.0.1
+Suggests: knitr,
+    rmarkdown
+URL: http://github.com/roylanhv/ROLi
+BugReports:	http://github.com/roylanhv/ROLi/issues

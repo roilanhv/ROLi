@@ -52,7 +52,7 @@ head(x)
 smoothScatter(x, xlab = "x1", ylab = "x2")
 ```
 
-<img src="README_files/figure-html/unnamed-chunk-1-1.png" style="display: block; margin: auto;" />
+<img src="Readme_files/figure-html/unnamed-chunk-1-1.png" style="display: block; margin: auto;" />
 
 You can include code snippets of languages other than R, but note that
 the block header has no curly brackets around the language name.

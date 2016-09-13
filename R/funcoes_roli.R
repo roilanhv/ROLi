@@ -228,7 +228,17 @@ EBR <- function(data,func){ with(data,maxlim( 0.51 + 0.066*sqrt(es) )) }        
 #  FUNÇÕES NECESSÁRIAS
 #
     maxlim <- function(i,max_=1,min_=0){ sapply(i,function(i) min(max(i,min_),max_) )  }
-    
+   
+##' Incoming solar radiation atenuattion (K)
+##' 
+##' @param Rg global radiation serie.
+##' @param lon longitude from local analisys 
+##' @param lat latitude from local analisys
+##' @return Data frame with date and K index columns
+##' @author Roilan Hernandez, Guilherme Goergen and Jonatan Tatsch
+##' @importFrom stats setNames
+##' @importFrom dplyr %>% mutate select
+##' @importFrom REddyProc fCalcPotRadiation
     kloudines <- function(Rg,lon=-53.76,lat=-29.72,timezone=-4){
         # require(REddyProc)
         
@@ -239,38 +249,52 @@ EBR <- function(data,func){ with(data,maxlim( 0.51 + 0.066*sqrt(es) )) }        
         
         Rg <- 
             Rg %>%
-            dplyr::mutate(Rpot = REddyProc::fCalcPotRadiation(DoY.V.n = format(date,"%j") %>% as.numeric,
+            mutate(Rpot = fCalcPotRadiation(DoY.V.n = format(date,"%j") %>% as.numeric,
                                                               Hour.V.n = format(date,"%H") %>% as.numeric,
                                                               Lat_deg.n = lat,
                                                               Long_deg.n = lon,
                                                               TimeZone_h.n = -4,
                                                               useSolartime.b = TRUE)
             )  %>%
-            dplyr::mutate(K = Rg/Rpot) %>%
-            dplyr::mutate(K = ifelse(Rpot < 0.01,0.0,K)) %>%
-            dplyr::mutate(K = maxlim(K)) %>%
-            dplyr::mutate(K = ifelse(is.na(K), 0.0,K)) %>%
-            dplyr::select(date,K)
+            mutate(K = Rg/Rpot) %>%
+            mutate(K = ifelse(Rpot < 0.01,0.0,K)) %>%
+            mutate(K = maxlim(K)) %>%
+            mutate(K = ifelse(is.na(K), 0.0,K)) %>%
+            select(date,K)
             
         return(Rg)
     }
 
+##' Potencial Radiation from date vector
+##' 
+##' @param date A vector with data
+##' @param lon Longitude from local analisys 
+##' @param lat Latitude from local analisys
+##' @param timezone Local time diference with GMT (+1 for fluxes measurement)
+##' @return Vector with
+##' @author Roilan Hernandez, Guilherme Goergen and Jonatan Tatsch
+##' @importFrom dplyr %>% 
+##' @importFrom REddyProc fCalcPotRadiation
     Rg_Rpot <- function(date,lon=-53.76,lat=-29.72,timezone=-4){
-        # require(REddyProc)
         
-         if(lon==-53.76 & lat==-29.72) 
+        if(lon==-53.76 & lat==-29.72) 
             warning("Latitude e Longitude de Santa Maria",immediate. = TRUE)
         
-        REddyProc::fCalcPotRadiation(DoY.V.n = format(date,"%j") %>% as.numeric,
-                                     Hour.V.n = format(date,"%H") %>% as.numeric,
-                                     Lat_deg.n = lat,
-                                     Long_deg.n = lon,
-                                     TimeZone_h.n = timezone,
-                                     useSolartime.b = TRUE
+        fCalcPotRadiation(DoY.V.n = format(date,"%j") %>% as.numeric,
+                          Hour.V.n = format(date,"%H") %>% as.numeric,
+                          Lat_deg.n = lat,
+                          Long_deg.n = lon,
+                          TimeZone_h.n = timezone,
+                          useSolartime.b = TRUE
         )
     }
 
-
+##' Downward Longwave Radiation from a emissivity and a cloud cover schemes
+##' 
+##' @param data Data frame with column of date (date), temperature (Ta), partial vapor pressure (es), potencial radiation (Rpot), relative humidity (rh), atennuation index (K)
+##' @param E_fun Emissivity scheme
+##' @param C_fun Cloud cover scheme
+##' @return Vector with Downward Longwave Radiation time series
     roli_i <- function(data,E_fun = "FHY",C_fun = "CQB"){
         emis_ <- do.call(E_fun,list(data=data,func = C_fun)) 
         roli_est <-  with(data, emis_*sigma*Ta^4)   
@@ -279,9 +303,16 @@ EBR <- function(data,func){ with(data,maxlim( 0.51 + 0.066*sqrt(es) )) }        
         out_rol
     }
 
-    
+##' Function for day and nigth identification
+##' @param date A vector with dates
+##' @param lon Longitude from local analisys 
+##' @param lat Latitude from local analisys
+##' @param timezone Local time diference with GMT (+1 for fluxes measurement)
+##' @importFrom dplyr %>% 
+##' @importFrom REddyProc fCalcPotRadiation
+##' @return Vector with "day"/"night" string
     to.daylight <- 
-        function(date,lon = -47.63,lat = -21.61, timezone = -3){
+        function(date,lon = -47.63,lat = -21.61, timezone = -4){
 
             
             if(lon == -47.63 & lat == -21.61 & timezone == -3) 
@@ -290,7 +321,7 @@ EBR <- function(data,func){ with(data,maxlim( 0.51 + 0.066*sqrt(es) )) }        
             date1 = format(date, "%j") %>% as.numeric()
             date2 = format(date, "%H") %>% as.numeric()
             
-            ifelse(REddyProc::fCalcPotRadiation(DoY.V.n = date1,
+            ifelse(fCalcPotRadiation(DoY.V.n = date1,
                                      Hour.V.n = date2,  
                                      Lat_deg.n = lat,
                                      Long_deg.n = lon,

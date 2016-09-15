@@ -331,56 +331,65 @@ EBR <- function(data,func){ with(data,maxlim( 0.51 + 0.066*sqrt(es) )) }        
             
         }
     
-    
-    eval.params <- function(data_){
+##' Function for day and nigth identification
+##' @param data_ A data frame with all atmospherics variables
+##' @param lon Longitude from local analisys 
+##' @param lat Latitude from local analisys
+##' @param timezone Local time diference with GMT (+1 for fluxes measurement)
+##' @importFrom dplyr %>% filter mutate arrange 
+##' @importFrom openair cutData 
+##' @importFrom magrittr set_names
+##' @importFrom hydroGOF gof
+##' @importFrom tidyr gather separate spread
+##' @return Vector with "day"/"night" string
+    eval.params <- function(data_,lon=-53.76,lat=-29.72,timezone=-4){
         
         data_ <-  
-            openair::cutData(x = data_,type = "season",hemisphere = "southern") %>%
-            dplyr::mutate(daytime = to.daylight(date,lon=-53.76,lat=-29.72,timezone=-4))
+            cutData(x = data_,type = "season",hemisphere = "southern") %>% 
+            mutate(daytime = to.daylight(date,lon=-53.76,lat=-29.72,timezone=-4))
         
         lapply(unique(data_$season) %>% as.vector, function(j){ 
-            # j <- unique(data_$season)[2] %>% as.vector
-            # 
+   
             season.data <-  data_ %>%
-                dplyr::filter(season == j)
+                filter(season == j)
             
             lapply(unique(season.data$daytime), function(k){
-                # k <- unique(season.data$daytime)[1]
-                in.data <- season.data %>% dplyr::filter(daytime == k) 
+                
+                in.data <- season.data %>% filter(daytime == k) 
                 
                 estats.roli <- 
                     lapply(unique(in.data$params), function(i){ # i = "FBM_CQB"
                         
                         tdy.roli.filt <- 
                             in.data %>%
-                            dplyr::filter(params == i)
+                            filter(params == i)
                         
                         gof.data <- 
-                            hydroGOF::gof(sim = tdy.roli.filt$value,
+                            gof(sim = tdy.roli.filt$value,
                                           obs = tdy.roli.filt$Li,
                                           na.rm = TRUE) %>% 
                             as.data.frame() %>%
-                            magrittr::set_names(i) 
+                            set_names(i) 
                         
                     }) %>% bind_cols() 
                 
                 estats.roli$stats <- rownames(gof(1:10,10:1))
                 
                 estats.roli %<>% 
-                    tidyr::gather(params,value,-stats) %>%
-                    dplyr::arrange(stats)
+                    gather(params,value,-stats) %>%
+                    arrange(stats)
                 
                 estats.roli.arrange <- 
                     estats.roli %>% 
-                    tidyr::separate(params,sep = "_",into = c("emis","aten")) %>% 
-                    tidyr::spread(emis,value) 
+                    separate(params,sep = "_",into = c("emis","aten")) %>% 
+                    spread(emis,value) 
                 
                 estats.roli.arrange
                 
-            }) %>% magrittr::set_names(unique(data_$daytime))
+            }) %>% set_names(unique(data_$daytime))
             
             
-        }) %>% magrittr::set_names(unique(data_$season) %>% as.vector)
+        }) %>% set_names(unique(data_$season) %>% as.vector)
         
         
     }

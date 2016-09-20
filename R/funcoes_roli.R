@@ -95,6 +95,7 @@
 ##' @return a vector with emissivity estimatives
 ##' @author Roilan Hernandez, Guilherme Goergen and Jonatan Tatsch
     EIJ <- function(data,func){ 
+        with(data,maxlim(1 - 0.261 * exp(-0.000777 * (273 - Ta)^2))) 
         } ## Idso & Jackson (1969)
         # NOTE: (Ta - 273.15) OU (273 - Ta)
 
@@ -170,6 +171,7 @@
 ##' @return a vector with emissivity estimatives
 ##' @author Roilan Hernandez, Guilherme Goergen and Jonatan Tatsch
     AGB <- function(data,func){
+        sigma <- 5.67051*10^(-8)
         a <- with(data,(0.84*(rh-68))/(sigma*Ta^4) )
         b <- with(data,(1- 21*K/Ta)^4)
         maxlim(a+b)
@@ -252,15 +254,15 @@
     kloudines <- function(Rg, dates,lon=-53.76,lat=-29.72,timezone=-4){
   
         if(lon==-53.76 & lat==-29.72) 
-            warning("Latitude e Longitude de Santa Maria",call. = TRUE,immediate. = TRUE)
+            warning("Latitude e Longitude de Santa Maria, RS, Brazil",
+                    call. = TRUE,immediate. = TRUE)
         
         Rpot <- Rad.Pot(date = dates,lon = lon, lat = lat,timezone = timezone)
         
-        K <- 
-            Rg/Rpot %>% 
-            ifelse(is.infinite(.),0.0, . ) %>%
-            maxlim(.) %>%
-            ifelse(is.na(.), 0.0,.)
+        K <- Rg/Rpot
+        K <- ifelse(is.infinite(K),0.0, K ) 
+        K <- maxlim(K)
+        K <- ifelse(is.na(K), 0.0,K)
  
         return(K)
     }

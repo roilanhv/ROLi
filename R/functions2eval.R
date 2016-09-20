@@ -73,6 +73,7 @@ Rad.Pot <- function(date,lon=-53.76,lat=-29.72,timezone=-4){
 }
 
 
+
 ##' Function for evaluation of all parameterizations 
 ##' @param data_ A data frame with all atmospherics variables
 ##' @param lon Longitude from local analisys 

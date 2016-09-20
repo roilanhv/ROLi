@@ -16,7 +16,9 @@
 ##' 
 ##' @return a vector with cloud amount estimatives
 ##' @author Roilan Hernandez, Guilherme Goergen and Jonatan Tatsch    
-    CKC <- function(data){ with(data,maxlim( (4/3*(1-K))^(1/3.4) ))   } # Kasten & Czeplack (1980)
+    CKC <- function(data){
+        with(data,maxlim( (4/3*(1-K))^(1/3.4) ))   
+        } # Kasten & Czeplack (1980)
     
 ##' Amount of cloud estimatives functions.
 ##' 
@@ -24,7 +26,9 @@
 ##' 
 ##' @return a vector with cloud amount estimatives
 ##' @author Roilan Hernandez, Guilherme Goergen and Jonatan Tatsch    
-    CCB <- function(data){ with(data,maxlim( 2.33 - 3.33*K  ) )  }      # Campbell (1985)
+    CCB <- function(data){ 
+        with(data,maxlim( 2.33 - 3.33*K  ) ) 
+        }      # Campbell (1985)
     
 ##' Amount of cloud estimatives functions.
 ##' 
@@ -55,7 +59,9 @@
 ##' 
 ##' @return a vector with cloud amount estimatives
 ##' @author Roilan Hernandez, Guilherme Goergen and Jonatan Tatsch    
-    CJG <- function(data){ with(data,maxlim( ifelse(K < 0.9 , 1.1-K,2*(1-K)) ))} # Jedge (2006)
+    CJG <- function(data){ 
+        with(data,maxlim( ifelse(K < 0.9 , 1.1-K,2*(1-K)) ))
+        } # Jedge (2006)
 
 ##
 #/////////////////////////////////////////////////////////////////////////////////////////////////

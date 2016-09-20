@@ -74,66 +74,66 @@ Rad.Pot <- function(date,lon=-53.76,lat=-29.72,timezone=-4){
 
 
 
-##' Function for evaluation of all parameterizations 
-##' @param data_ A data frame with all atmospherics variables
-##' @param lon Longitude from local analisys 
-##' @param lat Latitude from local analisys
-##' @param timezone Local time diference with GMT (-1 for fluxes measurement)
-##' @importFrom dplyr %>% filter_ filter mutate arrange_ bind_cols
-##' @importFrom openair cutData 
-##' @importFrom magrittr set_names %<>%
-##' @importFrom hydroGOF gof
-##' @importFrom tidyr gather separate spread_
-##' @return List with statistical error information between predicted and observed Li 
-eval.params <- function(data_,lon=-53.76,lat=-29.72,timezone=-4){
-    
-    data_ <-  
-        cutData(x = data_,type = "season",hemisphere = "southern") %>% 
-        mutate(daytime = to.daylight(date,lon=lon,lat=lat,timezone=timezone))
-    
-    lapply(with(data_, unique(season)) %>% as.vector, function(j){ 
-        
-        season.data <-  data_ %>%
-            filter(season == j)
-        
-        lapply(with(season.data,unique(daytime)), function(k){
-            
-            in.data <- 
-                season.data %>% 
-                filter_("daytime" == k) 
-            
-            estats.roli <- 
-                lapply(with(in.data,unique(params)), function(i){ # i = "FBM_CQB"
-                    
-                    tdy.roli.filt <- 
-                        in.data %>%
-                        filter_("params" == i)
-                    
-                    gof.data <- 
-                        gof(sim = with(tdy.roli.filt,value),
-                            obs = with(tdy.roli.filt,Li),
-                            na.rm = TRUE) %>% 
-                        as.data.frame() %>%
-                        set_names(i) 
-                    
-                }) %>% bind_cols() 
-            
-            estats.roli %<>% mutate(stats = rownames(gof(1:10,10:1)) )
-            
-            estats.roli %<>% 
-                gather(params,value,-stats) %>%
-                arrange_("stats")
-            
-            estats.roli.arrange <- 
-                estats.roli %>% 
-                separate(params,sep = "_",into = c("emis","aten")) %>% 
-                spread_("emis","value")
-            
-            estats.roli.arrange
-            
-        }) %>% set_names(with(data_,unique(daytime)))
-    }) %>% set_names(with(data_,unique(season)) %>% as.vector)
-}
+# ##' Function for evaluation of all parameterizations
+# ##' @param data_ A data frame with all atmospherics variables
+# ##' @param lon Longitude from local analisys
+# ##' @param lat Latitude from local analisys
+# ##' @param timezone Local time diference with GMT (-1 for fluxes measurement)
+# ##' @importFrom dplyr %>% filter_ filter mutate arrange_ bind_cols
+# ##' @importFrom openair cutData
+# ##' @importFrom magrittr set_names %<>%
+# ##' @importFrom hydroGOF gof
+# ##' @importFrom tidyr gather separate spread_
+# ##' @return List with statistical error information between predicted and observed Li
+# eval.params <- function(data_,lon=-53.76,lat=-29.72,timezone=-4){
+# 
+#     data_ <-
+#         cutData(x = data_,type = "season",hemisphere = "southern") %>%
+#         mutate(daytime = to.daylight(date,lon=lon,lat=lat,timezone=timezone))
+# 
+#     lapply(with(data_, unique(season)) %>% as.vector, function(j){
+# 
+#         season.data <-  data_ %>%
+#             filter(season == j)
+# 
+#         lapply(with(season.data,unique(daytime)), function(k){
+# 
+#             in.data <-
+#                 season.data %>%
+#                 filter_("daytime" == k)
+# 
+#             estats.roli <-
+#                 lapply(with(in.data,unique(params)), function(i){ # i = "FBM_CQB"
+# 
+#                     tdy.roli.filt <-
+#                         in.data %>%
+#                         filter_("params" == i)
+# 
+#                     gof.data <-
+#                         gof(sim = with(tdy.roli.filt,value),
+#                             obs = with(tdy.roli.filt,Li),
+#                             na.rm = TRUE) %>%
+#                         as.data.frame() %>%
+#                         set_names(i)
+# 
+#                 }) %>% bind_cols()
+# 
+#             estats.roli %<>% mutate(stats = rownames(gof(1:10,10:1)) )
+# 
+#             estats.roli %<>%
+#                 gather(params,value,-stats) %>%
+#                 arrange_("stats")
+# 
+#             estats.roli.arrange <-
+#                 estats.roli %>%
+#                 separate(params,sep = "_",into = c("emis","aten")) %>%
+#                 spread_("emis","value")
+# 
+#             estats.roli.arrange
+# 
+#         }) %>% set_names(with(data_,unique(daytime)))
+#     }) %>% set_names(with(data_,unique(season)) %>% as.vector)
+# }
 
 # 
 #    select_stats <- function(roli_list,idx = "RMSE"){

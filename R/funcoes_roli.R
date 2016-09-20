@@ -95,7 +95,6 @@
 ##' @return a vector with emissivity estimatives
 ##' @author Roilan Hernandez, Guilherme Goergen and Jonatan Tatsch
     EIJ <- function(data,func){ 
-        with(data,maxlim(1 - 0.261 * exp(-0.000777 * (Ta - 273.15)^2))) 
         } ## Idso & Jackson (1969)
         # NOTE: (Ta - 273.15) OU (273 - Ta)
 

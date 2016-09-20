@@ -76,7 +76,7 @@
 ##' @param func a function for amount of cloud 
 ##' @return a vector with emissivity estimatives
 ##' @author Roilan Hernandez, Guilherme Goergen and Jonatan Tatsch
-EBR <- function(data,func){ with(data,maxlim( 0.51 + 0.066*sqrt(es) )) }                                          ## Brunt (1932)
+    EBR <- function(data,func){ with(data,maxlim( 0.51 + 0.066*sqrt(es) )) }                                          ## Brunt (1932)
 
 ##' Emissivity from atmosphere
 ##' 
@@ -84,7 +84,9 @@ EBR <- function(data,func){ with(data,maxlim( 0.51 + 0.066*sqrt(es) )) }        
 ##' @param func a function for amount of cloud 
 ##' @return a vector with emissivity estimatives
 ##' @author Roilan Hernandez, Guilherme Goergen and Jonatan Tatsch
-    ESW <- function(data,func){ with(data,maxlim(0.0000092*Ta^2)) }                                                 ## Swinbank (1963)
+    ESW <- function(data,func){ 
+        with(data,maxlim(0.0000092*Ta^2)) 
+        }     ## Swinbank (1963)
 
 ##' Emissivity from atmosphere
 ##' 
@@ -92,8 +94,10 @@ EBR <- function(data,func){ with(data,maxlim( 0.51 + 0.066*sqrt(es) )) }        
 ##' @param func a function for amount of cloud 
 ##' @return a vector with emissivity estimatives
 ##' @author Roilan Hernandez, Guilherme Goergen and Jonatan Tatsch
-    EIJ <- function(data,func){ with(data,maxlim(1 - 0.261 * exp(-0.000777 * (Ta - 273.15)^2))) } ## Idso & Jackson (1969)
-                                                                                                    # NOTE: (Ta - 273.15) OU (273 - Ta)
+    EIJ <- function(data,func){ 
+        with(data,maxlim(1 - 0.261 * exp(-0.000777 * (Ta - 273.15)^2))) 
+        } ## Idso & Jackson (1969)
+        # NOTE: (Ta - 273.15) OU (273 - Ta)
 
 ##' Emissivity from atmosphere
 ##' 
@@ -101,7 +105,9 @@ EBR <- function(data,func){ with(data,maxlim( 0.51 + 0.066*sqrt(es) )) }        
 ##' @param func a function for amount of cloud 
 ##' @return a vector with emissivity estimatives
 ##' @author Roilan Hernandez, Guilherme Goergen and Jonatan Tatsch
-    EBT <- function(data,func){ with(data,maxlim(1.24*(es/Ta)^(1/7) )) }                                           ## Brutsaert (1934)
+    EBT <- function(data,func){ 
+        with(data,maxlim(1.24*(es/Ta)^(1/7) ))
+        }   ## Brutsaert (1934)
     
 
 ##' Emissivity from atmosphere
@@ -110,7 +116,9 @@ EBR <- function(data,func){ with(data,maxlim( 0.51 + 0.066*sqrt(es) )) }        
 ##' @param func a function for amount of cloud 
 ##' @return a vector with emissivity estimatives
 ##' @author Roilan Hernandez, Guilherme Goergen and Jonatan Tatsch
-    EID <- function(data,func){ with(data,maxlim(0.7 + 0.0000595*es*exp(1500/Ta) )) }                              ## Idso (1981)
+    EID <- function(data,func){ 
+        with(data,maxlim(0.7 + 0.0000595*es*exp(1500/Ta) )) 
+        }   ## Idso (1981)
 
 ##' Emissivity from atmosphere
 ##' 
@@ -118,7 +126,9 @@ EBR <- function(data,func){ with(data,maxlim( 0.51 + 0.066*sqrt(es) )) }        
 ##' @param func a function for amount of cloud 
 ##' @return a vector with emissivity estimatives
 ##' @author Roilan Hernandez, Guilherme Goergen and Jonatan Tatsch
-    EKZ <- function(data,func) { with(data,maxlim( 0.23 + 0.484*(es/Ta)^(1/8) )) }                                   ## Konzelmann (1994)
+    EKZ <- function(data,func) {
+        with(data,maxlim( 0.23 + 0.484*(es/Ta)^(1/8) )) 
+        }   ## Konzelmann (1994)
 
 ##' Emissivity from atmosphere
 ##' 
@@ -126,7 +136,9 @@ EBR <- function(data,func){ with(data,maxlim( 0.51 + 0.066*sqrt(es) )) }        
 ##' @param func a function for amount of cloud 
 ##' @return a vector with emissivity estimatives
 ##' @author Roilan Hernandez, Guilherme Goergen and Jonatan Tatsch
-    EPR <- function(data,func){ with(data,maxlim(1 - ((1+46.5*es/Ta) * exp(-sqrt(1.2+3*46.5*es/Ta))))) }            ## Prata (1996)
+    EPR <- function(data,func){ 
+        with(data,maxlim(1 - ((1+46.5*es/Ta) * exp(-sqrt(1.2+3*46.5*es/Ta)))))
+        } ## Prata (1996)
 
 #/////////////////////////////////////////////////////////////////////////////////////////////////
 # Parametrizações de ...
@@ -138,7 +150,9 @@ EBR <- function(data,func){ with(data,maxlim( 0.51 + 0.066*sqrt(es) )) }        
 ##' @param func a function for amount of cloud 
 ##' @return a vector with emissivity estimatives
 ##' @author Roilan Hernandez, Guilherme Goergen and Jonatan Tatsch
-    ALH <- function(data,func){ 1.18/1.24*EBT(data) * with(data,(-.34*K+1.37)) } ## Lhomme (2007)
+    ALH <- function(data,func){ 
+        1.18/1.24*EBT(data) * with(data,(-.34*K+1.37)) 
+        } ## Lhomme (2007)
     
 ##' Effective emissivity from atmosphere with cloud atenuation
 ##' 
@@ -146,7 +160,9 @@ EBR <- function(data,func){ with(data,maxlim( 0.51 + 0.066*sqrt(es) )) }        
 ##' @param func a function for amount of cloud 
 ##' @return a vector with emissivity estimatives
 ##' @author Roilan Hernandez, Guilherme Goergen and Jonatan Tatsch
-    ABM <- function(data,func){ EID(data)*with(data,(1+0.3*(1-K)^2 )) } ## Stockli (2007)
+    ABM <- function(data,func){ 
+        EID(data)*with(data,(1+0.3*(1-K)^2 ))
+        } ## Stockli (2007)
     
 ##' Effective emissivity from atmosphere with cloud atenuation
 ##' 
@@ -227,7 +243,9 @@ EBR <- function(data,func){ with(data,maxlim( 0.51 + 0.066*sqrt(es) )) }        
 #/////////////////////////////////////////////////////////////////////////////////////////////////
 #  FUNÇÕES NECESSÁRIAS
 #
-    maxlim <- function(i,max_=1,min_=0){ sapply(i,function(i) min(max(i,min_),max_) )  }
+    maxlim <- function(i,max_=1,min_=0){ 
+        sapply(i,function(i) min(max(i,min_),max_) ) 
+        }
    
 ##' Incoming solar radiation atenuattion (K)
 ##' 
@@ -260,7 +278,8 @@ EBR <- function(data,func){ with(data,maxlim( 0.51 + 0.066*sqrt(es) )) }        
             mutate(K = ifelse(Rpot < 0.01,0.0,K)) %>%
             mutate(K = maxlim(K)) %>%
             mutate(K = ifelse(is.na(K), 0.0,K)) %>%
-            select(date,K)
+            select(K) %>%
+            t %>% c
             
         return(Rg)
     }

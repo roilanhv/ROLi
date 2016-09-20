@@ -48,6 +48,29 @@ to.daylight <-
         
     }
 
+##' Potencial Radiation from date vector
+##' 
+##' @param date A vector with data
+##' @param lon Longitude from local analisys 
+##' @param lat Latitude from local analisys
+##' @param timezone Local time diference with GMT (-1 for fluxes measurement)
+##' @return Vector with
+##' @author Roilan Hernandez, Guilherme Goergen and Jonatan Tatsch
+##' @importFrom dplyr %>% 
+##' @importFrom REddyProc fCalcPotRadiation
+Rad.Pot <- function(date,lon=-53.76,lat=-29.72,timezone=-4){
+    
+    if(lon==-53.76 & lat==-29.72) 
+        warning("Latitude e Longitude de Santa Maria",immediate. = TRUE)
+    
+    fCalcPotRadiation(DoY.V.n = format(date,"%j") %>% as.numeric,
+                      Hour.V.n = format(date,"%H") %>% as.numeric,
+                      Lat_deg.n = lat,
+                      Long_deg.n = lon,
+                      TimeZone_h.n = timezone,
+                      useSolartime.b = TRUE
+    )
+}
 
 
 ##' Function for evaluation of all parameterizations 

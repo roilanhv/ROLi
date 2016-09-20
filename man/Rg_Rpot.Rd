@@ -13,7 +13,7 @@ Rg_Rpot(date, lon = -53.76, lat = -29.72, timezone = -4)
 
 \item{lat}{Latitude from local analisys}
 
-\item{timezone}{Local time diference with GMT (+1 for fluxes measurement)}
+\item{timezone}{Local time diference with GMT (-1 for fluxes measurement)}
 }
 \value{
 Vector with

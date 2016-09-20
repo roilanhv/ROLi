@@ -4,17 +4,21 @@
 \alias{kloudines}
 \title{Incoming solar radiation atenuattion (K)}
 \usage{
-kloudines(Rg, lon = -53.76, lat = -29.72, timezone = -4)
+kloudines(Rg, dates, lon = -53.76, lat = -29.72, timezone = -4)
 }
 \arguments{
 \item{Rg}{global radiation serie.}
 
+\item{dates}{A vector with dates of time serie, same lenght than Rg}
+
 \item{lon}{longitude from local analisys}
 
 \item{lat}{latitude from local analisys}
+
+\item{timezone}{Local time diference with GMT (-1 for fluxes measurement)}
 }
 \value{
-Data frame with date and K index columns
+Vector with K index columns
 }
 \description{
 Incoming solar radiation atenuattion (K)

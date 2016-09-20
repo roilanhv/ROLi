@@ -7,7 +7,9 @@
 roli_i(data, E_fun = "FHY", C_fun = "CQB")
 }
 \arguments{
-\item{data}{Data frame with column of date (date), temperature (Ta), partial vapor pressure (es), potencial radiation (Rpot), relative humidity (rh), atennuation index (K)}
+\item{data}{Data frame with column of date (date), temperature (Ta), 
+partial vapor pressure (es), potencial radiation (Rpot), relative humidity (rh), 
+atennuation index (K)}
 
 \item{E_fun}{Emissivity scheme}
 

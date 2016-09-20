@@ -2,7 +2,7 @@
 % Please edit documentation in R/funcoes_roli.R
 \name{eval.params}
 \alias{eval.params}
-\title{Function for day and nigth identification}
+\title{Function for evaluation of all parameterizations}
 \usage{
 eval.params(data_, lon = -53.76, lat = -29.72, timezone = -4)
 }
@@ -13,12 +13,12 @@ eval.params(data_, lon = -53.76, lat = -29.72, timezone = -4)
 
 \item{lat}{Latitude from local analisys}
 
-\item{timezone}{Local time diference with GMT (+1 for fluxes measurement)}
+\item{timezone}{Local time diference with GMT (-1 for fluxes measurement)}
 }
 \value{
-Vector with "day"/"night" string
+List with statistical error information between predicted and observed Li
 }
 \description{
-Function for day and nigth identification
+Function for evaluation of all parameterizations
 }
 

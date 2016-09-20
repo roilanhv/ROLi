@@ -250,38 +250,34 @@
 ##' Incoming solar radiation atenuattion (K)
 ##' 
 ##' @param Rg global radiation serie.
+##' @param dates A vector with dates of time serie, same lenght than Rg
 ##' @param lon longitude from local analisys 
 ##' @param lat latitude from local analisys
-##' @return Data frame with date and K index columns
+##' @param timezone Local time diference with GMT (-1 for fluxes measurement)
+##' @return Vector with K index columns
 ##' @author Roilan Hernandez, Guilherme Goergen and Jonatan Tatsch
 ##' @importFrom stats setNames
-##' @importFrom dplyr %>% mutate select
+##' @importFrom dplyr %>% mutate select 
+##' @importFrom plyr . 
 ##' @importFrom REddyProc fCalcPotRadiation
-    kloudines <- function(Rg,lon=-53.76,lat=-29.72,timezone=-4){
-        # require(REddyProc)
-        
-        if(!("date" %in% names(Rg))) 
-            return(message("Need Date and Global Radiation column only"))
+    kloudines <- function(Rg, dates,lon=-53.76,lat=-29.72,timezone=-4){
+  
         if(lon==-53.76 & lat==-29.72) 
             warning("Latitude e Longitude de Santa Maria",call. = TRUE,immediate. = TRUE)
         
-        Rg <- 
-            Rg %>%
-            mutate(Rpot = fCalcPotRadiation(DoY.V.n = format(date,"%j") %>% as.numeric,
-                                                              Hour.V.n = format(date,"%H") %>% as.numeric,
-                                                              Lat_deg.n = lat,
-                                                              Long_deg.n = lon,
-                                                              TimeZone_h.n = -4,
-                                                              useSolartime.b = TRUE)
-            )  %>%
-            mutate(K = Rg/Rpot) %>%
-            mutate(K = ifelse(Rpot < 0.01,0.0,K)) %>%
-            mutate(K = maxlim(K)) %>%
-            mutate(K = ifelse(is.na(K), 0.0,K)) %>%
-            select(K) %>%
-            t %>% c
-            
-        return(Rg)
+        Rpot <- fCalcPotRadiation(DoY.V.n = format(dates,"%j") %>% as.numeric,
+                                  Hour.V.n = format(dates,"%H") %>% as.numeric,
+                                  Lat_deg.n = lat,
+                                  Long_deg.n = lon,
+                                  TimeZone_h.n = timezone,
+                                  useSolartime.b = TRUE)
+        
+        K <- Rg/Rpot %>% 
+                ifelse(is.infinite(.),0.0, . ) %>%
+                maxlim(.) %>%
+                ifelse(is.na(.), 0.0,.)
+ 
+        return(K)
     }
 
 ##' Potencial Radiation from date vector
@@ -289,7 +285,7 @@
 ##' @param date A vector with data
 ##' @param lon Longitude from local analisys 
 ##' @param lat Latitude from local analisys
-##' @param timezone Local time diference with GMT (+1 for fluxes measurement)
+##' @param timezone Local time diference with GMT (-1 for fluxes measurement)
 ##' @return Vector with
 ##' @author Roilan Hernandez, Guilherme Goergen and Jonatan Tatsch
 ##' @importFrom dplyr %>% 
@@ -310,7 +306,9 @@
 
 ##' Downward Longwave Radiation from a emissivity and a cloud cover schemes
 ##' 
-##' @param data Data frame with column of date (date), temperature (Ta), partial vapor pressure (es), potencial radiation (Rpot), relative humidity (rh), atennuation index (K)
+##' @param data Data frame with column of date (date), temperature (Ta), 
+##' partial vapor pressure (es), potencial radiation (Rpot), relative humidity (rh), 
+##' atennuation index (K)
 ##' @param E_fun Emissivity scheme
 ##' @param C_fun Cloud cover scheme
 ##' @return Vector with Downward Longwave Radiation time series
@@ -350,72 +348,67 @@
             
         }
     
-##' Function for day and nigth identification
+##' Function for evaluation of all parameterizations 
 ##' @param data_ A data frame with all atmospherics variables
 ##' @param lon Longitude from local analisys 
 ##' @param lat Latitude from local analisys
-##' @param timezone Local time diference with GMT (+1 for fluxes measurement)
-##' @importFrom dplyr %>% filter mutate arrange 
+##' @param timezone Local time diference with GMT (-1 for fluxes measurement)
+##' @importFrom dplyr %>% filter mutate arrange_ bind_cols
 ##' @importFrom openair cutData 
-##' @importFrom magrittr set_names
+##' @importFrom magrittr set_names %<>%
 ##' @importFrom hydroGOF gof
-##' @importFrom tidyr gather separate spread
-##' @return Vector with "day"/"night" string
+##' @importFrom tidyr gather separate spread_
+##' @return List with statistical error information between predicted and observed Li 
     eval.params <- function(data_,lon=-53.76,lat=-29.72,timezone=-4){
         
         data_ <-  
             cutData(x = data_,type = "season",hemisphere = "southern") %>% 
-            mutate(daytime = to.daylight(date,lon=-53.76,lat=-29.72,timezone=-4))
+            mutate(daytime = to.daylight(date,lon=lon,lat=lat,timezone=timezone))
         
-        lapply(unique(data_$season) %>% as.vector, function(j){ 
+        lapply(with(data_, unique(season)) %>% as.vector, function(j){ 
    
             season.data <-  data_ %>%
                 filter(season == j)
             
-            lapply(unique(season.data$daytime), function(k){
+            lapply(with(season.data,unique(daytime)), function(k){
                 
-                in.data <- season.data %>% filter(daytime == k) 
+                in.data <- season.data %>% filter_("daytime" == k) 
                 
                 estats.roli <- 
-                    lapply(unique(in.data$params), function(i){ # i = "FBM_CQB"
+                    lapply(with(in.data,unique(params)), function(i){ # i = "FBM_CQB"
                         
                         tdy.roli.filt <- 
                             in.data %>%
-                            filter(params == i)
+                            filter_("params" == i)
                         
                         gof.data <- 
-                            gof(sim = tdy.roli.filt$value,
-                                          obs = tdy.roli.filt$Li,
-                                          na.rm = TRUE) %>% 
+                            gof(sim = with(tdy.roli.filt,value),
+                                obs = with(tdy.roli.filt,Li),
+                                na.rm = TRUE) %>% 
                             as.data.frame() %>%
                             set_names(i) 
                         
                     }) %>% bind_cols() 
                 
-                estats.roli$stats <- rownames(gof(1:10,10:1))
+                estats.roli %<>% mutate(stats = rownames(gof(1:10,10:1)) )
                 
                 estats.roli %<>% 
                     gather(params,value,-stats) %>%
-                    arrange(stats)
+                    arrange_("stats")
                 
                 estats.roli.arrange <- 
                     estats.roli %>% 
                     separate(params,sep = "_",into = c("emis","aten")) %>% 
-                    spread(emis,value) 
+                    spread_("emis","value")
                 
                 estats.roli.arrange
                 
-            }) %>% set_names(unique(data_$daytime))
-            
-            
-        }) %>% set_names(unique(data_$season) %>% as.vector)
-        
-        
+            }) %>% set_names(with(data_,unique(daytime)))
+        }) %>% set_names(with(data_,unique(season)) %>% as.vector)
     }
     
-    
-    
-    select_stats <- function(roli_list,idx = "RMSE"){
+
+   select_stats <- function(roli_list,idx = "RMSE"){
         
         stats.rmse <- NULL
         
@@ -424,7 +417,7 @@
                 season <- names(roli_list)[i]
                 day.tim <- names(roli_list[[i]])[j]
                 stats.rmse[[season]][[day.tim]] <- 
-                    roli_list[[season]][[day.tim]] %>% filter(stats == idx)
+                    roli_list[[season]][[day.tim]] %>% filter_("stats" == idx)
                 
             }
         }

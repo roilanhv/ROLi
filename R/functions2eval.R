@@ -1,6 +1,4 @@
 
-
-
 ##' Downward Longwave Radiation from a emissivity and a cloud cover schemes
 ##' 
 ##' @param data Data frame with column of date (date), temperature (Ta), 
@@ -9,6 +7,12 @@
 ##' @param E_fun Emissivity scheme
 ##' @param C_fun Cloud cover scheme
 ##' @return Vector with Downward Longwave Radiation time series
+##' @examples 
+##' # Downward longwave for Santa Maria site, January and July of  2014
+##' Li_sm <- get.Li(data = data2,E_fun = "FHY",C_fun = "CQB")
+##' head(Li_sm)
+##' summary(Li_sm)
+##' 
 get.Li <- function(data,E_fun = "FHY",C_fun = "CQB"){
     sigma <- 5.67051*10^(-8) # W m^(-2) T^(-4)
     emis_ <- do.call(E_fun,list(data=data,func = C_fun)) 

@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 # longwaver, a downward longwave radiation estimation R package.  
-=======
-# Your Document Title
->>>>>>> master
 Roilan Hernández
 
 October 01, 2016

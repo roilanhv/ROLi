@@ -4,7 +4,6 @@
 ##' @param data a data frame with all atmospherics variables
 ##' 
 ##' @return a vector with cloud amount estimatives
-##' @author Roilan Hernandez, Guilherme Goergen and Jonatan Tatsch
     CQB <- function(data){
         a <- maxlim(with(data,0.34^2 + 4 * 0.458 * (0.803-K)),max_ = Inf)
         maxlim( ( 0.34-sqrt(a) ) / (-2 * 0.458))
@@ -263,7 +262,7 @@
             warning("Latitude e Longitude de Santa Maria, RS, Brazil",
                     call. = TRUE,immediate. = TRUE)
         
-        Rpot <- Rad.Pot(date = dates,lon = lon, lat = lat,timezone = timezone)
+        Rpot <- PotRad(date = dates,lon = lon, lat = lat,timezone = timezone)
         
         K <- Rg/Rpot
         K <- ifelse(is.infinite(K),0.0, K ) 

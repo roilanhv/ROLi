@@ -3,7 +3,7 @@
 \docType{data}
 \name{data2}
 \alias{data2}
-\title{Glacier locations}
+\title{Santa Maria micrometeorological observations}
 \format{\describe{
 \item{date}{Date in POSIX format.}
 \item{Rg}{Global radiation( W m-2)}

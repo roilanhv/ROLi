@@ -1,4 +1,4 @@
-#' Glacier locations
+#' Santa Maria micrometeorological observations 
 #'
 #' Downloaded by Dianne Cook.
 #'

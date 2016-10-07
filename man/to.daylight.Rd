@@ -13,12 +13,15 @@ to.daylight(date, lon = -47.63, lat = -21.61, timezone = -4)
 
 \item{lat}{Latitude from local analisys}
 
-\item{timezone}{Local time diference with GMT (+1 for fluxes measurement)}
+\item{timezone}{Local time diference with GMT (-1 for fluxes measurement)}
 }
 \value{
 Vector with "day"/"night" string
 }
 \description{
 Function for day and nigth identification
+}
+\author{
+Roilan Hernandez
 }
 

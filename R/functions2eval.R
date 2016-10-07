@@ -28,13 +28,12 @@ get.Li <- function(data,E_fun = "FHY",C_fun = "CQB"){
 ##' @param date A vector with dates
 ##' @param lon Longitude from local analisys 
 ##' @param lat Latitude from local analisys
-##' @param timezone Local time diference with GMT (+1 for fluxes measurement)
+##' @param timezone Local time diference with GMT (-1 for fluxes measurement)
 ##' @importFrom dplyr %>% 
-##' @importFrom REddyProc fCalcPotRadiation
 ##' @return Vector with "day"/"night" string
+##' @author Roilan Hernandez
 to.daylight <- 
     function(date,lon = -47.63,lat = -21.61, timezone = -4){
-        
         
         if(lon == -47.63 & lat == -21.61 & timezone == -3) 
             message("Warning: This data are only valid for PdG site. RHV")
@@ -49,20 +48,18 @@ to.daylight <-
                                  TimeZone_h.n = timezone,    
                                  useSolartime.b = TRUE ) > 0 , 
                "day","night")
-        
     }
 
 ##' Potencial Radiation from date vector
-##' 
 ##' @param date A vector with data
 ##' @param lon Longitude from local analisys 
 ##' @param lat Latitude from local analisys
 ##' @param timezone Local time diference with GMT (-1 for fluxes measurement)
-##' @return Vector with
-##' @author Roilan Hernandez, Guilherme Goergen and Jonatan Tatsch
+##' @return Vector with potential radiation for given dates and coordinates.
 ##' @importFrom dplyr %>% 
-##' @importFrom REddyProc fCalcPotRadiation
-Rad.Pot <- function(date,lon=-53.76,lat=-29.72,timezone=-4){
+##' @author Roilan Hernandez
+##' 
+PotRad <-  function(date,lon=-53.76,lat=-29.72,timezone=-4){
     
     if(lon==-53.76 & lat==-29.72) 
         warning("Latitude e Longitude de Santa Maria",immediate. = TRUE)

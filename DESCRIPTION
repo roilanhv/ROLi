@@ -12,7 +12,6 @@ Imports:
     dplyr,
     magrittr,
     tidyr,
-    REddyProc,
     openair,
     hydroGOF,
     plyr

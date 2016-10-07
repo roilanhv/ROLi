@@ -21,4 +21,11 @@ Vector with Downward Longwave Radiation time series
 \description{
 Downward Longwave Radiation from a emissivity and a cloud cover schemes
 }
+\examples{
+# Downward longwave for Santa Maria site, January and July of  2014
+Li_sm <- get.Li(data = data2,E_fun = "FHY",C_fun = "CQB")
+head(Li_sm)
+summary(Li_sm)
+
+}
 

@@ -1,6 +1,4 @@
 
-
-
 ##' Downward Longwave Radiation from a emissivity and a cloud cover schemes
 ##' 
 ##' @param data Data frame with column of date (date), temperature (Ta), 
@@ -9,6 +7,12 @@
 ##' @param E_fun Emissivity scheme
 ##' @param C_fun Cloud cover scheme
 ##' @return Vector with Downward Longwave Radiation time series
+##' @examples 
+##' # Downward longwave for Santa Maria site, January and July of  2014
+##' Li_sm <- get.Li(data = data2,E_fun = "FHY",C_fun = "CQB")
+##' head(Li_sm)
+##' summary(Li_sm)
+##' 
 get.Li <- function(data,E_fun = "FHY",C_fun = "CQB"){
     sigma <- 5.67051*10^(-8) # W m^(-2) T^(-4)
     emis_ <- do.call(E_fun,list(data=data,func = C_fun)) 
@@ -24,13 +28,12 @@ get.Li <- function(data,E_fun = "FHY",C_fun = "CQB"){
 ##' @param date A vector with dates
 ##' @param lon Longitude from local analisys 
 ##' @param lat Latitude from local analisys
-##' @param timezone Local time diference with GMT (+1 for fluxes measurement)
+##' @param timezone Local time diference with GMT (-1 for fluxes measurement)
 ##' @importFrom dplyr %>% 
-##' @importFrom REddyProc fCalcPotRadiation
 ##' @return Vector with "day"/"night" string
+##' @author Roilan Hernandez
 to.daylight <- 
     function(date,lon = -47.63,lat = -21.61, timezone = -4){
-        
         
         if(lon == -47.63 & lat == -21.61 & timezone == -3) 
             message("Warning: This data are only valid for PdG site. RHV")
@@ -45,20 +48,18 @@ to.daylight <-
                                  TimeZone_h.n = timezone,    
                                  useSolartime.b = TRUE ) > 0 , 
                "day","night")
-        
     }
 
 ##' Potencial Radiation from date vector
-##' 
 ##' @param date A vector with data
 ##' @param lon Longitude from local analisys 
 ##' @param lat Latitude from local analisys
 ##' @param timezone Local time diference with GMT (-1 for fluxes measurement)
-##' @return Vector with
-##' @author Roilan Hernandez, Guilherme Goergen and Jonatan Tatsch
+##' @return Vector with potential radiation for given dates and coordinates.
 ##' @importFrom dplyr %>% 
-##' @importFrom REddyProc fCalcPotRadiation
-Rad.Pot <- function(date,lon=-53.76,lat=-29.72,timezone=-4){
+##' @author Roilan Hernandez
+##' 
+PotRad <-  function(date,lon=-53.76,lat=-29.72,timezone=-4){
     
     if(lon==-53.76 & lat==-29.72) 
         warning("Latitude e Longitude de Santa Maria",immediate. = TRUE)

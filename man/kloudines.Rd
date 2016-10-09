@@ -24,6 +24,6 @@ Vector with K index columns
 Incoming solar radiation atenuattion (K)
 }
 \author{
-Roilan Hernandez, Guilherme Goergen and Jonatan Tatsch
+Roilan Hernandez
 }
 

@@ -17,7 +17,4 @@ a vector with emissivity estimatives
 \description{
 Emissivity from atmosphere
 }
-\author{
-Roilan Hernandez, Guilherme Goergen and Jonatan Tatsch
-}
 

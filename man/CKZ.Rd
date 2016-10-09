@@ -17,7 +17,4 @@ a vector with cloud amount estimatives
 \description{
 Amount of cloud estimatives functions.
 }
-\author{
-Roilan Hernandez, Guilherme Goergen and Jonatan Tatsch
-}
 

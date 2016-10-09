@@ -17,7 +17,4 @@ a vector with emissivity estimatives
 \description{
 Effective emissivity from atmosphere with cloud atenuation
 }
-\author{
-Roilan Hernandez, Guilherme Goergen and Jonatan Tatsch
-}
 

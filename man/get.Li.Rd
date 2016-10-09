@@ -26,6 +26,5 @@ Downward Longwave Radiation from a emissivity and a cloud cover schemes
 Li_sm <- get.Li(data = data2,E_fun = "FHY",C_fun = "CQB")
 head(Li_sm)
 summary(Li_sm)
-
 }
 

@@ -12,7 +12,7 @@
 ##' Li_sm <- get.Li(data = data2,E_fun = "FHY",C_fun = "CQB")
 ##' head(Li_sm)
 ##' summary(Li_sm)
-##' 
+##' @export
 get.Li <- function(data,E_fun = "FHY",C_fun = "CQB"){
     sigma <- 5.67051*10^(-8) # W m^(-2) T^(-4)
     emis_ <- do.call(E_fun,list(data=data,func = C_fun)) 
@@ -32,6 +32,7 @@ get.Li <- function(data,E_fun = "FHY",C_fun = "CQB"){
 ##' @importFrom dplyr %>% 
 ##' @return Vector with "day"/"night" string
 ##' @author Roilan Hernandez
+##' @export
 to.daylight <- 
     function(date,lon = -47.63,lat = -21.61, timezone = -4){
         
@@ -58,7 +59,7 @@ to.daylight <-
 ##' @return Vector with potential radiation for given dates and coordinates.
 ##' @importFrom dplyr %>% 
 ##' @author Roilan Hernandez
-##' 
+##' @export
 PotRad <-  function(date,lon=-53.76,lat=-29.72,timezone=-4){
     
     if(lon==-53.76 & lat==-29.72) 

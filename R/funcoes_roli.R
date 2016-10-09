@@ -1,8 +1,6 @@
 
 ##' Amount of cloud estimatives functions.
-##' 
 ##' @param data a data frame with all atmospherics variables
-##' 
 ##' @return a vector with cloud amount estimatives
 ##' @export
     CQB <- function(data){
@@ -14,8 +12,7 @@
 ##' 
 ##' @param data a data frame with all atmospherics variables
 ##' 
-##' @return a vector with cloud amount estimatives
-##' @author Roilan Hernandez, Guilherme Goergen and Jonatan Tatsch    
+##' @return a vector with cloud amount estimatives  
 ##' @export
     CKC <- function(data){
         with(data,maxlim( (4/3*(1-K))^(1/3.4) ))   
@@ -25,8 +22,7 @@
 ##' 
 ##' @param data a data frame with all atmospherics variables
 ##' 
-##' @return a vector with cloud amount estimatives
-##' @author Roilan Hernandez, Guilherme Goergen and Jonatan Tatsch    
+##' @return a vector with cloud amount estimatives 
 ##' @export
     CCB <- function(data){ 
         with(data,maxlim( 2.33 - 3.33*K  ) ) 
@@ -37,7 +33,6 @@
 ##' @param data a data frame with all atmospherics variables
 ##' @param alt Site sea level heigth
 ##' @return a vector with cloud amount estimatives
-##' @author Roilan Hernandez, Guilherme Goergen and Jonatan Tatsch
 ##' @export
     CKZ <- function(data, alt = 88.){ 
             a <- 1./( 0.78*exp(-0.00085*alt))
@@ -49,7 +44,6 @@
 ##' @param data a data frame with all atmospherics variables
 ##' 
 ##' @return a vector with cloud amount estimatives
-##' @author Roilan Hernandez, Guilherme Goergen and Jonatan Tatsch
 ##' @export
     CWU <- function(data){
         num <- with(data,252.7 - (Rg * 60*60*24/(4.19*10000)))
@@ -61,8 +55,7 @@
 ##' 
 ##' @param data a data frame with all atmospherics variables
 ##' 
-##' @return a vector with cloud amount estimatives
-##' @author Roilan Hernandez, Guilherme Goergen and Jonatan Tatsch    
+##' @return a vector with cloud amount estimatives 
 ##' @export
     CJG <- function(data){ 
         with(data,maxlim( ifelse(K < 0.9 , 1.1-K,2*(1-K)) ))
@@ -78,7 +71,6 @@
 ##' @param data a data frame with all atmospherics variables
 ##' @param func a function for amount of cloud 
 ##' @return a vector with emissivity estimatives
-##' @author Roilan Hernandez, Guilherme Goergen and Jonatan Tatsch
 ##' @export
     EAN <- function(data,func){ with(data,maxlim( 0.83 - 0.18*(10^(-0.067*es)) )) }                                   ## Angstrom (1915)
 
@@ -87,7 +79,6 @@
 ##' @param data a data frame with all atmospherics variables
 ##' @param func a function for amount of cloud 
 ##' @return a vector with emissivity estimatives
-##' @author Roilan Hernandez, Guilherme Goergen and Jonatan Tatsch
 ##' @export
     EBR <- function(data,func){ with(data,maxlim( 0.51 + 0.066*sqrt(es) )) }                                          ## Brunt (1932)
 
@@ -96,7 +87,6 @@
 ##' @param data a data frame with all atmospherics variables
 ##' @param func a function for amount of cloud 
 ##' @return a vector with emissivity estimatives
-##' @author Roilan Hernandez, Guilherme Goergen and Jonatan Tatsch
 ##' @export
     ESW <- function(data,func){ 
         with(data,maxlim(0.0000092*Ta^2)) 
@@ -107,7 +97,6 @@
 ##' @param data a data frame with all atmospherics variables
 ##' @param func a function for amount of cloud 
 ##' @return a vector with emissivity estimatives
-##' @author Roilan Hernandez, Guilherme Goergen and Jonatan Tatsch
 ##' @export
     EIJ <- function(data,func){ 
         with(data,maxlim(1 - 0.261 * exp(-0.000777 * (273 - Ta)^2))) 
@@ -119,7 +108,6 @@
 ##' @param data a data frame with all atmospherics variables
 ##' @param func a function for amount of cloud 
 ##' @return a vector with emissivity estimatives
-##' @author Roilan Hernandez, Guilherme Goergen and Jonatan Tatsch
 ##' @export
     EBT <- function(data,func){ 
         with(data,maxlim(1.24*(es/Ta)^(1/7) ))
@@ -131,7 +119,6 @@
 ##' @param data a data frame with all atmospherics variables
 ##' @param func a function for amount of cloud 
 ##' @return a vector with emissivity estimatives
-##' @author Roilan Hernandez, Guilherme Goergen and Jonatan Tatsch
 ##' @export
     EID <- function(data,func){ 
         with(data,maxlim(0.7 + 0.0000595*es*exp(1500/Ta) )) 
@@ -142,7 +129,6 @@
 ##' @param data a data frame with all atmospherics variables
 ##' @param func a function for amount of cloud 
 ##' @return a vector with emissivity estimatives
-##' @author Roilan Hernandez, Guilherme Goergen and Jonatan Tatsch
 ##' @export
     EKZ <- function(data,func) {
         with(data,maxlim( 0.23 + 0.484*(es/Ta)^(1/8) )) 
@@ -153,7 +139,6 @@
 ##' @param data a data frame with all atmospherics variables
 ##' @param func a function for amount of cloud 
 ##' @return a vector with emissivity estimatives
-##' @author Roilan Hernandez, Guilherme Goergen and Jonatan Tatsch
 ##' @export
     EPR <- function(data,func){ 
         with(data,maxlim(1 - ((1+46.5*es/Ta) * exp(-sqrt(1.2+3*46.5*es/Ta)))))
@@ -168,7 +153,6 @@
 ##' @param data a data frame with all atmospherics variables
 ##' @param func a function for amount of cloud 
 ##' @return a vector with emissivity estimatives
-##' @author Roilan Hernandez, Guilherme Goergen and Jonatan Tatsch
 ##' @export
     ALH <- function(data,func){ 
         1.18/1.24*EBT(data) * with(data,(-.34*K+1.37)) 
@@ -190,7 +174,6 @@
 ##' @param data a data frame with all atmospherics variables
 ##' @param func a function for amount of cloud 
 ##' @return a vector with emissivity estimatives
-##' @author Roilan Hernandez, Guilherme Goergen and Jonatan Tatsch
 ##' @export
     AGB <- function(data,func){
         sigma <- 5.67051*10^(-8)
@@ -209,7 +192,6 @@
 ##' @param data a data frame with all atmospherics variables
 ##' @param func a function for amount of cloud 
 ##' @return a vector with emissivity estimatives
-##' @author Roilan Hernandez, Guilherme Goergen and Jonatan Tatsch
 ##' @export
     FAN <- function(data,func){
       C <- do.call(func , args = list(data = data)) 
@@ -221,7 +203,6 @@
 ##' @param data a data frame with all atmospherics variables
 ##' @param func a function for amount of cloud 
 ##' @return a vector with emissivity estimatives
-##' @author Roilan Hernandez, Guilherme Goergen and Jonatan Tatsch
 ##' @export
     FBR <- function(data,func){ 
       C <- do.call(func , args = list(data = data)) 
@@ -233,7 +214,6 @@
 ##' @param data a data frame with all atmospherics variables
 ##' @param func a function for amount of cloud 
 ##' @return a vector with emissivity estimatives
-##' @author Roilan Hernandez, Guilherme Goergen and Jonatan Tatsch
 ##' @export
         # FMU <- function()
     FHY <- function(data,func){ 
@@ -246,7 +226,6 @@
 ##' @param data a data frame with all atmospherics variables
 ##' @param func a function for amount of cloud 
 ##' @return a vector with emissivity estimatives
-##' @author Roilan Hernandez, Guilherme Goergen and Jonatan Tatsch
 ##' @export
     FKZ <- function(data,func){
         C <- do.call(func , args = list(data = data)) 
@@ -258,7 +237,6 @@
 ##' @param data a data frame with all atmospherics variables
 ##' @param func a function for amount of cloud 
 ##' @return a vector with emissivity estimatives
-##' @author Roilan Hernandez, Guilherme Goergen and Jonatan Tatsch
 ##' @export
     FIJ <- function(data,func){
         C <- do.call(func , args = list(data = data)) 
@@ -274,7 +252,7 @@
 ##' @param lat latitude from local analisys
 ##' @param timezone Local time diference with GMT (-1 for fluxes measurement)
 ##' @return Vector with K index columns
-##' @author Roilan Hernandez, Guilherme Goergen and Jonatan Tatsch
+##' @author Roilan Hernandez
 ##' @importFrom stats setNames
 ##' @importFrom dplyr %>% mutate select 
 ##' @importFrom plyr . 

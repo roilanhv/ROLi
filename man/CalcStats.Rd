@@ -4,7 +4,7 @@
 \alias{CalcStats}
 \title{Function for statistical analise}
 \usage{
-CalcStats(data_li, statistic = "pbias")
+CalcStats(data_li, statistic = c("rmse", "pbias"))
 }
 \arguments{
 \item{data_li}{Data frame with observed and calculated  downward longwave radiation series.}

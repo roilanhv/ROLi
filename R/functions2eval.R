@@ -87,14 +87,29 @@ PotRad <-  function(date,lon=-53.76,lat=-29.72,timezone=-4){
 #' LiStats
 #' @export
 CalcStats <- function(data_li, 
-                      statistic = "pbias"){
+                      statistic = c("rmse","pbias")){
     
-    data_li %>%
+    
+    result <- 
+        data_li %>%
         gather( params, value, -Li) %>%
         rename(obs = Li, sim = value) %>% 
-        group_by(params) %>%
-        summarise(RESULT = do.call(statistic, list(obs = obs, sim = sim, na.rm = TRUE)))
-        
+        group_by(params)
+    
+    schems <- data.frame(schemes = unique(result$params))
+    
+    result <-
+    lapply(1:length(statistic), function(i){
+    
+        result2 <- 
+            result %>%
+            summarise(RESULT = do.call(statistic[i], list(obs = obs, sim = sim, na.rm = TRUE))) %>%
+            setNames(c("schemes",statistic[i])) %>%
+            select_(statistic[i])
+    }) %>% bind_cols()
+    
+    bind_cols(schems,result)
+    
 }
 
 

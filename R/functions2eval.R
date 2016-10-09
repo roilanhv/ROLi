@@ -74,10 +74,32 @@ PotRad <-  function(date,lon=-53.76,lat=-29.72,timezone=-4){
     )
 }
 
+#' Function for statistical analise
+#' 
+#' Recommended use of function from hydroGOF package (ex., rmse, mae, pbias, me, nrmse, rSD...)
+#' @param data_li Data frame with observed and calculated  downward longwave radiation series.
+#' @param statistic Statistical index to be calculated between observation and each simulation, "rmse" default.
+#' @importFrom tidyr gather
+#' @importFrom dplyr rename group_by summarise 
+#' @import hydroGOF
+#' @examples
+#' LiStats <- CalcStats(data_li = data_li, statistic = "pbias")
+#' LiStats
+#' @export
+CalcStats <- function(data_li, 
+                      statistic = "pbias"){
+    
+    data_li %>%
+        gather( params, value, -Li) %>%
+        rename(obs = Li, sim = value) %>% 
+        group_by(params) %>%
+        summarise(RESULT = do.call(statistic, list(obs = obs, sim = sim, na.rm = TRUE)))
+        
+}
 
 
 # ##' Function for evaluation of all parameterizations
-# ##' @param data_ A data frame with all atmospherics variables
+# ##' @param data_ A data frame with all atmospherics variables and simulated series
 # ##' @param lon Longitude from local analisys
 # ##' @param lat Latitude from local analisys
 # ##' @param timezone Local time diference with GMT (-1 for fluxes measurement)
@@ -137,20 +159,20 @@ PotRad <-  function(date,lon=-53.76,lat=-29.72,timezone=-4){
 #     }) %>% set_names(with(data_,unique(season)) %>% as.vector)
 # }
 
-# 
+#
 #    select_stats <- function(roli_list,idx = "RMSE"){
-#         
+#
 #         stats.rmse <- NULL
-#         
+#
 #         for(i in 1:4){
 #             for(j in 1:2){
 #                 season <- names(roli_list)[i]
 #                 day.tim <- names(roli_list[[i]])[j]
-#                 stats.rmse[[season]][[day.tim]] <- 
+#                 stats.rmse[[season]][[day.tim]] <-
 #                     roli_list[[season]][[day.tim]] %>% filter_("stats" == idx)
-#                 
+#
 #             }
 #         }
 #         stats.rmse
 #     }
-#     
+#

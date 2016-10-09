@@ -72,7 +72,8 @@
 ##' @param func a function for amount of cloud 
 ##' @return a vector with emissivity estimatives
 ##' @export
-    EAN <- function(data,func){ with(data,maxlim( 0.83 - 0.18*(10^(-0.067*es)) )) }                                   ## Angstrom (1915)
+    EAN <- function(data,func){ with(data,maxlim( 0.83 - 0.18*(10^(-0.067*es)) )) }                                   
+    ## Angstrom (1915)
 
 ##' Emissivity from atmosphere
 ##' 
@@ -80,7 +81,8 @@
 ##' @param func a function for amount of cloud 
 ##' @return a vector with emissivity estimatives
 ##' @export
-    EBR <- function(data,func){ with(data,maxlim( 0.51 + 0.066*sqrt(es) )) }                                          ## Brunt (1932)
+    EBR <- function(data,func){ with(data,maxlim( 0.51 + 0.066*sqrt(es) )) }                                         
+    ## Brunt (1932)
 
 ##' Emissivity from atmosphere
 ##' 

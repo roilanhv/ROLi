@@ -18,7 +18,7 @@
 data2
 }
 \description{
-Downloaded by Dianne Cook.
+Santa Maria micrometeorological observations
 }
 \keyword{datasets}
 

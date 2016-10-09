@@ -15,5 +15,5 @@ in the atmosphere. But these data are not always available and therefore simpler
 have been developed based on more readily available measures, such as the temperature and
 humidity measured in meteorological stations. Several empirical expressions to estimate the
 emissivity of the atmosphere in clear sky conditions (e\_{ac}) and cloud cover fraction (C) are
-available in the literature. However, when applied to different regions, those in which they
-were obtained, uncertainty in the estimation increases.
+available in the literature. However, when applied to regions different from those in which they were obtained, 
+uncertainty in the estimation increases.

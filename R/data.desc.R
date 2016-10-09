@@ -1,6 +1,5 @@
 #' Santa Maria micrometeorological observations 
 #'
-#' Downloaded by Dianne Cook.
 #'
 #' @format
 #' \describe{
@@ -15,3 +14,5 @@
 #' }
 #'
 "data2"
+
+

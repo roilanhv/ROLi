@@ -63,8 +63,8 @@
 
 ##
 #/////////////////////////////////////////////////////////////////////////////////////////////////
-# Parametrizações de ...
-#---- EMISSIVIDADE 
+#                                        PARAMETRIZAÇÔES DE 
+#----                                       EMISSIVIDADE 
 
 ##' Emissivity from atmosphere
 ##' 
@@ -72,7 +72,14 @@
 ##' @param func a function for amount of cloud 
 ##' @return a vector with emissivity estimatives
 ##' @export
-    EAN <- function(data,func){ with(data,maxlim( 0.83 - 0.18*(10^(-0.067*es)) )) }                                   
+    EAN <- function(data,func){ 
+            coef1 <- 0.83
+            coef2 <- 0.18
+            coef3 <- 0.067
+            
+            with(data,maxlim( coef1 - coef2*(10^(-coef3*es)) ))     
+        
+    }                                   
     ## Angstrom (1915)
 
 ##' Emissivity from atmosphere
@@ -81,8 +88,9 @@
 ##' @param func a function for amount of cloud 
 ##' @return a vector with emissivity estimatives
 ##' @export
-    EBR <- function(data,func){ with(data,maxlim( 0.51 + 0.066*sqrt(es) )) }                                         
-    ## Brunt (1932)
+    EBR <- function(data,func){ 
+        with(data,maxlim( 0.51 + 0.066*sqrt(es) )) 
+    } ## Brunt (1932)
 
 ##' Emissivity from atmosphere
 ##' 
@@ -217,11 +225,10 @@
 ##' @param func a function for amount of cloud 
 ##' @return a vector with emissivity estimatives
 ##' @export
-        # FMU <- function()
     FHY <- function(data,func){ 
       C <- do.call(func , args = list(data = data)) 
       maxlim(0.69*(1-C^6) + 0.979*C^4)
-      }                                                 ## HYBRID (2009)
+      }     ## HYBRID (2009)
     
 ##' Effective emissivity from atmosphere with cloud atenuation
 ##' 
@@ -232,7 +239,7 @@
     FKZ <- function(data,func){
         C <- do.call(func , args = list(data = data)) 
         EKZ(data)*(1.0-C^3)+0.963*C^3
-    }                                                   ## Konzelmann (1994)
+    }      ## Konzelmann (1994)
     
 ##' Effective emissivity from atmosphere with cloud atenuation
 ##' 

@@ -4,18 +4,20 @@
 \alias{CalcStats}
 \title{Function for statistical analise}
 \usage{
-CalcStats(data_li, statistic = c("rmse", "pbias"))
+CalcStats(data_li, statistic = c("rmse", "pbias"), avg.time = "hourly")
 }
 \arguments{
 \item{data_li}{Data frame with observed and calculated  downward longwave radiation series.}
 
 \item{statistic}{Statistical index to be calculated between observation and each simulation, "rmse" default.}
+
+\item{avg.time}{Temporal resolution in analysis, "hourly" for hourly observations or "daily" for convertion to mean daily values.}
 }
 \description{
 Recommended use of function from hydroGOF package (ex., rmse, mae, pbias, me, nrmse, rSD...)
 }
 \examples{
-LiStats <- CalcStats(data_li = data_li, statistic = "pbias")
+LiStats <- CalcStats(data_li = data_li, statistic = "pbias",avg.time = "daily")
 LiStats
 }
 

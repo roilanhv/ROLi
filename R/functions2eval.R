@@ -79,33 +79,47 @@ PotRad <-  function(date,lon=-53.76,lat=-29.72,timezone=-4){
 #' Recommended use of function from hydroGOF package (ex., rmse, mae, pbias, me, nrmse, rSD...)
 #' @param data_li Data frame with observed and calculated  downward longwave radiation series.
 #' @param statistic Statistical index to be calculated between observation and each simulation, "rmse" default.
+#' @param avg.time Temporal resolution in analysis, "hourly" for hourly observations or "daily" for convertion to mean daily values. 
 #' @importFrom tidyr gather
-#' @importFrom dplyr rename group_by summarise 
+#' @importFrom dplyr rename group_by summarise select summarise_each funs select_ bind_cols
 #' @import hydroGOF
 #' @examples
-#' LiStats <- CalcStats(data_li = data_li, statistic = "pbias")
+#' LiStats <- CalcStats(data_li = data_li, statistic = "pbias",avg.time = "daily")
 #' LiStats
 #' @export
 CalcStats <- function(data_li, 
-                      statistic = c("rmse","pbias")){
+                      statistic = c("rmse","pbias"),
+                      avg.time = "hourly"){
     
-    
+    if(avg.time == "daily") {
+        
+        result <- 
+            data_li %>% 
+            gather( params, value, -Li, -date) %>%
+            group_by(params,day = as.Date(date)) %>%
+            summarise_each(funs(mean)) %>%
+            select(date, Li, params, value) %>%
+            rename(obs =Li, sim = value)
+        
+    } else {
+ 
     result <- 
         data_li %>%
-        gather( params, value, -Li) %>%
-        rename(obs = Li, sim = value) %>% 
-        group_by(params)
+        gather( params, value, -Li, -date) %>%
+        rename_(obs = "Li", sim = "value") %>% 
+        group_by(params) 
+    }
     
     schems <- data.frame(schemes = unique(result$params))
     
     result <-
     lapply(1:length(statistic), function(i){
-    
-        result2 <- 
+
             result %>%
             summarise(RESULT = do.call(statistic[i], list(obs = obs, sim = sim, na.rm = TRUE))) %>%
             setNames(c("schemes",statistic[i])) %>%
             select_(statistic[i])
+        
     }) %>% bind_cols()
     
     bind_cols(schems,result)

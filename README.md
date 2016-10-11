@@ -18,7 +18,7 @@ The incident longwave radiation (*Li*) is one of the essential components in the
 
 ```r
     data_atmos <- 
-    read_rds("../BAGS/longwaveR_data.rds") %>%
+    read_rds("../../BAGS/longwaveR_data.rds") %>%
     # Adding Potential Radiation in site (W/m2):
     mutate(Rpot = PotRad(date,lon=-53.76,lat=-29.72 )) %>%
     # Adding partial vapor water pressure (Pa):
@@ -221,6 +221,7 @@ schemes            rmse   pbias         NSE   nrmse         rSD
 ------------  ---------  ------  ----------  ------  ----------
 FAN_CQB        20.80353     4.8   0.5759504    65.1   0.9579928
 FAN_CQB_adj    17.66632     1.4   0.6942018    55.3   1.0016697
+
 
 
 

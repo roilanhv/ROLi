@@ -78,7 +78,7 @@ date                         Rg         Ta         rh   Li       Rpot         es
                 )
 ```
 
-<img src="longwaveR_vignette_files/figure-html/unnamed-chunk-4-1.png" style="display: block; margin: auto;" />
+<img src="README_files/figure-html/unnamed-chunk-4-1.png" style="display: block; margin: auto;" />
 
 
 ```r
@@ -89,7 +89,7 @@ date                         Rg         Ta         rh   Li       Rpot         es
              col = 1:2)
 ```
 
-<img src="longwaveR_vignette_files/figure-html/unnamed-chunk-5-1.png" style="display: block; margin: auto;" />
+<img src="README_files/figure-html/unnamed-chunk-5-1.png" style="display: block; margin: auto;" />
 
 
 ```r
@@ -119,7 +119,7 @@ FAN_CQB    30.72946     4.8   0.3329657    81.7   0.9349243
                 )
 ```
 
-<img src="longwaveR_vignette_files/figure-html/unnamed-chunk-7-1.png" style="display: block; margin: auto;" />
+<img src="README_files/figure-html/unnamed-chunk-7-1.png" style="display: block; margin: auto;" />
 
 
 
@@ -132,7 +132,7 @@ FAN_CQB    30.72946     4.8   0.3329657    81.7   0.9349243
              avg.time = "day")
 ```
 
-<img src="longwaveR_vignette_files/figure-html/unnamed-chunk-8-1.png" style="display: block; margin: auto;" />
+<img src="README_files/figure-html/unnamed-chunk-8-1.png" style="display: block; margin: auto;" />
 
 
 ```r
@@ -181,7 +181,7 @@ FAN_CQB    20.80353     4.8   0.5759504    65.1   0.9579928
                 )
 ```
 
-<img src="longwaveR_vignette_files/figure-html/unnamed-chunk-11-1.png" style="display: block; margin: auto;" />
+<img src="README_files/figure-html/unnamed-chunk-11-1.png" style="display: block; margin: auto;" />
 
 
 
@@ -193,7 +193,7 @@ FAN_CQB    20.80353     4.8   0.5759504    65.1   0.9579928
              col = 1:3, avg.time = "day")
 ```
 
-<img src="longwaveR_vignette_files/figure-html/unnamed-chunk-12-1.png" style="display: block; margin: auto;" />
+<img src="README_files/figure-html/unnamed-chunk-12-1.png" style="display: block; margin: auto;" />
 
 
 ```r

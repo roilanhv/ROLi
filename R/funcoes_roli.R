@@ -499,15 +499,15 @@
           
           emiss <- EAN(data, adjust = TRUE)
           emiss$emiss <- do.call("EAN",
-                                 args = as.list(modifyList(formals(EAN), 
-                                                           c(list(data = data, func = "-"), 
+                                 args = as.list(modifyList(formals(EAN),
+                                                           c(list(data = data, func = "-"),
                                                              as.list(emiss$coefs)))
                                  )
           )
-          
+
           suppressWarnings(
               tmp.nls <- nls( Li/(sigma*Ta^4) ~ maxlim( emiss$emiss * (1+coef1*C) ) ,
-                              data = data, na.action = "na.exclude",
+                              data = data,# na.action = "na.exclude",
                               start = list(coef1 = coef1) )
           )
           new.coefs <- coef(tmp.nls) 

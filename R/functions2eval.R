@@ -34,7 +34,7 @@ get.Li <- function(data,
         roli_est <-  with(data, emis_*sigma*Ta^4)   
     }
     out_rol <- data.frame(ROL = roli_est) 
-    names(out_rol) <- paste(E_fun,C_fun,sep = "-")
+    names(out_rol) <- paste(E_fun,C_fun,sep = "_")
     out_rol
 }
 

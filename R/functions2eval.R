@@ -24,6 +24,7 @@ get.Li <- function(data,E_fun = "FHY",C_fun = "CQB"){
 
 
 
+
 ##' Function for day and nigth identification
 ##' @param date A vector with dates
 ##' @param lon Longitude from local analisys 

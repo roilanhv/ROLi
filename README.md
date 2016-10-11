@@ -142,16 +142,18 @@ The incident longwave radiation (*Li*) is one of the essential components in the
 
 
 ```r
-kable(CalcStats(data_li = Li_sim_obs,
+CalcStats(data_li = Li_sim_obs,
           statistic = c("rmse","pbias","NSE","nrmse","rSD"),
-          avg.time = "daily") )
+          avg.time = "daily") 
 ```
 
-
-
-schemes        rmse   pbias         NSE   nrmse         rSD
---------  ---------  ------  ----------  ------  ----------
-FAN_CQB    20.80353     4.8   0.5759504    65.1   0.9579928
+```
+## Source: local data frame [1 x 6]
+## 
+##   schemes     rmse pbias       NSE nrmse       rSD
+##    (fctr)    (dbl) (dbl)     (dbl) (dbl)     (dbl)
+## 1 FAN_CQB 20.80353   4.8 0.5759504  65.1 0.9579928
+```
 
 # Adjusting *Li* schemes coeficients
 
@@ -204,30 +206,34 @@ FAN_CQB    20.80353     4.8   0.5759504    65.1   0.9579928
 
 
 ```r
-kable(CalcStats(data_li = Li_sim_obs_adj,
+CalcStats(data_li = Li_sim_obs_adj,
           statistic = c("rmse","pbias","NSE","nrmse","rSD"),
-          avg.time = "hourly") )
+          avg.time = "hourly") 
 ```
 
-
-
-schemes            rmse   pbias         NSE   nrmse         rSD
-------------  ---------  ------  ----------  ------  ----------
-FAN_CQB        30.72946     4.8   0.3329657    81.7   0.9349243
-FAN_CQB_adj    26.07404     1.5   0.5197638    69.3   1.0294446
+```
+## Source: local data frame [2 x 6]
+## 
+##       schemes     rmse pbias       NSE nrmse       rSD
+##        (fctr)    (dbl) (dbl)     (dbl) (dbl)     (dbl)
+## 1     FAN_CQB 30.72946   4.8 0.3329657  81.7 0.9349243
+## 2 FAN_CQB_adj 26.07404   1.5 0.5197638  69.3 1.0294446
+```
 
 ```r
-kable(CalcStats(data_li = Li_sim_obs_adj,
+CalcStats(data_li = Li_sim_obs_adj,
           statistic = c("rmse","pbias","NSE","nrmse","rSD"),
-          avg.time = "daily") )
+          avg.time = "daily") 
 ```
 
-
-
-schemes            rmse   pbias         NSE   nrmse         rSD
-------------  ---------  ------  ----------  ------  ----------
-FAN_CQB        20.80353     4.8   0.5759504    65.1   0.9579928
-FAN_CQB_adj    17.66632     1.4   0.6942018    55.3   1.0016697
+```
+## Source: local data frame [2 x 6]
+## 
+##       schemes     rmse pbias       NSE nrmse       rSD
+##        (fctr)    (dbl) (dbl)     (dbl) (dbl)     (dbl)
+## 1     FAN_CQB 20.80353   4.8 0.5759504  65.1 0.9579928
+## 2 FAN_CQB_adj 17.66632   1.4 0.6942018  55.3 1.0016697
+```
 
 
 

@@ -4,12 +4,16 @@
 \alias{FAN}
 \title{Effective emissivity from atmosphere with cloud atenuation}
 \usage{
-FAN(data, func)
+FAN(data, func, coef1 = 0.22, adjust = FALSE)
 }
 \arguments{
 \item{data}{a data frame with all atmospherics variables}
 
 \item{func}{a function for amount of cloud}
+
+\item{coef1}{Scheme coeficients}
+
+\item{adjust}{FALSE, TRUE if nonlinear least square adjusting wanted}
 }
 \value{
 a vector with emissivity estimatives

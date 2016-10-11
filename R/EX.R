@@ -16,7 +16,7 @@
 #     mutate(es = (rh/100) * (0.6112 * exp((17.67*Ta)/(243.5+Ta))) *10) %>%
 #     mutate(Ta = Ta+273.15) %>%
 #     mutate(K = kloudines(Rg = Rg,dates = date,lon=-53.76,lat=-29.72 ))
-
+# 
 # data2
-# save(data2,file = "./data/sm_data.rda")
+ # save(data2,file = "./data/sm_data.rda",compress = "xz")
 # 

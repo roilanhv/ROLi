@@ -4,12 +4,16 @@
 \alias{AGB}
 \title{Effective emissivity from atmosphere with cloud atenuation}
 \usage{
-AGB(data, func)
+AGB(data, func, coef1 = 0.84, coef2 = 21, adjust = FALSE)
 }
 \arguments{
 \item{data}{a data frame with all atmospherics variables}
 
 \item{func}{a function for amount of cloud}
+
+\item{coef1, coef2}{Scheme coeficients}
+
+\item{adjust}{FALSE, TRUE if nonlinear least square adjusting wanted}
 }
 \value{
 a vector with emissivity estimatives

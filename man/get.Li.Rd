@@ -4,7 +4,7 @@
 \alias{get.Li}
 \title{Downward Longwave Radiation from a emissivity and a cloud cover schemes}
 \usage{
-get.Li(data, E_fun = "FHY", C_fun = "CQB")
+get.Li(data, E_fun = "FHY", C_fun = "CQB", adjust = FALSE)
 }
 \arguments{
 \item{data}{Data frame with column of date (date), temperature (Ta), 
@@ -14,6 +14,8 @@ atennuation index (K)}
 \item{E_fun}{Emissivity scheme}
 
 \item{C_fun}{Cloud cover scheme}
+
+\item{adjust}{FALSE, TRUE if nonlinear least square adjusting wanted}
 }
 \value{
 Vector with Downward Longwave Radiation time series
@@ -23,7 +25,13 @@ Downward Longwave Radiation from a emissivity and a cloud cover schemes
 }
 \examples{
 # Downward longwave for Santa Maria site, January and July of  2014
+# without adjusting
 Li_sm <- get.Li(data = data2,E_fun = "FHY",C_fun = "CQB")
+head(Li_sm)
+summary(Li_sm)
+# Downward longwave for Santa Maria site, January and July of  2014
+# with adjusting
+Li_sm <- get.Li(data = data2,E_fun = "FBR",C_fun = "CQB",adjust = TRUE)
 head(Li_sm)
 summary(Li_sm)
 }

@@ -4,12 +4,17 @@
 \alias{EAN}
 \title{Emissivity from atmosphere}
 \usage{
-EAN(data, func)
+EAN(data, func, coef1 = 0.83, coef2 = 0.18, coef3 = 0.067,
+  adjust = FALSE)
 }
 \arguments{
-\item{data}{a data frame with all atmospherics variables}
+\item{data}{Data frame with all atmospherics variables}
 
-\item{func}{a function for amount of cloud}
+\item{func}{Function for amount of cloud}
+
+\item{coef1, coef2, coef3}{Scheme coeficients}
+
+\item{adjust}{FALSE, TRUE if nonlinear least square adjusting wanted}
 }
 \value{
 a vector with emissivity estimatives

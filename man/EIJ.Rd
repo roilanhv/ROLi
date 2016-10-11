@@ -4,12 +4,16 @@
 \alias{EIJ}
 \title{Emissivity from atmosphere}
 \usage{
-EIJ(data, func)
+EIJ(data, func, coef1 = 0.261, coef2 = -0.000777, adjust = FALSE)
 }
 \arguments{
 \item{data}{a data frame with all atmospherics variables}
 
 \item{func}{a function for amount of cloud}
+
+\item{coef1, coef2}{Scheme coeficients}
+
+\item{adjust}{FALSE, TRUE if nonlinear least square adjusting wanted}
 }
 \value{
 a vector with emissivity estimatives

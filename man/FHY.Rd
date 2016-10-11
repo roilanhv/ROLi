@@ -4,12 +4,16 @@
 \alias{FHY}
 \title{Effective emissivity from atmosphere with cloud atenuation}
 \usage{
-FHY(data, func)
+FHY(data, func, coef1 = 0.69, coef2 = 0.979, adjust = FALSE)
 }
 \arguments{
 \item{data}{a data frame with all atmospherics variables}
 
 \item{func}{a function for amount of cloud}
+
+\item{coef1, coef2}{Scheme coeficients}
+
+\item{adjust}{FALSE, TRUE if nonlinear least square adjusting wanted}
 }
 \value{
 a vector with emissivity estimatives

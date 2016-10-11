@@ -1,6 +1,6 @@
 Package: ROLi
 Title: Evaluate various downward longwave parametrizations
-Version: 0.0.1
+Version: 1.10.16
 Authors@R: person("Roilan Hernandez", email = "roylanhv@gmail.com", role = c("aut", "cre"))
 Description: Evaluate various downward longwave parametrizations. Determine the best schemes
         for clear and cloudy skies.
@@ -10,9 +10,7 @@ License: GPL-3
 LazyData: true
 Imports:
     dplyr,
-    magrittr,
     tidyr,
-    openair,
     hydroGOF,
     plyr
 RoxygenNote: 5.0.1

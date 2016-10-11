@@ -6,19 +6,35 @@
 ##' atennuation index (K)
 ##' @param E_fun Emissivity scheme
 ##' @param C_fun Cloud cover scheme
+##' @param adjust FALSE, TRUE if nonlinear least square adjusting wanted
 ##' @return Vector with Downward Longwave Radiation time series
 ##' @examples 
 ##' # Downward longwave for Santa Maria site, January and July of  2014
+##' # without adjusting
 ##' Li_sm <- get.Li(data = data2,E_fun = "FHY",C_fun = "CQB")
 ##' head(Li_sm)
 ##' summary(Li_sm)
+##' # Downward longwave for Santa Maria site, January and July of  2014
+##' # with adjusting
+##' Li_sm <- get.Li(data = data2,E_fun = "FBR",C_fun = "CQB",adjust = TRUE)
+##' head(Li_sm)
+##' summary(Li_sm)
 ##' @export
-get.Li <- function(data,E_fun = "FHY",C_fun = "CQB"){
+get.Li <- function(data,
+                   E_fun = "FHY",C_fun = "CQB",
+                   adjust = FALSE){
+    
     sigma <- 5.67051*10^(-8) # W m^(-2) T^(-4)
-    emis_ <- do.call(E_fun,list(data=data,func = C_fun)) 
-    roli_est <-  with(data, emis_*sigma*Ta^4)   
+    
+    emis_ <- do.call(E_fun,list(data=data,func = C_fun, adjust = adjust)) 
+    
+    if(adjust){
+        roli_est <-  with(data, emis_$emiss*sigma*Ta^4)
+    } else {
+        roli_est <-  with(data, emis_*sigma*Ta^4)   
+    }
     out_rol <- data.frame(ROL = roli_est) 
-    names(out_rol) <- paste(E_fun,C_fun,sep = "_")
+    names(out_rol) <- paste(E_fun,C_fun,sep = "-")
     out_rol
 }
 
@@ -81,7 +97,7 @@ PotRad <-  function(date,lon=-53.76,lat=-29.72,timezone=-4){
 #' @param statistic Statistical index to be calculated between observation and each simulation, "rmse" default.
 #' @param avg.time Temporal resolution in analysis, "hourly" for hourly observations or "daily" for convertion to mean daily values. 
 #' @importFrom tidyr gather
-#' @importFrom dplyr rename group_by summarise select summarise_each funs select_ bind_cols
+#' @importFrom dplyr rename rename_ group_by summarise select summarise_each funs select_ bind_cols
 #' @import hydroGOF
 #' @examples
 #' LiStats <- CalcStats(data_li = data_li, statistic = "pbias",avg.time = "daily")
@@ -90,6 +106,8 @@ PotRad <-  function(date,lon=-53.76,lat=-29.72,timezone=-4){
 CalcStats <- function(data_li, 
                       statistic = c("rmse","pbias"),
                       avg.time = "hourly"){
+    
+     Li <- params <- value <- obs <- sim <- NULL
     
     if(avg.time == "daily") {
         
@@ -125,6 +143,48 @@ CalcStats <- function(data_li,
     bind_cols(schems,result)
     
 }
+
+#' Function to get all scheme calculation, adjust = TRUE make a adjusting NLS.
+#' @param data Data frame with atmospheric variables
+#' @param Ovrcst_sch Schemes for cloud cover index
+#' @param Cld_sch Schemes of atmosphere emissivity with consideration of Ovrcst_sch
+#' @param Emiss_sch Schemes of atmosphere emissivity 
+#' @param adjust FALSE, TRUE for NLS adjusting 
+#' @return Data frame with Li observed and all combintions of schemes for calculations of Li
+#' @author Roilan Hernandez
+#' @export
+#' @importFrom dplyr bind_cols
+get.AllSchems <- function(data,
+                          Ovrcst_sch = c("CQB","CKC","CCB","CKZ","CWU","CJG"),
+                          Cld_sch = c("FAN","FBR","FHY","FKZ","FIJ"),
+                          Emiss_sch  = c("EAN","EBR","ESW","EIJ","EBT","EID","EKZ","EPR","ABM","ALH","AGB"),
+                          adjust = FALSE){
+    
+    roli_comb <- rbind(expand.grid(Emiss_sch,"-"), expand.grid(Cld_sch, Ovrcst_sch) )
+    
+    Li.sims <- 
+        lapply(1:nrow(roli_comb), function(i){
+            cat("=")
+            tmp.get.Li <- 
+            get.Li(data = data,
+                   E_fun = roli_comb[i,1] %>% as.character,
+                   C_fun = roli_comb[i,2] %>% as.character,
+                   adjust = adjust)
+            
+            if(adjust){
+                tmp.get.Li <- tmp.get.Li$emiss
+            } else {
+                tmp.get.Li
+            }
+            
+        }) %>% bind_cols()
+    
+    
+    names(Li.sims) <- gsub("_-","",names(Li.sims))
+    
+    cbind(data.frame(date = data$date), Li.sims)
+}
+
 
 
 # ##' Function for evaluation of all parameterizations

@@ -1,4 +1,10 @@
 
+
+
+
+
+
+
 ##' Amount of cloud estimatives functions.
 ##' @param data a data frame with all atmospherics variables
 ##' @return a vector with cloud amount estimatives
@@ -9,9 +15,7 @@
     }  # Quadratic regression of Black(1956)
     
 ##' Amount of cloud estimatives functions.
-##' 
 ##' @param data a data frame with all atmospherics variables
-##' 
 ##' @return a vector with cloud amount estimatives  
 ##' @export
     CKC <- function(data){
@@ -29,7 +33,6 @@
         }      # Campbell (1985)
     
 ##' Amount of cloud estimatives functions.
-##' 
 ##' @param data a data frame with all atmospherics variables
 ##' @param alt Site sea level heigth
 ##' @return a vector with cloud amount estimatives
@@ -40,9 +43,7 @@
     }                                                     # Konzelmann (1994)
     
 ##' Amount of cloud estimatives functions.
-##' 
 ##' @param data a data frame with all atmospherics variables
-##' 
 ##' @return a vector with cloud amount estimatives
 ##' @export
     CWU <- function(data){
@@ -52,9 +53,7 @@
     } # Weishampel and Urban (1996)
 
 ##' Amount of cloud estimatives functions.
-##' 
 ##' @param data a data frame with all atmospherics variables
-##' 
 ##' @return a vector with cloud amount estimatives 
 ##' @export
     CJG <- function(data){ 
@@ -67,9 +66,13 @@
 #----                                       EMISSIVIDADE 
 
 ##' Emissivity from atmosphere
-##' @param data a data frame with all atmospherics variables
-##' @param func a function for amount of cloud 
+##' @param data Data frame with all atmospherics variables
+##' @param func Function for amount of cloud 
+##' @param coef1,coef2,coef3 Scheme coeficients 
+##' @param adjust FALSE, TRUE if nonlinear least square adjusting wanted
 ##' @return a vector with emissivity estimatives
+##' @import stats
+##' @import utils
 ##' @export
     EAN <- function(data,func, 
                     coef1 = 0.83, coef2 = 0.18, coef3 = 0.067, 
@@ -94,15 +97,17 @@
                 
             }
             
-    }                                   
-    ## Angstrom (1915)
+    }   ## Angstrom (1915)
 
     
 ##' Emissivity from atmosphere
-##' 
 ##' @param data a data frame with all atmospherics variables
 ##' @param func a function for amount of cloud 
+##' @param coef1,coef2 Scheme coeficients 
+##' @param adjust FALSE, TRUE if nonlinear least square adjusting wanted
 ##' @return a vector with emissivity estimatives
+##' @import stats
+##' @import utils
 ##' @export
     EBR <- function(data,func,
                     coef1 = 0.51, coef2 = 0.066,
@@ -128,13 +133,16 @@
             
         }
         
-    } ## Brunt (1932)
+    }    ## Brunt (1932)
 
 ##' Emissivity from atmosphere
-##' 
 ##' @param data a data frame with all atmospherics variables
 ##' @param func a function for amount of cloud 
+##' @param coef1 Scheme coeficients 
+##' @param adjust FALSE, TRUE if nonlinear least square adjusting wanted
 ##' @return a vector with emissivity estimatives
+##' @import stats
+##' @import utils
 ##' @export
     ESW <- function(data,func,
                     coef1 = 0.0000092,
@@ -162,10 +170,13 @@
     }     ## Swinbank (1963)
 
 ##' Emissivity from atmosphere
-##' 
 ##' @param data a data frame with all atmospherics variables
 ##' @param func a function for amount of cloud 
+##' @param coef1,coef2 Scheme coeficients 
+##' @param adjust FALSE, TRUE if nonlinear least square adjusting wanted
 ##' @return a vector with emissivity estimatives
+##' @import stats
+##' @import utils
 ##' @export
     EIJ <- function(data,func, 
                     coef1 = 0.261, coef2 = -0.000777,
@@ -192,10 +203,13 @@
     # NOTE: (Ta - 273.15) OU (273 - Ta)
 
 ##' Emissivity from atmosphere
-##' 
 ##' @param data a data frame with all atmospherics variables
-##' @param func a function for amount of cloud 
+##' @param func a function for amount of cloud
+##' @param coef1,coef2 Scheme coeficients  
+##' @param adjust FALSE, TRUE if nonlinear least square adjusting wanted
 ##' @return a vector with emissivity estimatives
+##' @import stats
+##' @import utils
 ##' @export
     EBT <- function(data,func,
                     coef1 = 1.24, coef2 = 1/7, 
@@ -224,10 +238,13 @@
     
 
 ##' Emissivity from atmosphere
-##' 
 ##' @param data a data frame with all atmospherics variables
 ##' @param func a function for amount of cloud 
+##' @param coef1,coef2 Scheme coeficients 
+##' @param adjust FALSE, TRUE if nonlinear least square adjusting wanted
 ##' @return a vector with emissivity estimatives
+##' @import stats
+##' @import utils
 ##' @export
     EID <- function(data,func,
                     coef1 = 0.7, coef2 = 0.0000595,
@@ -256,10 +273,13 @@
         }   ## Idso (1981)
 
 ##' Emissivity from atmosphere
-##' 
 ##' @param data a data frame with all atmospherics variables
 ##' @param func a function for amount of cloud 
+##' @param coef1,coef2,coef3 Scheme coeficients 
+##' @param adjust FALSE, TRUE if nonlinear least square adjusting wanted
 ##' @return a vector with emissivity estimatives
+##' @import stats
+##' @import utils
 ##' @export
     EKZ <- function(data,func,
                     coef1 = 0.23, coef2 = 0.484, coef3 = 1/8,
@@ -288,10 +308,13 @@
         }   ## Konzelmann (1994)
 
 ##' Emissivity from atmosphere
-##' 
 ##' @param data a data frame with all atmospherics variables
 ##' @param func a function for amount of cloud 
+##' @param coef1,coef2,coef3 Scheme coeficients 
+##' @param adjust FALSE, TRUE if nonlinear least square adjusting wanted
 ##' @return a vector with emissivity estimatives
+##' @import stats
+##' @import utils
 ##' @export
     EPR <- function(data,func,
                     coef1 = 1, coef2 = 1.2, coef3 = 3,
@@ -324,10 +347,13 @@
 #---- EMISSIVIDADE EFETIVA COM INDICE DE ATENUAÇÃO
 
 ##' Effective emissivity from atmosphere with cloud atenuation
-##' 
 ##' @param data a data frame with all atmospherics variables
 ##' @param func a function for amount of cloud 
+##' @param coef1,coef2,coef3,coef4 Scheme coeficients 
+##' @param adjust FALSE, TRUE if nonlinear least square adjusting wanted
 ##' @return a vector with emissivity estimatives
+##' @import stats
+##' @import utils
 ##' @export
     ALH <- function(data,func, 
                     coef1 = 1.18, coef2 = 1.24, coef3 = -.34, coef4 = 1.37,
@@ -336,9 +362,9 @@
         if(adjust){
             
             emiss <- EBT(data, adjust = TRUE)
-            
+            sigma <- 5.67051*10^(-8)
             emiss$emiss <- do.call("EBT",
-                                   args = as.list(modifyList(formals(EBT2), 
+                                   args = as.list(modifyList(formals(EBT), 
                                                              c(list(data = data, func = "-"), 
                                                                as.list(emiss$coefs)))
                                                   )
@@ -364,18 +390,24 @@
         
         } ## Lhomme (2007)
     
+    
 ##' Effective emissivity from atmosphere with cloud atenuation
-##' 
 ##' @param data a data frame with all atmospherics variables
 ##' @param func a function for amount of cloud 
+##' @param coef1 Scheme coeficients 
+##' @param adjust FALSE, TRUE if nonlinear least square adjusting wanted
 ##' @return a vector with emissivity estimatives
 ##' @author Roilan Hernandez, Guilherme Goergen and Jonatan Tatsch
+##' @import stats
+##' @import utils
 ##' @export
     ABM <- function(data,func,
                     coef1 = 0.3,
                     adjust = FALSE){ 
         
         if(adjust){
+            
+            sigma <- 5.67051*10^(-8)
             
             emiss <- EID(data, adjust = TRUE)
             emiss$emiss <- do.call("EID",
@@ -408,7 +440,11 @@
 ##' 
 ##' @param data a data frame with all atmospherics variables
 ##' @param func a function for amount of cloud 
+##' @param coef1,coef2 Scheme coeficients 
+##' @param adjust FALSE, TRUE if nonlinear least square adjusting wanted
 ##' @return a vector with emissivity estimatives
+##' @import stats
+##' @import utils
 ##' @export
     AGB <- function(data,func,
                     coef1 = 0.84, coef2 = 21.,
@@ -445,12 +481,19 @@
 ##' 
 ##' @param data a data frame with all atmospherics variables
 ##' @param func a function for amount of cloud 
+##' @param coef1 Scheme coeficients 
+##' @param adjust FALSE, TRUE if nonlinear least square adjusting wanted
 ##' @return a vector with emissivity estimatives
+##' @import stats
+##' @import utils
 ##' @export
     FAN <- function(data,func,
                     coef1 = 0.22,
                     adjust = FALSE){
+        
       C <- do.call(func , args = list(data = data)) 
+      
+      sigma <- 5.67051*10^(-8)
       
       if(adjust){
           
@@ -484,13 +527,19 @@
 ##' 
 ##' @param data a data frame with all atmospherics variables
 ##' @param func a function for amount of cloud 
+##' @param coef1 Scheme coeficients 
+##' @param adjust FALSE, TRUE if nonlinear least square adjusting wanted
 ##' @return a vector with emissivity estimatives
+##' @import stats
+##' @import utils
 ##' @export
     FBR <- function(data,func,
                     coef1 = 0.22,
                     adjust = FALSE){
         
         C <- do.call(func , args = list(data = data)) 
+        
+        sigma <- 5.67051*10^(-8)
         
         if(adjust){
             
@@ -524,13 +573,19 @@
 ##' 
 ##' @param data a data frame with all atmospherics variables
 ##' @param func a function for amount of cloud 
+##' @param coef1,coef2 Scheme coeficients 
+##' @param adjust FALSE, TRUE if nonlinear least square adjusting wanted
 ##' @return a vector with emissivity estimatives
+##' @import stats
+##' @import utils
 ##' @export
     FHY <- function(data,func,
                     coef1 = 0.69, coef2 = 0.979,
                     adjust = FALSE){
         
         C <- do.call(func , args = list(data = data)) 
+        
+        sigma <- 5.67051*10^(-8)
         
         if(adjust){
             
@@ -555,12 +610,18 @@
 ##' 
 ##' @param data a data frame with all atmospherics variables
 ##' @param func a function for amount of cloud 
+##' @param coef1 Scheme coeficients 
+##' @param adjust FALSE, TRUE if nonlinear least square adjusting wanted
 ##' @return a vector with emissivity estimatives
+##' @import stats
+##' @import utils
 ##' @export
     FKZ <- function(data,func, 
                     coef1 = 0.963,
                     adjust = FALSE){
         C <- do.call(func , args = list(data = data)) 
+        
+        sigma <- 5.67051*10^(-8)
         
         if(adjust){
             
@@ -593,13 +654,19 @@
 ##' 
 ##' @param data a data frame with all atmospherics variables
 ##' @param func a function for amount of cloud 
+##' @param coef1 Scheme coeficients 
+##' @param adjust FALSE, TRUE if nonlinear least square adjusting wanted
 ##' @return a vector with emissivity estimatives
+##' @import stats
+##' @import utils
 ##' @export
     FIJ <- function(data,func,
                     coef1 = 0.22,
                     adjust = FALSE){
         
         C <- do.call(func , args = list(data = data)) 
+        
+        sigma <- 5.67051*10^(-8)
         
         if(adjust){
             
@@ -627,9 +694,11 @@
             
         }
         
-        
     }                                                   
     
+#############################
+### OTHERS FUNCTIONS
+### 
 
 ##' Incoming solar radiation atenuattion (K)
 ##' 

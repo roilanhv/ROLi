@@ -4,12 +4,16 @@
 \alias{EID}
 \title{Emissivity from atmosphere}
 \usage{
-EID(data, func)
+EID(data, func, coef1 = 0.7, coef2 = 5.95e-05, adjust = FALSE)
 }
 \arguments{
 \item{data}{a data frame with all atmospherics variables}
 
 \item{func}{a function for amount of cloud}
+
+\item{coef1, coef2}{Scheme coeficients}
+
+\item{adjust}{FALSE, TRUE if nonlinear least square adjusting wanted}
 }
 \value{
 a vector with emissivity estimatives

@@ -4,12 +4,17 @@
 \alias{ALH}
 \title{Effective emissivity from atmosphere with cloud atenuation}
 \usage{
-ALH(data, func)
+ALH(data, func, coef1 = 1.18, coef2 = 1.24, coef3 = -0.34, coef4 = 1.37,
+  adjust = FALSE)
 }
 \arguments{
 \item{data}{a data frame with all atmospherics variables}
 
 \item{func}{a function for amount of cloud}
+
+\item{coef1, coef2, coef3, coef4}{Scheme coeficients}
+
+\item{adjust}{FALSE, TRUE if nonlinear least square adjusting wanted}
 }
 \value{
 a vector with emissivity estimatives

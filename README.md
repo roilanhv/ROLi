@@ -2,6 +2,7 @@
 Roilan Hernández Valdés  
 October 9, 2016  
 
+[![DOI](https://zenodo.org/badge/67534590.svg)](https://zenodo.org/badge/latestdoi/67534590)
 
 # Introduction
 

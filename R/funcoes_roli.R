@@ -372,7 +372,7 @@
                     
             suppressWarnings(
                 tmp.nls <- nls( Li/(sigma*Ta^4) ~ maxlim( (coef1/coef2) * emiss$emiss *  (coef3*K+coef4) ) ,
-                            data = data, na.action = "na.exclude",
+                            data = data, #na.action = "na.exclude",
                             start = list(coef1 = coef1, coef3 = coef3 ) )
             )
             new.coefs <- coef(tmp.nls) 
@@ -420,8 +420,8 @@
             
             suppressWarnings(
                 tmp.nls <- nls( Li/(sigma*Ta^4) ~ maxlim( emiss$emiss * (1+coef1*(1-data$K)^2 ) ) ,
-                            data = data, na.action = "na.exclude",
-                            start = list(coef1 = coef1) )
+                                data = data, 
+                                start = list(coef1 = coef1) )
             )
             new.coefs <- coef(tmp.nls) 
             new.emiss <- predict(tmp.nls)
@@ -434,7 +434,7 @@
         
         
         
-        } ## Stockli (2007)
+    } ## Stockli (2007)
     
 ##' Effective emissivity from atmosphere with cloud atenuation
 ##' 
@@ -591,7 +591,7 @@
             
             suppressWarnings(
                 tmp.nls <- nls( Li/(sigma*Ta^4) ~ maxlim( coef1 *(1-C^6) + coef2 * C^4 ) ,
-                                data = data, #na.action = "na.exclude",
+                                data = data, na.action = "na.exclude",
                                 start = list(coef1 = coef1, coef2 = coef2) )
             )
             new.coefs <- coef(tmp.nls) 

@@ -553,7 +553,7 @@
             
             suppressWarnings(
                 tmp.nls <- nls( Li/(sigma*Ta^4) ~ maxlim( emiss$emiss * (1+coef1*C) ) ,
-                                data = data, na.action = "na.exclude",
+                                data = data, #na.action = "na.exclude",
                                 start = list(coef1 = coef1) )
             )
             new.coefs <- coef(tmp.nls) 
@@ -591,7 +591,7 @@
             
             suppressWarnings(
                 tmp.nls <- nls( Li/(sigma*Ta^4) ~ maxlim( coef1 *(1-C^6) + coef2 * C^4 ) ,
-                                data = data, na.action = "na.exclude",
+                                data = data, #na.action = "na.exclude",
                                 start = list(coef1 = coef1, coef2 = coef2) )
             )
             new.coefs <- coef(tmp.nls) 
@@ -635,7 +635,7 @@
             
             suppressWarnings(
                 tmp.nls <- nls( Li/(sigma*Ta^4) ~ maxlim( emiss$emiss *(1.0-C^3)+ coef1 * C^3 ) ,
-                                data = data, na.action = "na.exclude",
+                                data = data,# na.action = "na.exclude",
                                 start = list(coef1 = coef1) )
             )
             new.coefs <- coef(tmp.nls) 
@@ -680,7 +680,7 @@
             
             suppressWarnings(
                 tmp.nls <- nls( Li/(sigma*Ta^4) ~ maxlim( emiss$emiss *(1+coef1*C^2) ) ,
-                                data = data, na.action = "na.exclude",
+                                data = data,#na.action = "na.exclude",
                                 start = list(coef1 = coef1) )
             )
             new.coefs <- coef(tmp.nls) 

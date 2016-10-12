@@ -165,12 +165,13 @@ get.AllSchems <- function(data,
     Li.sims <- 
         lapply(1:nrow(roli_comb), function(i){
   
+            cat("=",roli_comb[i,1] %>% as.character,roli_comb[i,2] %>% as.character , "\n")
+            tmp.Li <- 
             get.Li(data = data,
                    E_fun = roli_comb[i,1] %>% as.character,
                    C_fun = roli_comb[i,2] %>% as.character,
                    adjust = adjust)
-            cat("=",roli_comb[i,1] %>% as.character,roli_comb[i,2] %>% as.character , "\n")
-            
+            tmp.Li
         }) %>% bind_cols()
     
     names(Li.sims) <- gsub("_-","",names(Li.sims))

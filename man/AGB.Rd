@@ -21,4 +21,9 @@ a vector with emissivity estimatives
 \description{
 Effective emissivity from atmosphere with cloud atenuation
 }
+\references{
+Gabathuler M, Marty CA, Hanselmann KW (2001) Parameterization
+of incoming longwave radiation in high-mountain environments.
+Phys Geogr 22:99–114
+}
 

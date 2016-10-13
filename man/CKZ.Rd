@@ -17,4 +17,9 @@ a vector with cloud amount estimatives
 \description{
 Amount of cloud estimatives functions.
 }
+\references{
+Konzelmann T, van de Wal RSW, Greuell W, Bintanja R, Henneken  EAC, Abe-Ouchi A 
+(1994) Parameterization of global and longwave incoming radiation for the Greenland Ice Sheet. 
+Glob Planet Chang 9:143–164
+}
 

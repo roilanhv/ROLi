@@ -2,7 +2,7 @@
 % Please edit documentation in R/funcoes_roli.R
 \name{FHY}
 \alias{FHY}
-\title{Effective emissivity from atmosphere with cloud atenuation}
+\title{Effective emissivity from atmosphere with cloud atenuation.}
 \usage{
 FHY(data, func, coef1 = 0.69, coef2 = 0.979, adjust = FALSE)
 }
@@ -19,6 +19,11 @@ FHY(data, func, coef1 = 0.69, coef2 = 0.979, adjust = FALSE)
 a vector with emissivity estimatives
 }
 \description{
-Effective emissivity from atmosphere with cloud atenuation
+Effective emissivity from atmosphere with cloud atenuation.
+}
+\references{
+Friend AD, Stevens AK, Knox RG, Cannell MGR (1997) A processbased,
+terrestrial biosphere model of ecosystem dynamics
+(Hybrid v3.0). Ecol Model 95:249–287
 }
 

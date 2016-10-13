@@ -21,4 +21,8 @@ a vector with emissivity estimatives
 \description{
 Effective emissivity from atmosphere with cloud atenuation
 }
+\references{
+Ångström A (1915) A study of the radiation of the atmosphere.
+Smithsonian Miscellaneous Collections 65(3)
+}
 

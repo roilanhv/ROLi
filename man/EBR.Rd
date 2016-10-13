@@ -21,4 +21,8 @@ a vector with emissivity estimatives
 \description{
 Emissivity from atmosphere
 }
+\references{
+Brunt D (1932) Notes on radiation in the atmosphere I. Q J Roy
+Meteor Soc 58:389–420
+}
 

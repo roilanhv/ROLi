@@ -15,4 +15,9 @@ a vector with cloud amount estimatives
 \description{
 Amount of cloud estimatives functions.
 }
+\references{
+Weishampel JF, Urban DL (1996) Coupling a spatially-explicit forest
+gap model with a 3-D solar routine to simulate latitudinal effects.
+Ecol Model 86:101–111
+}
 

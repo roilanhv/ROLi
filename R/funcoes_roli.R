@@ -9,6 +9,8 @@
 ##' @param data a data frame with all atmospherics variables
 ##' @return a vector with cloud amount estimatives
 ##' @export
+##' @references Black JN (1956) The distribution of solar radiation over the Earth’s surface. Arch Meteor Geophy B 7:165–189
+##' 
     CQB <- function(data){
         a <- maxlim(with(data,0.34^2 + 4 * 0.458 * (0.803-K)),max_ = Inf)
         maxlim( ( 0.34-sqrt(a) ) / (-2 * 0.458))
@@ -18,6 +20,7 @@
 ##' @param data a data frame with all atmospherics variables
 ##' @return a vector with cloud amount estimatives  
 ##' @export
+##' @references Kasten F, Czeplak G (1980) Solar and terrestrial radiation dependent on the amount and type of cloud. Sol Energy 24:177–189
     CKC <- function(data){
         with(data,maxlim( (4/3*(1-K))^(1/3.4) ))   
         } # Kasten & Czeplack (1980)
@@ -28,6 +31,7 @@
 ##' 
 ##' @return a vector with cloud amount estimatives 
 ##' @export
+##' @references Campbell GS (1985) Soil physics with BASIC. Elsevier, Amsterdam
     CCB <- function(data){ 
         with(data,maxlim( 2.33 - 3.33*K  ) ) 
         }      # Campbell (1985)
@@ -37,15 +41,21 @@
 ##' @param alt Site sea level heigth
 ##' @return a vector with cloud amount estimatives
 ##' @export
+##' @references Konzelmann T, van de Wal RSW, Greuell W, Bintanja R, Henneken  EAC, Abe-Ouchi A 
+##' (1994) Parameterization of global and longwave incoming radiation for the Greenland Ice Sheet. 
+##' Glob Planet Chang 9:143–164
     CKZ <- function(data, alt = 88.){ 
             a <- 1./( 0.78*exp(-0.00085*alt))
           with(data,maxlim(  sqrt( (1-K)*a ) ))
-    }                                                     # Konzelmann (1994)
+    }     # Konzelmann (1994)
     
 ##' Amount of cloud estimatives functions.
 ##' @param data a data frame with all atmospherics variables
 ##' @return a vector with cloud amount estimatives
 ##' @export
+##' @references Weishampel JF, Urban DL (1996) Coupling a spatially-explicit forest
+##' gap model with a 3-D solar routine to simulate latitudinal effects.
+##' Ecol Model 86:101–111
     CWU <- function(data){
         num <- with(data,252.7 - (Rg * 60*60*24/(4.19*10000)))
         den <- with(data,0.695*(Rpot * 60*60*24/(4.19*10000)))
@@ -56,6 +66,9 @@
 ##' @param data a data frame with all atmospherics variables
 ##' @return a vector with cloud amount estimatives 
 ##' @export
+##' @references Jegede OO, Ogolo EO, Aregbesola TO (2006) Estimating net
+##' radiation using routine meteorological data at a tropical location
+##' in Nigeria. Int J Sustain Energy 25:107–115
     CJG <- function(data){ 
         with(data,maxlim( ifelse(K < 0.9 , 1.1-K,2*(1-K)) ))
         } # Jedge (2006)
@@ -74,6 +87,8 @@
 ##' @import stats
 ##' @import utils
 ##' @export
+##' @references Ångström A (1915) A study of the radiation of the atmosphere.
+##' Smithsonian Miscellaneous Collections 65(3)
     EAN <- function(data,func, 
                     coef1 = 0.83, coef2 = 0.18, coef3 = 0.067, 
                     adjust = FALSE){ 
@@ -112,6 +127,8 @@
 ##' @import stats
 ##' @import utils
 ##' @export
+##' @references Brunt D (1932) Notes on radiation in the atmosphere I. Q J Roy
+##' Meteor Soc 58:389–420
     EBR <- function(data,func,
                     coef1 = 0.51, coef2 = 0.066,
                     adjust = FALSE){
@@ -149,6 +166,8 @@
 ##' @import stats
 ##' @import utils
 ##' @export
+##' @references Swinbank WC (1963) Long-wave radiation from clear skies. Q J Roy
+##' Meteor Soc 89:339–348
     ESW <- function(data,func,
                     coef1 = 0.0000092,
                     adjust = FALSE){ 
@@ -185,6 +204,8 @@
 ##' @import stats
 ##' @import utils
 ##' @export
+##' @references Idso SB, Jackson RD (1969) Thermal radiation from the atmosphere.
+##' J Geophys Res 74:5397–5403
     EIJ <- function(data,func, 
                     coef1 = 0.261, coef2 = -0.000777,
                     adjust = FALSE){
@@ -220,6 +241,8 @@
 ##' @import stats
 ##' @import utils
 ##' @export
+##' @references Brutsaert W (1975) On a derivable formula for long-wave radiation
+##' from clear skies. Water Resour Res 11:742–744
     EBT <- function(data,func,
                     coef1 = 1.24, coef2 = 1/7, 
                     adjust = FALSE){ 
@@ -257,6 +280,9 @@
 ##' @import stats
 ##' @import utils
 ##' @export
+##' @references Idso SB (1981) A set of equations for full spectrum and 8- to 14-μm
+##'  and 10.5- to 12.5-μm thermal radiation from cloudless skies.
+##'  Water Resour Res 17:295–304
     EID <- function(data,func,
                     coef1 = 0.7, coef2 = 0.0000595,
                     adjust = FALSE){ 
@@ -294,6 +320,10 @@
 ##' @import stats
 ##' @import utils
 ##' @export
+##' @references Konzelmann T, van de Wal RSW, Greuell W, Bintanja R, Henneken
+##' EAC, Abe-Ouchi A (1994) Parameterization of global and
+##' longwave incoming radiation for the Greenland Ice Sheet. Glob
+##' Planet Chang 9:143–164
     EKZ <- function(data,func,
                     coef1 = 0.23, coef2 = 0.484, coef3 = 1/8,
                     adjust = FALSE) {
@@ -331,6 +361,8 @@
 ##' @import stats
 ##' @import utils
 ##' @export
+##' @references Prata AJ (1996) A new long-wave formula for estimating downward clearsky
+##' radiation at the surface. Q J Roy Meteor Soc 122:1127–1151
     EPR <- function(data,func,
                     coef1 = 1, coef2 = 1.2, coef3 = 3,
                     adjust = FALSE) {
@@ -372,6 +404,9 @@
 ##' @import stats
 ##' @import utils
 ##' @export
+##' @references Lhomme JP, Vacher JJ, Rocheteau A (2007) Estimating downward
+##' long-wave radiation on the Andean Altiplano. Agr For Meteorol
+##' 145:139–148
     ALH <- function(data,func, 
                     coef1 = 1.18, coef2 = 1.24, coef3 = -.34, coef4 = 1.37,
                     adjust=FALSE){
@@ -418,6 +453,9 @@
 ##' @import stats
 ##' @import utils
 ##' @export
+##' @references Stöckli R (2007) LBA-MIP driver data gap filling algorithms.
+##' Unpublished. http://www.climatemodeling.org/lba-mip/LBAmipDriverDataFillingMethods.pdf
+##' Accessed 7 May 2011
     ABM <- function(data,func,
                     coef1 = 0.3,
                     adjust = FALSE){ 
@@ -462,6 +500,9 @@
 ##' @import stats
 ##' @import utils
 ##' @export
+##' @references Gabathuler M, Marty CA, Hanselmann KW (2001) Parameterization
+##' of incoming longwave radiation in high-mountain environments.
+##' Phys Geogr 22:99–114
     AGB <- function(data,func,
                     coef1 = 0.84, coef2 = 21.,
                     adjust = FALSE){
@@ -503,6 +544,8 @@
 ##' @import stats
 ##' @import utils
 ##' @export
+##' @references Ångström A (1915) A study of the radiation of the atmosphere.
+##' Smithsonian Miscellaneous Collections 65(3)
     FAN <- function(data,func,
                     coef1 = 0.22,
                     adjust = FALSE){
@@ -549,6 +592,8 @@
 ##' @import stats
 ##' @import utils
 ##' @export
+##' @references Brutsaert W (1975) On a derivable formula for long-wave radiation
+##' from clear skies. Water Resour Res 11:742–744
     FBR <- function(data,func,
                     coef1 = 0.22,
                     adjust = FALSE){
@@ -583,10 +628,9 @@
             
         }
         
-    }                                                  ## Brutsaert (1982) ou (1975)**
+    }       ## Brutsaert (1982) ou (1975)**
 
-##' Effective emissivity from atmosphere with cloud atenuation
-##' 
+##' Effective emissivity from atmosphere with cloud atenuation.
 ##' @param data a data frame with all atmospherics variables
 ##' @param func a function for amount of cloud 
 ##' @param coef1,coef2 Scheme coeficients 
@@ -595,6 +639,9 @@
 ##' @import stats
 ##' @import utils
 ##' @export
+##' @references Friend AD, Stevens AK, Knox RG, Cannell MGR (1997) A processbased,
+##' terrestrial biosphere model of ecosystem dynamics
+##' (Hybrid v3.0). Ecol Model 95:249–287
     FHY <- function(data,func,
                     coef1 = 0.69, coef2 = 0.979,
                     adjust = FALSE){
@@ -634,6 +681,10 @@
 ##' @import stats
 ##' @import utils
 ##' @export
+##' @references Konzelmann T, van de Wal RSW, Greuell W, Bintanja R, Henneken
+##' EAC, Abe-Ouchi A (1994) Parameterization of global and
+##' longwave incoming radiation for the Greenland Ice Sheet. Glob
+##' Planet Chang 9:143–164
     FKZ <- function(data,func, 
                     coef1 = 0.963,
                     adjust = FALSE){
@@ -678,6 +729,8 @@
 ##' @import stats
 ##' @import utils
 ##' @export
+##' @references Idso SB, Jackson RD (1969) Thermal radiation from the atmosphere. 
+##' J Geophys Res 74:5397–5403
     FIJ <- function(data,func,
                     coef1 = 0.22,
                     adjust = FALSE){

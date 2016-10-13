@@ -22,4 +22,8 @@ a vector with emissivity estimatives
 \description{
 Emissivity from atmosphere
 }
+\references{
+Ångström A (1915) A study of the radiation of the atmosphere.
+Smithsonian Miscellaneous Collections 65(3)
+}
 

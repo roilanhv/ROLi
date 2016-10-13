@@ -21,4 +21,8 @@ a vector with emissivity estimatives
 \description{
 Emissivity from atmosphere
 }
+\references{
+Brutsaert W (1975) On a derivable formula for long-wave radiation
+from clear skies. Water Resour Res 11:742–744
+}
 

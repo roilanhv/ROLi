@@ -21,4 +21,8 @@ a vector with emissivity estimatives
 \description{
 Emissivity from atmosphere
 }
+\references{
+Swinbank WC (1963) Long-wave radiation from clear skies. Q J Roy
+Meteor Soc 89:339–348
+}
 

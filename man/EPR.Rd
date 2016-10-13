@@ -21,4 +21,8 @@ a vector with emissivity estimatives
 \description{
 Emissivity from atmosphere
 }
+\references{
+Prata AJ (1996) A new long-wave formula for estimating downward clearsky
+radiation at the surface. Q J Roy Meteor Soc 122:1127–1151
+}
 

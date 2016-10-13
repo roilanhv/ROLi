@@ -15,4 +15,9 @@ a vector with cloud amount estimatives
 \description{
 Amount of cloud estimatives functions.
 }
+\references{
+Jegede OO, Ogolo EO, Aregbesola TO (2006) Estimating net
+radiation using routine meteorological data at a tropical location
+in Nigeria. Int J Sustain Energy 25:107–115
+}
 

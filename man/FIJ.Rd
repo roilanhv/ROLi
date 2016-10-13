@@ -21,4 +21,8 @@ a vector with emissivity estimatives
 \description{
 Effective emissivity from atmosphere with cloud atenuation
 }
+\references{
+Idso SB, Jackson RD (1969) Thermal radiation from the atmosphere. 
+J Geophys Res 74:5397–5403
+}
 

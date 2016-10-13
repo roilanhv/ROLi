@@ -22,4 +22,9 @@ a vector with emissivity estimatives
 \description{
 Effective emissivity from atmosphere with cloud atenuation
 }
+\references{
+Lhomme JP, Vacher JJ, Rocheteau A (2007) Estimating downward
+long-wave radiation on the Andean Altiplano. Agr For Meteorol
+145:139–148
+}
 

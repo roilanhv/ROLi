@@ -1,4 +1,4 @@
-Package: ROLi
+Package: longwaveR
 Title: Evaluate various downward longwave parametrizations
 Version: 1.10.16
 Authors@R: person("Roilan Hernandez", email = "roylanhv@gmail.com", role = c("aut", "cre"))

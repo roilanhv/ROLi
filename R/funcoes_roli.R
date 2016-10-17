@@ -87,7 +87,10 @@
                                 start = list(coef1 = coef1,coef2=coef2,coef3=coef3) )
                 
                 new.coefs <- coef(tmp.nls) 
-                new.emiss <- predict(tmp.nls)
+                new.emiss <- do.call(EAN,as.list(modifyList(formals(EAN),
+                                                    c(list(data = data, func = func),
+                                                      as.list(new.coefs)))))
+           
                 
                 return(list(emiss = new.emiss, coefs = new.coefs))
                 
@@ -122,7 +125,9 @@
                             start = list(coef1 = coef1,coef2=coef2) )
             
             new.coefs <- coef(tmp.nls) 
-            new.emiss <- predict(tmp.nls)
+            new.emiss <- do.call(EBR,as.list(modifyList(formals(EBR),
+                                                        c(list(data = data, func = func),
+                                                          as.list(new.coefs)))))
             
             return(list(emiss = new.emiss, coefs = new.coefs))
             
@@ -157,7 +162,9 @@
                             start = list(coef1 = coef1) )
             
             new.coefs <- coef(tmp.nls) 
-            new.emiss <- predict(tmp.nls)
+            new.emiss <- do.call(ESW,as.list(modifyList(formals(ESW),
+                                                        c(list(data = data, func = func),
+                                                          as.list(new.coefs)))))
             
             return(list(emiss = new.emiss, coefs = new.coefs))
             
@@ -191,7 +198,9 @@
                             start = list(coef1 = coef1, coef2 = coef2) )
             
             new.coefs <- coef(tmp.nls) 
-            new.emiss <- predict(tmp.nls)
+            new.emiss <- do.call(EIJ,as.list(modifyList(formals(EIJ),
+                                                        c(list(data = data, func = func),
+                                                          as.list(new.coefs)))))
             
             return(list(emiss = new.emiss, coefs = new.coefs))
             
@@ -224,7 +233,9 @@
                             start = list(coef1 = coef1, coef2 = coef2) )
             
             new.coefs <- coef(tmp.nls) 
-            new.emiss <- predict(tmp.nls)
+            new.emiss <- do.call(EBT,as.list(modifyList(formals(EBT),
+                                                        c(list(data = data, func = func),
+                                                          as.list(new.coefs)))))
             
             return(list(emiss = new.emiss, coefs = new.coefs))
             
@@ -259,7 +270,9 @@
                             start = list(coef1 = coef1, coef2 = coef2) )
             
             new.coefs <- coef(tmp.nls) 
-            new.emiss <- predict(tmp.nls)
+            new.emiss <- do.call(EID,as.list(modifyList(formals(EID),
+                                                        c(list(data = data, func = func),
+                                                          as.list(new.coefs)))))
             
             return(list(emiss = new.emiss, coefs = new.coefs))
             
@@ -294,7 +307,9 @@
                             start = list(coef1 = coef1, coef2 = coef2) )
             
             new.coefs <- coef(tmp.nls) 
-            new.emiss <- predict(tmp.nls)
+            new.emiss <- do.call(EKZ,as.list(modifyList(formals(EKZ),
+                                                        c(list(data = data, func = func),
+                                                          as.list(new.coefs)))))
             
             return(list(emiss = new.emiss, coefs = new.coefs))
             
@@ -329,7 +344,9 @@
                             start = list(coef1 = coef1,  coef3 = coef3 ) )
             
             new.coefs <- coef(tmp.nls) 
-            new.emiss <- predict(tmp.nls)
+            new.emiss <- do.call(EPR,as.list(modifyList(formals(EPR),
+                                                        c(list(data = data, func = func),
+                                                          as.list(new.coefs)))))
             
             return(list(emiss = new.emiss, coefs = new.coefs))
             
@@ -361,18 +378,18 @@
         
         if(adjust){
             
-            emiss <- EBT(data, adjust = TRUE)
+            emiss <- EBT(data = data,func = func, adjust = TRUE)
             sigma <- 5.67051*10^(-8)
-            emiss$emiss <- do.call("EBT",
-                                   args = as.list(modifyList(formals(EBT), 
-                                                             c(list(data = data, func = "-"), 
-                                                               as.list(emiss$coefs)))
-                                                  )
-                                   )
-                    
+            # emiss$emiss <- do.call("EBT",
+            #                        args = as.list(modifyList(formals(EBT), 
+            #                                                  c(list(data = data, func = "-"), 
+            #                                                    as.list(emiss$coefs)))
+            #                                       )
+            #                        )
+            #         
             suppressWarnings(
                 tmp.nls <- nls( Li/(sigma*Ta^4) ~ maxlim( (coef1/coef2) * emiss$emiss *  (coef3*K+coef4) ) ,
-                            data = data, na.action = "na.exclude",
+                            data = data, #na.action = "na.exclude",
                             start = list(coef1 = coef1, coef3 = coef3 ) )
             )
             new.coefs <- coef(tmp.nls) 
@@ -409,19 +426,18 @@
             
             sigma <- 5.67051*10^(-8)
             
-            emiss <- EID(data, adjust = TRUE)
-            emiss$emiss <- do.call("EID",
-                                   args = as.list(modifyList(formals(EID), 
-                                                             c(list(data = data, func = "-"), 
-                                                               as.list(emiss$coefs)))
-                                   )
-            )
-            
+            emiss <- EID(data = data,func = func , adjust = TRUE)
+            # emiss$emiss <- do.call("EID",
+            #                        args = as.list(modifyList(formals(EID), 
+            #                                                  c(list(data = data, func = "-"), 
+            #                                                    as.list(emiss$coefs)))
+            #                        )
+            # )
             
             suppressWarnings(
                 tmp.nls <- nls( Li/(sigma*Ta^4) ~ maxlim( emiss$emiss * (1+coef1*(1-data$K)^2 ) ) ,
-                            data = data, na.action = "na.exclude",
-                            start = list(coef1 = coef1) )
+                                data = data, 
+                                start = list(coef1 = coef1) )
             )
             new.coefs <- coef(tmp.nls) 
             new.emiss <- predict(tmp.nls)
@@ -434,7 +450,7 @@
         
         
         
-        } ## Stockli (2007)
+    } ## Stockli (2007)
     
 ##' Effective emissivity from atmosphere with cloud atenuation
 ##' 
@@ -497,13 +513,13 @@
       
       if(adjust){
           
-          emiss <- EAN(data, adjust = TRUE)
-          emiss$emiss <- do.call("EAN",
-                                 args = as.list(modifyList(formals(EAN),
-                                                           c(list(data = data, func = "-"),
-                                                             as.list(emiss$coefs)))
-                                 )
-          )
+          emiss <- EAN(data = data,func=func, adjust = TRUE)
+          # emiss$emiss <- do.call("EAN",
+          #                        args = as.list(modifyList(formals(EAN),
+          #                                                  c(list(data = data, func = "-"),
+          #                                                    as.list(emiss$coefs)))
+          #                        )
+          # )
 
           suppressWarnings(
               tmp.nls <- nls( Li/(sigma*Ta^4) ~ maxlim( emiss$emiss * (1+coef1*C) ) ,
@@ -543,13 +559,13 @@
         
         if(adjust){
             
-            emiss <- EBR(data, adjust = TRUE)
-            emiss$emiss <- do.call("EBR",
-                                   args = as.list(modifyList(formals(EBR), 
-                                                             c(list(data = data, func = "-"), 
-                                                               as.list(emiss$coefs)))
-                                   )
-            )
+            emiss <- EBR(data = data,func=func, adjust = TRUE)
+            # emiss$emiss <- do.call("EBR",
+            #                        args = as.list(modifyList(formals(EBR), 
+            #                                                  c(list(data = data, func = "-"), 
+            #                                                    as.list(emiss$coefs)))
+            #                        )
+            # )
             
             suppressWarnings(
                 tmp.nls <- nls( Li/(sigma*Ta^4) ~ maxlim( emiss$emiss * (1+coef1*C) ) ,
@@ -595,7 +611,9 @@
                                 start = list(coef1 = coef1, coef2 = coef2) )
             )
             new.coefs <- coef(tmp.nls) 
-            new.emiss <- predict(tmp.nls)
+            new.emiss <- do.call(FHY,as.list(modifyList(formals(FHY),
+                                                        c(list(data = data, func = func),
+                                                          as.list(new.coefs)))))
             
             return(list(emiss = new.emiss, coefs = new.coefs))
             
@@ -625,13 +643,13 @@
         
         if(adjust){
             
-            emiss <- EKZ(data = data, adjust = TRUE)
-            emiss$emiss <- do.call("EKZ",
-                                   args = as.list(modifyList(formals(EKZ), 
-                                                             c(list(data = data, func = "-"), 
-                                                               as.list(emiss$coefs)))
-                                   )
-            )
+            emiss <- EKZ(data = data,func = func, adjust = TRUE)
+            # emiss$emiss <- do.call("EKZ",
+            #                        args = as.list(modifyList(formals(EKZ), 
+            #                                                  c(list(data = data, func = "-"), 
+            #                                                    as.list(emiss$coefs)))
+            #                        )
+            # )
             
             suppressWarnings(
                 tmp.nls <- nls( Li/(sigma*Ta^4) ~ maxlim( emiss$emiss *(1.0-C^3)+ coef1 * C^3 ) ,
@@ -670,14 +688,14 @@
         
         if(adjust){
             
-            emiss <- EIJ(data = data, adjust = TRUE)
-            emiss$emiss <- do.call("EIJ",
-                                   args = as.list(modifyList(formals(EIJ), 
-                                                             c(list(data = data, func = "-"), 
-                                                               as.list(emiss$coefs)))
-                                   )
-            )
-            
+            emiss <- EIJ(data = data, func = func, adjust = TRUE)
+            # emiss$emiss <- do.call("EIJ",
+            #                        args = as.list(modifyList(formals(EIJ), 
+            #                                                  c(list(data = data, func = "-"), 
+            #                                                    as.list(emiss$coefs)))
+            #                        )
+            # )
+            # 
             suppressWarnings(
                 tmp.nls <- nls( Li/(sigma*Ta^4) ~ maxlim( emiss$emiss *(1+coef1*C^2) ) ,
                                 data = data,#na.action = "na.exclude",

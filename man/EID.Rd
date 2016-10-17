@@ -22,8 +22,8 @@ a vector with emissivity estimatives
 Emissivity from atmosphere
 }
 \references{
-Idso SB (1981) A set of equations for full spectrum and 8- to 14-μm
- and 10.5- to 12.5-μm thermal radiation from cloudless skies.
+Idso SB (1981) A set of equations for full spectrum and 8- to 14-um
+ and 10.5- to 12.5-um thermal radiation from cloudless skies.
  Water Resour Res 17:295–304
 }
 

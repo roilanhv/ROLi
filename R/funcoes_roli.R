@@ -13,6 +13,7 @@
 ##' 
     CQB <- function(data){
         a <- maxlim(with(data,0.34^2 + 4 * 0.458 * (0.803-K)),max_ = Inf)
+        a <- ifelse(is.infinite(a),NA,a)
         maxlim( ( 0.34-sqrt(a) ) / (-2 * 0.458))
     }  # Quadratic regression of Black(1956)
     
@@ -422,8 +423,12 @@
             #                                       )
             #                        )
             #         
+            
+            data$emiss <- emiss$emiss
+            data$K[is.na(data$emiss)] <- NA
+            
             suppressWarnings(
-                tmp.nls <- nls( Li/(sigma*Ta^4) ~ maxlim( (coef1/coef2) * emiss$emiss *  (coef3*K+coef4) ) ,
+                tmp.nls <- nls( Li/(sigma*Ta^4) ~ maxlim( (coef1/coef2) * emiss *  (coef3*K+coef4) ) ,
                             data = data, #na.action = "na.exclude",
                             start = list(coef1 = coef1, coef3 = coef3 ) )
             )
@@ -471,10 +476,12 @@
             #                                                    as.list(emiss$coefs)))
             #                        )
             # )
+            data$emiss <- emiss$emiss
+            data$K[is.na(data$emiss)] <- NA
             
             suppressWarnings(
-                tmp.nls <- nls( Li/(sigma*Ta^4) ~ maxlim( emiss$emiss * (1+coef1*(1-data$K)^2 ) ) ,
-                                data = data, 
+                tmp.nls <- nls( Li/(sigma*Ta^4) ~ maxlim( emiss * (1+coef1*(1-K)^2 ) ) ,
+                                data = data, na.action = "na.exclude",
                                 start = list(coef1 = coef1) )
             )
             new.coefs <- coef(tmp.nls) 
@@ -563,9 +570,11 @@
           #                                                    as.list(emiss$coefs)))
           #                        )
           # )
+          data$emiss <- emiss$emiss
+          C[is.na(data$emiss)] <- NA
 
           suppressWarnings(
-              tmp.nls <- nls( Li/(sigma*Ta^4) ~ maxlim( emiss$emiss * (1+coef1*C) ) ,
+              tmp.nls <- nls( Li/(sigma*Ta^4) ~ maxlim( emiss * (1+coef1*C) ) ,
                               data = data,# na.action = "na.exclude",
                               start = list(coef1 = coef1) )
           )
@@ -612,8 +621,11 @@
             #                        )
             # )
             
+            data$emiss <- emiss$emiss
+            C[is.na(data$emiss)] <- NA
+            
             suppressWarnings(
-                tmp.nls <- nls( Li/(sigma*Ta^4) ~ maxlim( emiss$emiss * (1+coef1*C) ) ,
+                tmp.nls <- nls( Li/(sigma*Ta^4) ~ maxlim( emiss * (1+coef1*C) ) ,
                                 data = data, #na.action = "na.exclude",
                                 start = list(coef1 = coef1) )
             )
@@ -651,6 +663,7 @@
         sigma <- 5.67051*10^(-8)
         
         if(adjust){
+           
             
             suppressWarnings(
                 tmp.nls <- nls( Li/(sigma*Ta^4) ~ maxlim( coef1 *(1-C^6) + coef2 * C^4 ) ,
@@ -702,8 +715,11 @@
             #                        )
             # )
             
+            data$emiss <- emiss$emiss
+            C[is.na(data$emiss)] <- NA
+            
             suppressWarnings(
-                tmp.nls <- nls( Li/(sigma*Ta^4) ~ maxlim( emiss$emiss *(1.0-C^3)+ coef1 * C^3 ) ,
+                tmp.nls <- nls( Li/(sigma*Ta^4) ~ maxlim( emiss *(1.0-C^3)+ coef1 * C^3 ) ,
                                 data = data,# na.action = "na.exclude",
                                 start = list(coef1 = coef1) )
             )
@@ -749,8 +765,12 @@
             #                        )
             # )
             # 
+            
+            data$emiss <- emiss$emiss
+            C[is.na(data$emiss)] <- NA
+            
             suppressWarnings(
-                tmp.nls <- nls( Li/(sigma*Ta^4) ~ maxlim( emiss$emiss *(1+coef1*C^2) ) ,
+                tmp.nls <- nls( Li/(sigma*Ta^4) ~ maxlim( emiss *(1+coef1*C^2) ) ,
                                 data = data,#na.action = "na.exclude",
                                 start = list(coef1 = coef1) )
             )

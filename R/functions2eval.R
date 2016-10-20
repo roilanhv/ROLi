@@ -25,7 +25,7 @@ get.Li <- function(data,
                    adjust = FALSE){
     
     sigma <- 5.67051*10^(-8) # W m^(-2) T^(-4)
-    
+    message("Combining emissivity: ", E_fun, ", whith cloud from: ", C_fun)
     emis_ <- do.call(E_fun,list(data=data,func = C_fun, adjust = adjust)) 
     
     if(adjust){

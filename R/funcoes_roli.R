@@ -9,7 +9,7 @@
 ##' @param data a data frame with all atmospherics variables
 ##' @return a vector with cloud amount estimatives
 ##' @export
-##' @references Black JN (1956) The distribution of solar radiation over the Earth’s surface. Arch Meteor Geophy B 7:165–189
+##' @references Black JN (1956) The distribution of solar radiation over the Earth's surface. Arch Meteor Geophy B 7:165–189
 ##' 
     CQB <- function(data){
         a <- maxlim(with(data,0.34^2 + 4 * 0.458 * (0.803-K)),max_ = Inf)
@@ -67,7 +67,7 @@
 ##' @param data a data frame with all atmospherics variables
 ##' @return a vector with cloud amount estimatives 
 ##' @export
-##' @references Jegede OO, Ogolo EO, Aregbesola TO (2006) Estimating net
+##' @references Jegede, O. O., Ogolo, E.O., Aregbesola, T.O. (2006) Estimating net
 ##' radiation using routine meteorological data at a tropical location
 ##' in Nigeria. Int J Sustain Energy 25:107–115
     CJG <- function(data){ 
@@ -88,7 +88,7 @@
 ##' @import stats
 ##' @import utils
 ##' @export
-##' @references Ångström A (1915) A study of the radiation of the atmosphere.
+##' @references Angstrom, A. (1915) A study of the radiation of the atmosphere.
 ##' Smithsonian Miscellaneous Collections 65(3)
     EAN <- function(data,func, 
                     coef1 = 0.83, coef2 = 0.18, coef3 = 0.067, 
@@ -98,8 +98,10 @@
             
             if(adjust){
                 
-                tmp.nls <- nls( Li/(sigma*Ta^4) ~ maxlim( coef1 - coef2*( 10^(-coef3*es))  ),
-                                data = data, na.action = "na.exclude",
+                
+                tmp.nls <-
+                    nls( Li/(sigma*Ta^4) ~ maxlim( coef1 - coef2*( 10^(-coef3*es))  ),
+                                data = data, #na.action = "na.exclude",
                                 start = list(coef1 = coef1,coef2=coef2,coef3=coef3) )
                 
                 new.coefs <- coef(tmp.nls) 
@@ -372,7 +374,8 @@
         
         if(adjust){
             
-            tmp.nls <- nls( Li/(sigma*Ta^4) ~ maxlim( 1 - ((coef1+46.5*es/Ta) * exp(-sqrt(coef2+coef3*46.5*es/Ta))) )  ,
+            tmp.nls <- nls( Li/(sigma*Ta^4) ~ maxlim( 1 - ((coef1+46.5*es/Ta) * 
+                                                               exp(-sqrt(coef2+coef3*46.5*es/Ta))) )  ,
                             data = data, na.action = "na.exclude",
                             start = list(coef1 = coef1,  coef3 = coef3 ) )
             
@@ -391,6 +394,93 @@
         
         
         } ## Prata (1996)
+
+    
+    
+##' Emissivity from atmosphere
+##' @param data a data frame with all atmospherics variables
+##' @param func a function for amount of cloud 
+##' @param coef1,coef2 Scheme coeficients 
+##' @param adjust FALSE, TRUE if nonlinear least square adjusting wanted
+##' @return a vector with emissivity estimatives
+##' @import stats
+##' @import utils
+##' @export
+##' @references Niemala (2001); TODO 
+ENM <- function(data,func,
+                coef1 = 0.72, coef2 = 0.0009,
+                adjust = FALSE) {
+    
+    sigma <- 5.67051*10^(-8)
+    
+    if(adjust){
+        
+        tmp.nls <- nls( Li/(sigma*Ta^4) ~ maxlim( coef1 + sign(es- 20.) *(coef2 * (es - 20.)))  ,
+                        data = data, #na.action = "na.exclude",
+                        start = list(coef1 = coef1,  coef2 = coef2 ) )
+        
+        new.coefs <- coef(tmp.nls) 
+        new.emiss <- do.call(ENM,as.list(modifyList(formals(ENM),
+                                                    c(list(data = data, func = func),
+                                                      as.list(new.coefs)))))
+        
+        return(list(emiss = new.emiss, coefs = new.coefs))
+        
+    } else {
+        
+        return( with(data,maxlim( coef1 + sign(es- 20.)  * (coef2 * (es - 20.0)))  ))
+        
+    }
+
+} ## Niemala (2001)
+
+
+
+##' Emissivity from atmosphere
+##' @param data a data frame with all atmospherics variables
+##' @param func a function for amount of cloud 
+##' @param coef1,coef2,coef3 Scheme coeficients 
+##' @param adjust FALSE, TRUE if nonlinear least square adjusting wanted
+##' @return a vector with emissivity estimatives
+##' @import stats
+##' @import utils
+##' @export
+##' @references Aimi, D. (2017); TODO 
+EAI <- function(data,func,
+                coef1 = 0.52843, coef2 = -0.00820,coef3 = 24242.65010,
+                adjust = FALSE) {
+    
+    sigma <- 5.67051*10^(-8)
+    
+    if(adjust){
+        
+        tmp.nls <- nls( Li/(sigma*Ta^4) ~ 
+                            maxlim( (coef1 + ( coef2 * (es - 20.0)) + 
+                                         coef3 / (sigma * Ta^4 * ifelse(Cover != "CN", Ta,es) )) 
+                                    * exp(es/Ta) ), #
+                        data = data,
+                        start = list(coef1 = coef1,  coef2 = coef2, coef3 = coef3) )
+        
+        new.coefs <- coef(tmp.nls) 
+        new.emiss <- do.call(EAI,as.list(modifyList(formals(EAI),
+                                                    c(list(data = data, func = func),
+                                                      as.list(new.coefs)))))
+        
+        return(list(emiss = new.emiss, coefs = new.coefs))
+        
+    } else {
+        
+        return( with(data,
+                     maxlim( (coef1 + ( coef2 * (es - 20.0)) + 
+                                  coef3 / (sigma * Ta^4 * ifelse(Cover != "CN", Ta,es) ))  
+                             * exp(es/Ta) ) # 
+                     )
+                )
+        
+    }
+    
+} ## Aimi (2017)
+
 
 #/////////////////////////////////////////////////////////////////////////////////////////////////
 # Parametrizações de ...
@@ -416,13 +506,7 @@
             
             emiss <- EBT(data = data,func = func, adjust = TRUE)
             sigma <- 5.67051*10^(-8)
-            # emiss$emiss <- do.call("EBT",
-            #                        args = as.list(modifyList(formals(EBT), 
-            #                                                  c(list(data = data, func = "-"), 
-            #                                                    as.list(emiss$coefs)))
-            #                                       )
-            #                        )
-            #         
+             
             
             data$emiss <- emiss$emiss
             data$K[is.na(data$emiss)] <- NA
@@ -458,7 +542,7 @@
 ##' @import stats
 ##' @import utils
 ##' @export
-##' @references Stöckli R (2007) LBA-MIP driver data gap filling algorithms.
+##' @references Stockli R (2007) LBA-MIP driver data gap filling algorithms.
 ##' Unpublished. http://www.climatemodeling.org/lba-mip/LBAmipDriverDataFillingMethods.pdf
 ##' Accessed 7 May 2011
     ABM <- function(data,func,
@@ -518,7 +602,8 @@
         
         if(adjust){
             
-            tmp.nls <- nls( Li/(sigma*Ta^4) ~ maxlim( (coef1*(rh-68))/(sigma*Ta^4) + (1.- coef2*K/Ta)^4 ) ,
+            tmp.nls <- nls( Li/(sigma*Ta^4) ~ maxlim( (coef1*(rh-68))/(sigma*Ta^4) + 
+                                                          (1.- coef2*K/Ta)^4 ) ,
                             data = data, na.action = "na.exclude",
                             start = list(coef1 = coef1, coef2 = coef2) )
             
@@ -551,7 +636,7 @@
 ##' @import stats
 ##' @import utils
 ##' @export
-##' @references Ångström A (1915) A study of the radiation of the atmosphere.
+##' @references Angstrom A (1915) A study of the radiation of the atmosphere.
 ##' Smithsonian Miscellaneous Collections 65(3)
     FAN <- function(data,func,
                     coef1 = 0.22,
@@ -564,12 +649,7 @@
       if(adjust){
           
           emiss <- EAN(data = data,func=func, adjust = TRUE)
-          # emiss$emiss <- do.call("EAN",
-          #                        args = as.list(modifyList(formals(EAN),
-          #                                                  c(list(data = data, func = "-"),
-          #                                                    as.list(emiss$coefs)))
-          #                        )
-          # )
+       
           data$emiss <- emiss$emiss
           C[is.na(data$emiss)] <- NA
 
@@ -614,13 +694,7 @@
         if(adjust){
             
             emiss <- EBR(data = data,func=func, adjust = TRUE)
-            # emiss$emiss <- do.call("EBR",
-            #                        args = as.list(modifyList(formals(EBR), 
-            #                                                  c(list(data = data, func = "-"), 
-            #                                                    as.list(emiss$coefs)))
-            #                        )
-            # )
-            
+       
             data$emiss <- emiss$emiss
             C[is.na(data$emiss)] <- NA
             
@@ -640,7 +714,7 @@
             
         }
         
-    }       ## Brutsaert (1982) ou (1975)**
+    }   ## Brutsaert (1982) ou (1975)**
 
 ##' Effective emissivity from atmosphere with cloud atenuation.
 ##' @param data a data frame with all atmospherics variables
@@ -708,12 +782,6 @@
         if(adjust){
             
             emiss <- EKZ(data = data,func = func, adjust = TRUE)
-            # emiss$emiss <- do.call("EKZ",
-            #                        args = as.list(modifyList(formals(EKZ), 
-            #                                                  c(list(data = data, func = "-"), 
-            #                                                    as.list(emiss$coefs)))
-            #                        )
-            # )
             
             data$emiss <- emiss$emiss
             C[is.na(data$emiss)] <- NA
@@ -758,13 +826,6 @@
         if(adjust){
             
             emiss <- EIJ(data = data, func = func, adjust = TRUE)
-            # emiss$emiss <- do.call("EIJ",
-            #                        args = as.list(modifyList(formals(EIJ), 
-            #                                                  c(list(data = data, func = "-"), 
-            #                                                    as.list(emiss$coefs)))
-            #                        )
-            # )
-            # 
             
             data$emiss <- emiss$emiss
             C[is.na(data$emiss)] <- NA
@@ -827,7 +888,8 @@
     
     # plot(with(data,Li/(sigma*Ta^4) ), pch = 19, cex =0.3, col = "red")
     # points(new.Li, pch = 19, cex =0.3)
-    # points(with(data, maxlim( 0.937097 - 0.167061*( 10^(-0.041560*es))) ), col = "green", pch = 19, cex =0.3)
+    # points(with(data, maxlim( 0.937097 - 0.167061*( 10^(-0.041560*es))) ),
+    # col = "green", pch = 19, cex =0.3)
     # 
     # data$new.Li <- predict(tmp.nls) * sigma * data$Ta^4 
     # data$old.Li <- with(data,maxlim( coef1 - coef2*( 10^(-coef3*es))) * sigma * Ta^4 )
@@ -841,8 +903,21 @@
     
     
     # aa <- EAN_gc(data = data,func = "-")
-    # bb <- EAN_gc(data = data,func = "-",coef1 = 0.93709740, coef2 = 0.16706067 ,coef3 = 0.04155977,adjust = TRUE)
+    # bb <- EAN_gc(data = data,func = "-",
+    # coef1 = 0.93709740, coef2 = 0.16706067 ,coef3 = 0.04155977,adjust = TRUE)
     # plot(aa, pch = 19, cex = 0.3,col = "red", ylim = c(0.5,1.0))
     # points(bb$emiss, pch = 19, cex = 0.3,col = "blue", ylim = c(0.5,1.0))
     # 
+    #####
+    ## FOR OPTIMIZATION OF INITIAL PARAMETERS
     
+    # coef1.0 <- with(data, min(Li/(sigma*Ta^4),na.rm = TRUE)) * 0.5
+    # 
+    # st <- 
+    # lm(log10(Li/(sigma*Ta^4) - coef1.0 ) ~  (es)  ,
+    #       data = data[complete.cases(data),] 
+    #       # ,start = list(coef1 = coef1,coef2=coef2,coef3=coef3), 
+    #       # ,trace = TRUE
+    #    ) %>% 
+    # coef() %>% as.numeric
+    # new.start <- list(coef1 = coef1.0, coef2 = 10^(st[1]), coef3 = st[2])

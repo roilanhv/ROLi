@@ -6,8 +6,8 @@
 \usage{
 get.AllSchems(data, Ovrcst_sch = c("CQB", "CKC", "CCB", "CKZ", "CWU", "CJG"),
   Cld_sch = c("FAN", "FBR", "FHY", "FKZ", "FIJ"), Emiss_sch = c("EAN",
-  "EBR", "ESW", "EIJ", "EBT", "EID", "EKZ", "EPR", "ABM", "ALH", "AGB"),
-  adjust = FALSE)
+  "EBR", "ESW", "EIJ", "EBT", "EID", "EKZ", "EPR", "ENM", "EAI", "ABM", "ALH",
+  "AGB"), adjust = FALSE)
 }
 \arguments{
 \item{data}{Data frame with atmospheric variables}

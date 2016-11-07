@@ -157,7 +157,8 @@ CalcStats <- function(data_li,
 get.AllSchems <- function(data,
                           Ovrcst_sch = c("CQB","CKC","CCB","CKZ","CWU","CJG"),
                           Cld_sch = c("FAN","FBR","FHY","FKZ","FIJ"),
-                          Emiss_sch  = c("EAN","EBR","ESW","EIJ","EBT","EID","EKZ","EPR","ABM","ALH","AGB"),
+                          Emiss_sch  = c("EAN","EBR","ESW","EIJ","EBT","EID","EKZ","EPR","ENM","EAI",
+                                         "ABM","ALH","AGB"),
                           adjust = FALSE){
     
     roli_comb <- rbind(expand.grid(Emiss_sch,"-"), expand.grid(Cld_sch, Ovrcst_sch) )

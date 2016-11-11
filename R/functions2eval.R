@@ -11,26 +11,23 @@
 ##' @examples 
 ##' # Downward longwave for Santa Maria site, January and July of  2014
 ##' # without adjusting
-##' Li_sm <- get.Li(data = data2,E_fun = "FHY",C_fun = "CQB")
-##' head(Li_sm)
-##' summary(Li_sm)
-##' # Downward longwave for Santa Maria site, January and July of  2014
-##' # with adjusting
-##' Li_sm <- get.Li(data = data2,E_fun = "FBR",C_fun = "CQB",adjust = TRUE)
+##' Li_sm <- get.Li(data = data2,E_fun = "EAN",C_fun = "CQB")
 ##' head(Li_sm)
 ##' summary(Li_sm)
 ##' @export
 get.Li <- function(data,
-                   E_fun = "FHY",C_fun = "CQB",
+                   E_fun = "EAN",C_fun = "CQB",
                    adjust = FALSE){
     
     sigma <- 5.67051*10^(-8) # W m^(-2) T^(-4)
     message("Combining emissivity: ", E_fun, ", whith cloud from: ", C_fun)
-    emis_ <- do.call(E_fun,list(data=data,func = C_fun, adjust = adjust)) 
+    emis_ <- try(do.call(E_fun,list(data=data,func = C_fun, adjust = adjust)),silent = TRUE)
     
     if(adjust){
+        if(class(emis_) == "try-error") emis_ <- list(emiss = NA,coefs = NA)
         roli_est <-  with(data, emis_$emiss*sigma*Ta^4)
     } else {
+        if(class(emis_) == "try-error") emis_ <- NA
         roli_est <-  with(data, emis_*sigma*Ta^4)   
     }
     out_rol <- data.frame(ROL = roli_est) 
@@ -147,7 +144,6 @@ CalcStats <- function(data_li,
 #' Function to get all scheme calculation, adjust = TRUE make a adjusting NLS.
 #' @param data Data frame with atmospheric variables
 #' @param Ovrcst_sch Schemes for cloud cover index
-#' @param Cld_sch Schemes of atmosphere emissivity with consideration of Ovrcst_sch
 #' @param Emiss_sch Schemes of atmosphere emissivity 
 #' @param adjust FALSE, TRUE for NLS adjusting 
 #' @return Data frame with Li observed and all combintions of schemes for calculations of Li

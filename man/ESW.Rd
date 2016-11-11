@@ -4,14 +4,15 @@
 \alias{ESW}
 \title{Emissivity from atmosphere}
 \usage{
-ESW(data, func, coef1 = 9.2e-06, adjust = FALSE)
+ESW(data, func = "-", coef1 = 9.2e-06, coef2 = 0.22, coef3 = 1,
+  adjust = FALSE)
 }
 \arguments{
 \item{data}{a data frame with all atmospherics variables}
 
 \item{func}{a function for amount of cloud}
 
-\item{coef1}{Scheme coeficients}
+\item{coef1, coef2, coef3}{Scheme coeficients}
 
 \item{adjust}{FALSE, TRUE if nonlinear least square adjusting wanted}
 }

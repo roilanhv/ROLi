@@ -11,26 +11,23 @@
 ##' @examples 
 ##' # Downward longwave for Santa Maria site, January and July of  2014
 ##' # without adjusting
-##' Li_sm <- get.Li(data = data2,E_fun = "FHY",C_fun = "CQB")
-##' head(Li_sm)
-##' summary(Li_sm)
-##' # Downward longwave for Santa Maria site, January and July of  2014
-##' # with adjusting
-##' Li_sm <- get.Li(data = data2,E_fun = "FBR",C_fun = "CQB",adjust = TRUE)
+##' Li_sm <- get.Li(data = data2,E_fun = "EAN",C_fun = "CQB")
 ##' head(Li_sm)
 ##' summary(Li_sm)
 ##' @export
 get.Li <- function(data,
-                   E_fun = "FHY",C_fun = "CQB",
+                   E_fun = "EAN",C_fun = "CQB",
                    adjust = FALSE){
     
     sigma <- 5.67051*10^(-8) # W m^(-2) T^(-4)
     message("Combining emissivity: ", E_fun, ", whith cloud from: ", C_fun)
-    emis_ <- do.call(E_fun,list(data=data,func = C_fun, adjust = adjust)) 
+    emis_ <- try(do.call(E_fun,list(data=data,func = C_fun, adjust = adjust)),silent = TRUE)
     
     if(adjust){
+        if(class(emis_) == "try-error") emis_ <- list(emiss = NA,coefs = NA)
         roli_est <-  with(data, emis_$emiss*sigma*Ta^4)
     } else {
+        if(class(emis_) == "try-error") emis_ <- NA
         roli_est <-  with(data, emis_*sigma*Ta^4)   
     }
     out_rol <- data.frame(ROL = roli_est) 
@@ -147,7 +144,6 @@ CalcStats <- function(data_li,
 #' Function to get all scheme calculation, adjust = TRUE make a adjusting NLS.
 #' @param data Data frame with atmospheric variables
 #' @param Ovrcst_sch Schemes for cloud cover index
-#' @param Cld_sch Schemes of atmosphere emissivity with consideration of Ovrcst_sch
 #' @param Emiss_sch Schemes of atmosphere emissivity 
 #' @param adjust FALSE, TRUE for NLS adjusting 
 #' @return Data frame with Li observed and all combintions of schemes for calculations of Li
@@ -155,22 +151,24 @@ CalcStats <- function(data_li,
 #' @export
 #' @importFrom dplyr bind_cols
 get.AllSchems <- function(data,
-                          Ovrcst_sch = c("CQB","CKC","CCB","CKZ","CWU","CJG"),
-                          Cld_sch = c("FAN","FBR","FHY","FKZ","FIJ"),
-                          Emiss_sch  = c("EAN","EBR","ESW","EIJ","EBT","EID","EKZ","EPR","ABM","ALH","AGB"),
+                          Ovrcst_sch = c("CQB","CKC","CCB","CKZ","CWU","CJG", "CLM", "CFG"),
+                          Emiss_sch  = c("EAN","EBR","EDO","EGR","EIJ","EID","EKZ","ENM",
+                                         "EPR","EST","ESW","EAI"),
                           adjust = FALSE){
     
-    roli_comb <- rbind(expand.grid(Emiss_sch,"-"), expand.grid(Cld_sch, Ovrcst_sch) )
+    roli_comb <- rbind(expand.grid(Emiss_sch,"-"), expand.grid(Emiss_sch, Ovrcst_sch) )
     
     Li.sims <- 
         lapply(1:nrow(roli_comb), function(i){
-  
+            
             tmp.Li <- 
             get.Li(data = data,
                    E_fun = roli_comb[i,1] %>% as.character,
                    C_fun = roli_comb[i,2] %>% as.character,
                    adjust = adjust)
-            tmp.Li
+            
+            return(tmp.Li)
+            
         }) %>% bind_cols()
     
     names(Li.sims) <- gsub("_-","",names(Li.sims))
@@ -179,6 +177,43 @@ get.AllSchems <- function(data,
 }
 
 
+#' Split data and Li series by time factor (ex., "daytime", "season", "cover")
+#' @export
+#' @param data_ Data frame with column date (POSIXct), Obs and all series for each scheme.
+#' @param split_class Type of cut data analises (daytime and season by default, other types needs as a factor column)
+#' @param lat,lon,timezone Latitude, longitude e timezone of observations local.
+#' @param  
+#' @importFrom openair cutData
+#' @importFrom tidyr gather
+#' @importFrom dplyr rename, mutate, %>%
+#' 
+split.stats <- function(data_ , 
+                        split_class = c("daytime","season","Cover","ID"),
+                        lon = -53.18,lat = -29.71,timezone = -3){ 
+                        
+    hemisphere <- ifelse(lat < 0.0, "southern", "northern")
+    
+    if(!"Obs" %in% names(data_)){ return(message("Column Obs isn't in the input data"))}
+    
+    output <- 
+    data_ %>% 
+        mutate(daytime = to.daylight(date,lon = lon,lat = lat,timezone = timezone)) %>%
+        cutData(type = "season",hemisphere = hemisphere) %>%
+        gather_(key_col = "params", value_col = "Sim", 
+                gather_cols = names(data_)[!names(data_) %in% c("date",split_class,"Obs")]) %>%
+        group_by_(.dots = c("params",split_class)) %>%
+        summarise(RMSE = rmse(obs = Obs, sim = Sim, na.rm = TRUE), 
+                  MAE = mae(obs = Obs, sim = Sim, na.rm = TRUE),
+                  PBIAS = pbias(obs = Obs, sim = Sim, na.rm = TRUE), 
+                  NSE = NSE(obs = Obs, sim = Sim, na.rm = TRUE), 
+                  R2 = cor(Sim, Obs, method = "pearson", use = "pairwise.complete.obs")^2 ,
+                  NObs = sum(is.na(Sim),!is.na(Sim)) ,
+                  PNAs = sum(is.na(Sim))/NObs*100 ) %>%
+        filter(PNAs < 95) %>%
+        ungroup()
+  
+    return(output)
+    }
 
 # ##' Function for evaluation of all parameterizations
 # ##' @param data_ A data frame with all atmospherics variables and simulated series

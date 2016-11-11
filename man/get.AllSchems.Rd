@@ -4,17 +4,14 @@
 \alias{get.AllSchems}
 \title{Function to get all scheme calculation, adjust = TRUE make a adjusting NLS.}
 \usage{
-get.AllSchems(data, Ovrcst_sch = c("CQB", "CKC", "CCB", "CKZ", "CWU", "CJG"),
-  Cld_sch = c("FAN", "FBR", "FHY", "FKZ", "FIJ"), Emiss_sch = c("EAN",
-  "EBR", "ESW", "EIJ", "EBT", "EID", "EKZ", "EPR", "ABM", "ALH", "AGB"),
-  adjust = FALSE)
+get.AllSchems(data, Ovrcst_sch = c("CQB", "CKC", "CCB", "CKZ", "CWU", "CJG",
+  "CLM", "CFG"), Emiss_sch = c("EAN", "EBR", "EDO", "EGR", "EIJ", "EID",
+  "EKZ", "ENM", "EPR", "EST", "ESW", "EAI"), adjust = FALSE)
 }
 \arguments{
 \item{data}{Data frame with atmospheric variables}
 
 \item{Ovrcst_sch}{Schemes for cloud cover index}
-
-\item{Cld_sch}{Schemes of atmosphere emissivity with consideration of Ovrcst_sch}
 
 \item{Emiss_sch}{Schemes of atmosphere emissivity}
 

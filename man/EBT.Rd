@@ -4,14 +4,15 @@
 \alias{EBT}
 \title{Emissivity from atmosphere}
 \usage{
-EBT(data, func, coef1 = 1.24, coef2 = 1/7, adjust = FALSE)
+EBT(data, func = "-", coef1 = 1.24, coef2 = 1/7, coef3 = 0.22,
+  coef4 = 1, adjust = FALSE)
 }
 \arguments{
 \item{data}{a data frame with all atmospherics variables}
 
 \item{func}{a function for amount of cloud}
 
-\item{coef1, coef2}{Scheme coeficients}
+\item{coef1, coef2, coef3, coef4}{Scheme coeficients}
 
 \item{adjust}{FALSE, TRUE if nonlinear least square adjusting wanted}
 }

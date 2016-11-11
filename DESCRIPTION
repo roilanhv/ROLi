@@ -12,7 +12,9 @@ Imports:
     dplyr,
     tidyr,
     hydroGOF,
-    plyr
+    plyr,
+    readr,
+    openair
 RoxygenNote: 5.0.1
 Suggests: knitr,
     rmarkdown

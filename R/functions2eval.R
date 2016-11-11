@@ -1,7 +1,7 @@
 
 ##' Downward Longwave Radiation from a emissivity and a cloud cover schemes
 ##' 
-##' @param data Data frame with column of date (date), temperature (Ta), 
+##' @param data_ Data frame with column of date (date), temperature (Ta), 
 ##' partial vapor pressure (es), potencial radiation (Rpot), relative humidity (rh), 
 ##' atennuation index (K)
 ##' @param E_fun Emissivity scheme
@@ -15,21 +15,35 @@
 ##' head(Li_sm)
 ##' summary(Li_sm)
 ##' @export
-get.Li <- function(data,
+##' @importFrom readr write_lines
+get.Li <- function(data_,
                    E_fun = "EAN",C_fun = "CQB",
-                   adjust = FALSE){
+                   adjust = FALSE,
+                   log_file = NULL){
     
     sigma <- 5.67051*10^(-8) # W m^(-2) T^(-4)
-    message("Combining emissivity: ", E_fun, ", whith cloud from: ", C_fun)
-    emis_ <- try(do.call(E_fun,list(data=data,func = C_fun, adjust = adjust)),silent = TRUE)
+        message("Combining emissivity: ", E_fun, ", whith cloud from: ", C_fun)
+    
+    emis_ <- try(do.call(E_fun,list(data=data_,func = C_fun, adjust = adjust)),silent = TRUE)
     
     if(adjust){
-        if(class(emis_) == "try-error") emis_ <- list(emiss = NA,coefs = NA)
-        roli_est <-  with(data, emis_$emiss*sigma*Ta^4)
+        
+        if(class(emis_) == "try-error") {
+            emis_ <- list(emiss = NA,coefs = NA)
+            roli_est <-  with(data_, emis_$emiss*sigma*Ta^4)
+        } else {  roli_est <-  with(data_, emis_$emiss*sigma*Ta^4) }
+        
     } else {
         if(class(emis_) == "try-error") emis_ <- NA
-        roli_est <-  with(data, emis_*sigma*Ta^4)   
+        roli_est <-  with(data_, emis_*sigma*Ta^4)   
     }
+    
+    if(!is.null(log_file)){
+        # write_lines(x = paste0("\n Emissivity: ", E_fun, ", Cloud Cover: ", C_fun), path = "./AJUST.log", append = TRUE )
+        # write_lines(x = paste0("\t",names(emis_$coefs),collapse = "\t\t"), path = "./AJUST.log", append = TRUE)
+        write_lines(x = paste(E_fun,C_fun, paste0(emis_$coefs %>% round(7),collapse = " ")), path = log_file, append = TRUE)
+    }
+    
     out_rol <- data.frame(ROL = roli_est) 
     names(out_rol) <- paste(E_fun,C_fun,sep = "_")
     out_rol
@@ -149,23 +163,37 @@ CalcStats <- function(data_li,
 #' @return Data frame with Li observed and all combintions of schemes for calculations of Li
 #' @author Roilan Hernandez
 #' @export
-#' @importFrom dplyr bind_cols
+#' @importFrom dplyr bind_cols 
+#' @importFrom readr write_file write_lines
 get.AllSchems <- function(data,
                           Ovrcst_sch = c("CQB","CKC","CCB","CKZ","CWU","CJG", "CLM", "CFG"),
                           Emiss_sch  = c("EAN","EBR","EDO","EGR","EIJ","EID","EKZ","ENM",
                                          "EPR","EST","ESW","EAI"),
-                          adjust = FALSE){
+                          adjust = FALSE, 
+                          log_file = NULL){
     
     roli_comb <- rbind(expand.grid(Emiss_sch,"-"), expand.grid(Emiss_sch, Ovrcst_sch) )
+    
+    if(!is.null(log_file)){
+    write_file(x = "\t START A NEW AJUST TASK", path = log_file, append = FALSE)
+    write_lines(x = paste("\t",Sys.time(), "\n"), path = log_file, append = TRUE)
+    write_lines(x = paste0("\t",length(Emiss_sch), " EMISSIVITY SCHEMES: ", 
+                           paste0(Emiss_sch,collapse = "-") ),
+                path = log_file, append = TRUE )
+    write_lines(x = paste0("\t",length(Ovrcst_sch), " CLOUD COVER SCHEMES: ", 
+                           paste0(Ovrcst_sch,collapse = "-") ),
+                path = log_file, append = TRUE )
+    }
     
     Li.sims <- 
         lapply(1:nrow(roli_comb), function(i){
             
             tmp.Li <- 
-            get.Li(data = data,
+            get.Li(data_ = data,
                    E_fun = roli_comb[i,1] %>% as.character,
                    C_fun = roli_comb[i,2] %>% as.character,
-                   adjust = adjust)
+                   adjust = adjust,
+                   log_file = log_file)
             
             return(tmp.Li)
             
@@ -184,10 +212,10 @@ get.AllSchems <- function(data,
 #' @param lat,lon,timezone Latitude, longitude e timezone of observations local.
 #' @param  
 #' @importFrom openair cutData
-#' @importFrom tidyr gather
-#' @importFrom dplyr rename, mutate, %>%
-#' 
-split.stats <- function(data_ , 
+#' @importFrom tidyr gather_
+#' @importFrom dplyr rename mutate %>% group_by_ summarise ungroup
+#' @import hydroGOF
+split_stats <- function(data_ , 
                         split_class = c("daytime","season","Cover","ID"),
                         lon = -53.18,lat = -29.71,timezone = -3){ 
                         

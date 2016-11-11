@@ -70,19 +70,42 @@
 ##' @references Jegede, O. O., Ogolo, E.O., Aregbesola, T.O. (2006) Estimating net
 ##' radiation using routine meteorological data at a tropical location
 ##' in Nigeria. Int J Sustain Energy 25:107–115
-    CJG <- function(data){ 
-        with(data,maxlim( ifelse(K < 0.9 , 1.1-K,2*(1-K)) ))
-        } # Jedge (2006)
+CJG <- function(data){ 
+    with(data,maxlim( ifelse(K < 0.9 , 1.1-K,2*(1-K)) ))
+} # Jedge (2006)
+
+##' Amount of cloud estimatives functions.
+##' @param data a data frame with all atmospherics variables
+##' @return a vector with cloud amount estimatives 
+##' @export
+##' @references Stockli R (2007) LBA-MIP driver data gap filling algorithms.
+##' Unpublished. http://www.climatemodeling.org/lba-mip/LBAmipDriverDataFillingMethods.pdf
+##' Accessed 7 May 2011
+CLM <- function(data){ 
+    with(data,maxlim( 1-K ))
+} # LBA_MIP  (2006)
+
+##' Amount of cloud estimatives functions.
+##' @param data a data frame with all atmospherics variables
+##' @return a vector with cloud amount estimatives 
+##' @export
+##' @references Flerchinger, G. N. (2009) Comparison of algoritmhs for incoming 
+##' atmospheric long-wave radiation, Water Resources Res., 45, W0342.  
+CFG <- function(data){ 
+    with(data,maxlim( ((1-K/max(K))/0.75)^(1./3.4) ))
+} # 
+
+
 
 ##
-#/////////////////////////////////////////////////////////////////////////////////////////////////
-#                                        PARAMETRIZAÇÔES DE 
-#----                                       EMISSIVIDADE 
+#/////////////////////////////////////////////////////////////////////////////////////////
+                                # PARAMETRIZAÇÔES DE 
+                                #    EMISSIVIDADE 
 
 ##' Emissivity from atmosphere
 ##' @param data Data frame with all atmospherics variables
 ##' @param func Function for amount of cloud 
-##' @param coef1,coef2,coef3 Scheme coeficients 
+##' @param coef1,coef2,coef3,coef4,coef5 Scheme coeficients 
 ##' @param adjust FALSE, TRUE if nonlinear least square adjusting wanted
 ##' @return a vector with emissivity estimatives
 ##' @import stats

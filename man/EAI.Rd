@@ -4,15 +4,15 @@
 \alias{EAI}
 \title{Emissivity from atmosphere}
 \usage{
-EAI(data, func, coef1 = 0.52843, coef2 = -0.0082, coef3 = 24242.6501,
-  adjust = FALSE)
+EAI(data, func = "-", coef1 = 0.52843, coef2 = -0.0082,
+  coef3 = 24242.6501, coef4 = 0.22, coef5 = 1, adjust = FALSE)
 }
 \arguments{
 \item{data}{a data frame with all atmospherics variables}
 
 \item{func}{a function for amount of cloud}
 
-\item{coef1, coef2, coef3}{Scheme coeficients}
+\item{coef1, coef2, coef3, coef4, coef5}{Scheme coeficients}
 
 \item{adjust}{FALSE, TRUE if nonlinear least square adjusting wanted}
 }

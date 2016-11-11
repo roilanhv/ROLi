@@ -4,14 +4,15 @@
 \alias{EPR}
 \title{Emissivity from atmosphere}
 \usage{
-EPR(data, func, coef1 = 1, coef2 = 1.2, coef3 = 3, adjust = FALSE)
+EPR(data, func = "-", coef1 = 1, coef2 = 1.2, coef3 = 3, coef4 = 0.22,
+  coef5 = 1, adjust = FALSE)
 }
 \arguments{
 \item{data}{a data frame with all atmospherics variables}
 
 \item{func}{a function for amount of cloud}
 
-\item{coef1, coef2, coef3}{Scheme coeficients}
+\item{coef1, coef2, coef3, coef4, coef5}{Scheme coeficients}
 
 \item{adjust}{FALSE, TRUE if nonlinear least square adjusting wanted}
 }

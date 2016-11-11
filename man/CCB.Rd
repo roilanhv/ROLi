@@ -16,6 +16,6 @@ a vector with cloud amount estimatives
 Amount of cloud estimatives functions.
 }
 \references{
-Campbell GS (1985) Soil physics with BASIC. Elsevier, Amsterdam
+Campbell, G.S. (1985) Soil physics with BASIC. Elsevier, Amsterdam
 }
 

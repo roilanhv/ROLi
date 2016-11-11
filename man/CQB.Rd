@@ -16,6 +16,7 @@ a vector with cloud amount estimatives
 Amount of cloud estimatives functions.
 }
 \references{
-Black JN (1956) The distribution of solar radiation over the Earth's surface. Arch Meteor Geophy B 7:165–189
+Black JN (1956) The distribution of solar radiation over the Earth's surface.
+Arch Meteor Geophy B 7:165–189
 }
 

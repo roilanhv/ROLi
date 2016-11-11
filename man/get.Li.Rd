@@ -4,7 +4,7 @@
 \alias{get.Li}
 \title{Downward Longwave Radiation from a emissivity and a cloud cover schemes}
 \usage{
-get.Li(data, E_fun = "FHY", C_fun = "CQB", adjust = FALSE)
+get.Li(data, E_fun = "EAN", C_fun = "CQB", adjust = FALSE)
 }
 \arguments{
 \item{data}{Data frame with column of date (date), temperature (Ta), 
@@ -26,12 +26,7 @@ Downward Longwave Radiation from a emissivity and a cloud cover schemes
 \examples{
 # Downward longwave for Santa Maria site, January and July of  2014
 # without adjusting
-Li_sm <- get.Li(data = data2,E_fun = "FHY",C_fun = "CQB")
-head(Li_sm)
-summary(Li_sm)
-# Downward longwave for Santa Maria site, January and July of  2014
-# with adjusting
-Li_sm <- get.Li(data = data2,E_fun = "FBR",C_fun = "CQB",adjust = TRUE)
+Li_sm <- get.Li(data = data2,E_fun = "EAN",C_fun = "CQB")
 head(Li_sm)
 summary(Li_sm)
 }

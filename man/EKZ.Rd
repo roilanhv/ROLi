@@ -4,15 +4,15 @@
 \alias{EKZ}
 \title{Emissivity from atmosphere}
 \usage{
-EKZ(data, func, coef1 = 0.23, coef2 = 0.484, coef3 = 1/8,
-  adjust = FALSE)
+EKZ(data, func = "-", coef1 = 0.23, coef2 = 0.484, coef3 = 1/8,
+  coef4 = 0.22, coef5 = 1, adjust = FALSE)
 }
 \arguments{
 \item{data}{a data frame with all atmospherics variables}
 
 \item{func}{a function for amount of cloud}
 
-\item{coef1, coef2, coef3}{Scheme coeficients}
+\item{coef1, coef2, coef3, coef4, coef5}{Scheme coeficients}
 
 \item{adjust}{FALSE, TRUE if nonlinear least square adjusting wanted}
 }

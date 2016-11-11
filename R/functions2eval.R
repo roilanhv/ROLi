@@ -155,23 +155,24 @@ CalcStats <- function(data_li,
 #' @export
 #' @importFrom dplyr bind_cols
 get.AllSchems <- function(data,
-                          Ovrcst_sch = c("CQB","CKC","CCB","CKZ","CWU","CJG"),
-                          Cld_sch = c("FAN","FBR","FHY","FKZ","FIJ"),
-                          Emiss_sch  = c("EAN","EBR","ESW","EIJ","EBT","EID","EKZ","EPR","ENM","EAI",
-                                         "ABM","ALH","AGB"),
+                          Ovrcst_sch = c("CQB","CKC","CCB","CKZ","CWU","CJG", "CLM", "CFG"),
+                          Emiss_sch  = c("EAN","EBR","EDO","EGR","EIJ","EID","EKZ","ENM",
+                                         "EPR","EST","ESW","EAI"),
                           adjust = FALSE){
     
-    roli_comb <- rbind(expand.grid(Emiss_sch,"-"), expand.grid(Cld_sch, Ovrcst_sch) )
+    roli_comb <- rbind(expand.grid(Emiss_sch,"-"), expand.grid(Emiss_sch, Ovrcst_sch) )
     
     Li.sims <- 
         lapply(1:nrow(roli_comb), function(i){
-  
+            
             tmp.Li <- 
             get.Li(data = data,
                    E_fun = roli_comb[i,1] %>% as.character,
                    C_fun = roli_comb[i,2] %>% as.character,
                    adjust = adjust)
-            tmp.Li
+            
+            return(tmp.Li)
+            
         }) %>% bind_cols()
     
     names(Li.sims) <- gsub("_-","",names(Li.sims))

@@ -217,11 +217,11 @@ get.AllSchems <- function(data,
 #' @import hydroGOF
 split_stats <- function(data_ , 
                         split_class = c("daytime","season","Cover","ID"),
-                        lon = -53.18,lat = -29.71,timezone = -3){ 
+                        lon = -53.18,lat = -29.71,timezone = -3, round = 3){ 
                         
     hemisphere <- ifelse(lat < 0.0, "southern", "northern")
     
-    if(!"Obs" %in% names(data_)){ return(message("Column Obs isn't in the input data"))}
+    if(!("Obs" %in% names(data_))){ return(message("Column Obs isn't in the input data"))}
     
     output <- 
     data_ %>% 
@@ -230,15 +230,15 @@ split_stats <- function(data_ ,
         gather_(key_col = "params", value_col = "Sim", 
                 gather_cols = names(data_)[!names(data_) %in% c("date",split_class,"Obs")]) %>%
         group_by_(.dots = c("params",split_class)) %>%
-        summarise(RMSE = rmse(obs = Obs, sim = Sim, na.rm = TRUE), 
-                  MAE = mae(obs = Obs, sim = Sim, na.rm = TRUE),
-                  PBIAS = pbias(obs = Obs, sim = Sim, na.rm = TRUE), 
-                  NSE = NSE(obs = Obs, sim = Sim, na.rm = TRUE), 
-                  R2 = cor(Sim, Obs, method = "pearson", use = "pairwise.complete.obs")^2 ,
+        summarise(RMSE = rmse(obs = Obs, sim = Sim, na.rm = TRUE) %>% round(round), 
+                  MAE = mae(obs = Obs, sim = Sim, na.rm = TRUE)%>% round(round),
+                  PBIAS = pbias(obs = Obs, sim = Sim, na.rm = TRUE)%>% round(round), 
+                  NSE = NSE(obs = Obs, sim = Sim, na.rm = TRUE)%>% round(round), 
+                  R2 = cor(Sim, Obs, method = "pearson", use = "pairwise.complete.obs")^2 %>% 
+                      round(round),
                   NObs = sum(is.na(Sim),!is.na(Sim)) ,
-                  PNAs = sum(is.na(Sim))/NObs*100 ) %>%
-        filter(PNAs < 95) %>%
-        ungroup()
+                  PNAs = (sum(is.na(Sim))/NObs)*100 %>% round(round)) %>%
+        ungroup() 
   
     return(output)
     }

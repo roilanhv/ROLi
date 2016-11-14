@@ -183,6 +183,8 @@ get.AllSchems <- function(data,
     write_lines(x = paste0("\t",length(Ovrcst_sch), " CLOUD COVER SCHEMES: ", 
                            paste0(Ovrcst_sch,collapse = "-") ),
                 path = log_file, append = TRUE )
+    write_lines(x = "EMISSIVITY CLOUD COEF1 COEF2 COEF3 COEF4 COEF5",
+                path = log_file, append = TRUE)
     }
     
     Li.sims <- 
@@ -231,6 +233,8 @@ split_stats <- function(data_ ,
                 gather_cols = names(data_)[!names(data_) %in% c("date",split_class,"Obs")]) %>%
         group_by_(.dots = c("params",split_class)) %>%
         summarise(RMSE = rmse(obs = Obs, sim = Sim, na.rm = TRUE) %>% round(round), 
+                  NRMSE = nrmse(obs = Obs, sim = Sim, na.rm = TRUE) %>% round(round),
+                  rSD = (1- sd(Sim,na.rm = TRUE)/sd(Obs,na.rm = TRUE))  %>% round(round),
                   MAE = mae(obs = Obs, sim = Sim, na.rm = TRUE)%>% round(round),
                   PBIAS = pbias(obs = Obs, sim = Sim, na.rm = TRUE)%>% round(round), 
                   NSE = NSE(obs = Obs, sim = Sim, na.rm = TRUE)%>% round(round), 

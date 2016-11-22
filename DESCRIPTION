@@ -14,7 +14,8 @@ Imports:
     hydroGOF,
     plyr,
     readr,
-    openair
+    openair,
+    zoo
 RoxygenNote: 5.0.1
 Suggests: knitr,
     rmarkdown

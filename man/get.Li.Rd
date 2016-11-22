@@ -4,10 +4,11 @@
 \alias{get.Li}
 \title{Downward Longwave Radiation from a emissivity and a cloud cover schemes}
 \usage{
-get.Li(data, E_fun = "EAN", C_fun = "CQB", adjust = FALSE)
+get.Li(data_, E_fun = "EAN", C_fun = "CQB", adjust = FALSE,
+  log_file = NULL)
 }
 \arguments{
-\item{data}{Data frame with column of date (date), temperature (Ta), 
+\item{data_}{Data frame with column of date (date), temperature (Ta), 
 partial vapor pressure (es), potencial radiation (Rpot), relative humidity (rh), 
 atennuation index (K)}
 
@@ -16,6 +17,8 @@ atennuation index (K)}
 \item{C_fun}{Cloud cover scheme}
 
 \item{adjust}{FALSE, TRUE if nonlinear least square adjusting wanted}
+
+\item{log_file}{path to a log file}
 }
 \value{
 Vector with Downward Longwave Radiation time series

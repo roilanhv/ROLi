@@ -579,7 +579,7 @@ EKZ <- function(data,func = "-",
 ##' @references Niemala, S. (2001) Comparison of surface radiative flux 
 ##' parameterizations part I: Longwave radiation. Atmos. Res., 58, 1-18.
 ENM <- function(data,func = "-",
-                coef1 = 0.72, coef2 = 0.09, coef3 = 0.06,
+                coef1 = 0.72, coef2 = 0.09, coef3 = 0.76,
                 coef4 = 0.22, coef5 = 1.0,
                 adjust = FALSE){ 
     
@@ -1142,9 +1142,58 @@ EAI <- function(data,func = "-",
         K <- maxlim(K)
         K <- ifelse(is.na(K), 0.0,K)
  
+        
+        
+        
         return(K)
     }
 
+    
+##' Create from hourly clearness index a mean daily clearness index and 
+##' smooth clearness index
+##' 
+##' @param data_ Dataframe with at least date and Rg column.
+##' @param lon longitude from local analisys 
+##' @param lat latitude from local analisys
+##' @param timezone local time diference with GMT (-1 for fluxes measurement)
+##' @param window_size lenght of window to smoothing  
+##' @return The same input dataframe with K_hourly, K_mean (daily mean), 
+##' K_smooth (smooth K_mean index in specific temporal window) with K index columns
+##' @author Roilan Hernandez
+##' @importFrom stats setNames
+##' @importFrom dplyr %>% mutate select group_by
+##' @importFrom plyr . 
+##' @importFrom zoo rollmean
+##' @export    
+correct.clearness.index <- function(data_,
+                                    lon, lat, timezone,
+                                    window_size = 6){
+    if(!(Rpot %in% names(data_))) {
+        data_ <- 
+            data_ %>%
+            mutate(Rpot =  PotRad(date = dates,lon = lon, lat = lat,timezone = timezone))
+    }
+    
+    K_mean <- 
+    data_ %>%
+    select(date, Rg, Rpot) %>%
+        filter(Rpot > 100) %>%
+        group_by(day = as.Date(date)) %>%
+        summarise(K_mean = mean(Rg,na.rm = TRUE)/mean(Rpot,na.rm = TRUE)) %>%
+        select(day,K_mean)
+    
+    data_ %>% 
+        mutate(day = as.Date(date)) %>%
+        merge(., K_mean, all.x = TRUE,by = "day") %>%
+        select(-day) %>%
+        mutate(K_hourly = kloudiness(Rg,lon=lon, lat=lat, timezone=timezone) ) %>%
+        mutate(K = ifelse(is.na(K_mean),
+                          NA,
+                          rollmean(K_mean[!is.na(K_mean)],k = window_size,fill = mean(K_mean[!is.na(K_mean)]),
+                                   align = "center",na.pad = TRUE)))
+    
+}    
+    
 
 ################################
 #####     GARBAGE         ######

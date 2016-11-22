@@ -1,12 +1,13 @@
 
 ##' Downward Longwave Radiation from a emissivity and a cloud cover schemes
 ##' 
-##' @param data Data frame with column of date (date), temperature (Ta), 
+##' @param data_ Data frame with column of date (date), temperature (Ta), 
 ##' partial vapor pressure (es), potencial radiation (Rpot), relative humidity (rh), 
 ##' atennuation index (K)
 ##' @param E_fun Emissivity scheme
 ##' @param C_fun Cloud cover scheme
 ##' @param adjust FALSE, TRUE if nonlinear least square adjusting wanted
+##' @param log_file path to a log file
 ##' @return Vector with Downward Longwave Radiation time series
 ##' @examples 
 ##' # Downward longwave for Santa Maria site, January and July of  2014
@@ -15,21 +16,35 @@
 ##' head(Li_sm)
 ##' summary(Li_sm)
 ##' @export
-get.Li <- function(data,
+##' @importFrom readr write_lines
+get.Li <- function(data_,
                    E_fun = "EAN",C_fun = "CQB",
-                   adjust = FALSE){
+                   adjust = FALSE,
+                   log_file = NULL){
     
     sigma <- 5.67051*10^(-8) # W m^(-2) T^(-4)
-    message("Combining emissivity: ", E_fun, ", whith cloud from: ", C_fun)
-    emis_ <- try(do.call(E_fun,list(data=data,func = C_fun, adjust = adjust)),silent = TRUE)
+        message("Combining emissivity: ", E_fun, ", whith cloud from: ", C_fun)
+    
+    emis_ <- try(do.call(E_fun,list(data=data_,func = C_fun, adjust = adjust)),silent = TRUE)
     
     if(adjust){
-        if(class(emis_) == "try-error") emis_ <- list(emiss = NA,coefs = NA)
-        roli_est <-  with(data, emis_$emiss*sigma*Ta^4)
+        
+        if(class(emis_) == "try-error") {
+            emis_ <- list(emiss = NA,coefs = NA)
+            roli_est <-  with(data_, emis_$emiss*sigma*Ta^4)
+        } else {  roli_est <-  with(data_, emis_$emiss*sigma*Ta^4) }
+        
     } else {
         if(class(emis_) == "try-error") emis_ <- NA
-        roli_est <-  with(data, emis_*sigma*Ta^4)   
+        roli_est <-  with(data_, emis_*sigma*Ta^4)   
     }
+    
+    if(!is.null(log_file)){
+        # write_lines(x = paste0("\n Emissivity: ", E_fun, ", Cloud Cover: ", C_fun), path = "./AJUST.log", append = TRUE )
+        # write_lines(x = paste0("\t",names(emis_$coefs),collapse = "\t\t"), path = "./AJUST.log", append = TRUE)
+        write_lines(x = paste(E_fun,C_fun, paste0(emis_$coefs %>% round(7),collapse = " ")), path = log_file, append = TRUE)
+    }
+    
     out_rol <- data.frame(ROL = roli_est) 
     names(out_rol) <- paste(E_fun,C_fun,sep = "_")
     out_rol
@@ -146,26 +161,43 @@ CalcStats <- function(data_li,
 #' @param Ovrcst_sch Schemes for cloud cover index
 #' @param Emiss_sch Schemes of atmosphere emissivity 
 #' @param adjust FALSE, TRUE for NLS adjusting 
+#' @param log_file path to a log file
 #' @return Data frame with Li observed and all combintions of schemes for calculations of Li
 #' @author Roilan Hernandez
 #' @export
-#' @importFrom dplyr bind_cols
+#' @importFrom dplyr bind_cols 
+#' @importFrom readr write_file write_lines
 get.AllSchems <- function(data,
                           Ovrcst_sch = c("CQB","CKC","CCB","CKZ","CWU","CJG", "CLM", "CFG"),
                           Emiss_sch  = c("EAN","EBR","EDO","EGR","EIJ","EID","EKZ","ENM",
                                          "EPR","EST","ESW","EAI"),
-                          adjust = FALSE){
+                          adjust = FALSE, 
+                          log_file = NULL){
     
     roli_comb <- rbind(expand.grid(Emiss_sch,"-"), expand.grid(Emiss_sch, Ovrcst_sch) )
+    
+    if(!is.null(log_file)){
+    write_file(x = "\t START A NEW AJUST TASK", path = log_file, append = FALSE)
+    write_lines(x = paste("\t",Sys.time(), "\n"), path = log_file, append = TRUE)
+    write_lines(x = paste0("\t",length(Emiss_sch), " EMISSIVITY SCHEMES: ", 
+                           paste0(Emiss_sch,collapse = "-") ),
+                path = log_file, append = TRUE )
+    write_lines(x = paste0("\t",length(Ovrcst_sch), " CLOUD COVER SCHEMES: ", 
+                           paste0(Ovrcst_sch,collapse = "-") ),
+                path = log_file, append = TRUE )
+    write_lines(x = "EMISSIVITY CLOUD COEF1 COEF2 COEF3 COEF4 COEF5",
+                path = log_file, append = TRUE)
+    }
     
     Li.sims <- 
         lapply(1:nrow(roli_comb), function(i){
             
             tmp.Li <- 
-            get.Li(data = data,
+            get.Li(data_ = data,
                    E_fun = roli_comb[i,1] %>% as.character,
                    C_fun = roli_comb[i,2] %>% as.character,
-                   adjust = adjust)
+                   adjust = adjust,
+                   log_file = log_file)
             
             return(tmp.Li)
             
@@ -178,40 +210,42 @@ get.AllSchems <- function(data,
 
 
 #' Split data and Li series by time factor (ex., "daytime", "season", "cover")
-#' @export
 #' @param data_ Data frame with column date (POSIXct), Obs and all series for each scheme.
 #' @param split_class Type of cut data analises (daytime and season by default, other types needs as a factor column)
 #' @param lat,lon,timezone Latitude, longitude e timezone of observations local.
-#' @param  
+#' @param round Digits for round
 #' @importFrom openair cutData
-#' @importFrom tidyr gather
-#' @importFrom dplyr rename, mutate, %>%
-#' 
-split.stats <- function(data_ , 
+#' @importFrom tidyr gather_
+#' @importFrom dplyr rename mutate %>% group_by_ summarise ungroup
+#' @import hydroGOF
+#' @export
+split_stats <- function(data_ ,
                         split_class = c("daytime","season","Cover","ID"),
-                        lon = -53.18,lat = -29.71,timezone = -3){ 
-                        
+                        lon = -53.18,lat = -29.71,timezone = -3, round = 3){
+                         
     hemisphere <- ifelse(lat < 0.0, "southern", "northern")
-    
-    if(!"Obs" %in% names(data_)){ return(message("Column Obs isn't in the input data"))}
-    
-    output <- 
-    data_ %>% 
-        mutate(daytime = to.daylight(date,lon = lon,lat = lat,timezone = timezone)) %>%
+
+    if(!("Obs" %in% names(data_))){ return(message("Column Obs isn't in the input data"))}
+
+    output <-
+    data_ %>%
+        mutate(daytime = to.daylight(date,lon = lon,lat = lat,timezone = timezone)) #%>%
         cutData(type = "season",hemisphere = hemisphere) %>%
-        gather_(key_col = "params", value_col = "Sim", 
+        gather_(key_col = "params", value_col = "Sim",
                 gather_cols = names(data_)[!names(data_) %in% c("date",split_class,"Obs")]) %>%
         group_by_(.dots = c("params",split_class)) %>%
-        summarise(RMSE = rmse(obs = Obs, sim = Sim, na.rm = TRUE), 
-                  MAE = mae(obs = Obs, sim = Sim, na.rm = TRUE),
-                  PBIAS = pbias(obs = Obs, sim = Sim, na.rm = TRUE), 
-                  NSE = NSE(obs = Obs, sim = Sim, na.rm = TRUE), 
-                  R2 = cor(Sim, Obs, method = "pearson", use = "pairwise.complete.obs")^2 ,
+        summarise(RMSE = rmse(obs = Obs, sim = Sim, na.rm = TRUE) %>% round(round),
+                  NRMSE = nrmse(obs = Obs, sim = Sim, na.rm = TRUE) %>% round(round),
+                  rSD = (1- sd(Sim,na.rm = TRUE)/sd(Obs,na.rm = TRUE))  %>% round(round),
+                  MAE = mae(obs = Obs, sim = Sim, na.rm = TRUE)%>% round(round),
+                  PBIAS = pbias(obs = Obs, sim = Sim, na.rm = TRUE)%>% round(round),
+                  NSE = NSE(obs = Obs, sim = Sim, na.rm = TRUE)%>% round(round),
+                  R2 = cor(Sim, Obs, method = "pearson", use = "pairwise.complete.obs")^2 %>%
+                      round(round),
                   NObs = sum(is.na(Sim),!is.na(Sim)) ,
-                  PNAs = sum(is.na(Sim))/NObs*100 ) %>%
-        filter(PNAs < 95) %>%
+                  PNAs = floor( (sum(is.na(Sim))/NObs)*100) ) %>%
         ungroup()
-  
+
     return(output)
     }
 

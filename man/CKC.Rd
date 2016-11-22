@@ -16,6 +16,7 @@ a vector with cloud amount estimatives
 Amount of cloud estimatives functions.
 }
 \references{
-Kasten, F.  Czeplak, G. (1980) Solar and terrestrial radiation dependent on the amount and type of cloud. Sol Energy 24:177–189
+Kasten, F.  Czeplak, G. (1980) Solar and terrestrial radiation
+dependent on the amount and type of cloud. Sol Energy 24:177–189
 }
 

@@ -6,7 +6,8 @@
 \usage{
 get.AllSchems(data, Ovrcst_sch = c("CQB", "CKC", "CCB", "CKZ", "CWU", "CJG",
   "CLM", "CFG"), Emiss_sch = c("EAN", "EBR", "EDO", "EGR", "EIJ", "EID",
-  "EKZ", "ENM", "EPR", "EST", "ESW", "EAI"), adjust = FALSE)
+  "EKZ", "ENM", "EPR", "EST", "ESW", "EAI"), adjust = FALSE,
+  log_file = NULL)
 }
 \arguments{
 \item{data}{Data frame with atmospheric variables}
@@ -16,6 +17,8 @@ get.AllSchems(data, Ovrcst_sch = c("CQB", "CKC", "CCB", "CKZ", "CWU", "CJG",
 \item{Emiss_sch}{Schemes of atmosphere emissivity}
 
 \item{adjust}{FALSE, TRUE for NLS adjusting}
+
+\item{log_file}{path to a log file}
 }
 \value{
 Data frame with Li observed and all combintions of schemes for calculations of Li

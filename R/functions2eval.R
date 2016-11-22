@@ -241,7 +241,7 @@ split_stats <- function(data_ ,
                   R2 = cor(Sim, Obs, method = "pearson", use = "pairwise.complete.obs")^2 %>% 
                       round(round),
                   NObs = sum(is.na(Sim),!is.na(Sim)) ,
-                  PNAs = (sum(is.na(Sim))/NObs)*100 %>% round(round)) %>%
+                  PNAs = floor( (sum(is.na(Sim))/NObs)*100) ) %>%
         ungroup() 
   
     return(output)

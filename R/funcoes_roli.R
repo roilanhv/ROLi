@@ -579,7 +579,7 @@ EKZ <- function(data,func = "-",
 ##' @references Niemala, S. (2001) Comparison of surface radiative flux 
 ##' parameterizations part I: Longwave radiation. Atmos. Res., 58, 1-18.
 ENM <- function(data,func = "-",
-                coef1 = 0.72, coef2 = 0.09, coef3 = 0.06,
+                coef1 = 0.72, coef2 = 0.09, coef3 = 0.76,
                 coef4 = 0.22, coef5 = 1.0,
                 adjust = FALSE){ 
     

@@ -1168,15 +1168,15 @@ EAI <- function(data,func = "-",
 correct.clearness.index <- function(data_,
                                     lon, lat, timezone,
                                     window_size = 6){
-    if(!(Rpot %in% names(data_))) {
+    if(!("Rpot" %in% names(data_))) {
         data_ <- 
             data_ %>%
-            mutate(Rpot =  PotRad(date = dates,lon = lon, lat = lat,timezone = timezone))
+            mutate(Rpot =  PotRad(date = date,lon = lon, lat = lat,timezone = timezone))
     }
     
     K_mean <- 
-    data_ %>%
-    select(date, Rg, Rpot) %>%
+        data_ %>%
+        select(date, Rg, Rpot) %>%
         filter(Rpot > 100) %>%
         group_by(day = as.Date(date)) %>%
         summarise(K_mean = mean(Rg,na.rm = TRUE)/mean(Rpot,na.rm = TRUE)) %>%
@@ -1186,7 +1186,7 @@ correct.clearness.index <- function(data_,
         mutate(day = as.Date(date)) %>%
         merge(., K_mean, all.x = TRUE,by = "day") %>%
         select(-day) %>%
-        mutate(K_hourly = kloudiness(Rg,lon=lon, lat=lat, timezone=timezone) ) %>%
+        mutate(K_hourly = kloudines(dates = date, Rg,lon=lon, lat=lat, timezone=timezone) ) %>%
         mutate(K = ifelse(is.na(K_mean),
                           NA,
                           rollmean(K_mean[!is.na(K_mean)],k = window_size,fill = mean(K_mean[!is.na(K_mean)]),

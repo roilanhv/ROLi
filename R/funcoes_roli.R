@@ -1161,7 +1161,7 @@ EAI <- function(data,func = "-",
 ##' K_smooth (smooth K_mean index in specific temporal window) with K index columns
 ##' @author Roilan Hernandez
 ##' @importFrom stats setNames
-##' @importFrom dplyr %>% mutate select group_by
+##' @importFrom dplyr %>% mutate select group_by filter_
 ##' @importFrom plyr . 
 ##' @importFrom zoo rollmean
 ##' @export    
@@ -1177,7 +1177,7 @@ correct.clearness.index <- function(data_,
     K_mean <- 
         data_ %>%
         select(date, Rg, Rpot) %>%
-        filter(Rpot > 100) %>%
+        filter_("Rpot" > 100) %>%
         group_by(day = as.Date(date)) %>%
         summarise(K_mean = mean(Rg,na.rm = TRUE)/mean(Rpot,na.rm = TRUE)) %>%
         select(day,K_mean)

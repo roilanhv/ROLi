@@ -97,7 +97,7 @@ CLM <- function(data){
 ##' @references Flerchinger, G. N. (2009) Comparison of algoritmhs for incoming 
 ##' atmospheric long-wave radiation, Water Resources Res., 45, W0342.  
 CFG <- function(data){ 
-    with(data,maxlim( ((1-K/max(K))/0.75)^(1./3.4) ))
+    with(data,maxlim( ((1-K/max(K,na.rm = TRUE))/0.75)^(1./3.4) ))
 } # 
 
 

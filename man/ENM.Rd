@@ -4,7 +4,7 @@
 \alias{ENM}
 \title{Emissivity from atmosphere}
 \usage{
-ENM(data, func = "-", coef1 = 0.72, coef2 = 0.09, coef3 = 0.06,
+ENM(data, func = "-", coef1 = 0.72, coef2 = 0.09, coef3 = 0.76,
   coef4 = 0.22, coef5 = 1, adjust = FALSE)
 }
 \arguments{

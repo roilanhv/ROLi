@@ -7,6 +7,7 @@
 ##' @param E_fun Emissivity scheme
 ##' @param C_fun Cloud cover scheme
 ##' @param adjust FALSE, TRUE if nonlinear least square adjusting wanted
+##' @param log_file path to a log file
 ##' @return Vector with Downward Longwave Radiation time series
 ##' @examples 
 ##' # Downward longwave for Santa Maria site, January and July of  2014
@@ -160,6 +161,7 @@ CalcStats <- function(data_li,
 #' @param Ovrcst_sch Schemes for cloud cover index
 #' @param Emiss_sch Schemes of atmosphere emissivity 
 #' @param adjust FALSE, TRUE for NLS adjusting 
+#' @param log_file path to a log file
 #' @return Data frame with Li observed and all combintions of schemes for calculations of Li
 #' @author Roilan Hernandez
 #' @export

@@ -17,6 +17,8 @@ atennuation index (K)}
 \item{C_fun}{Cloud cover scheme}
 
 \item{adjust}{FALSE, TRUE if nonlinear least square adjusting wanted}
+
+\item{log_file}{path to a log file}
 }
 \value{
 Vector with Downward Longwave Radiation time series

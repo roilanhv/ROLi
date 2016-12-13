@@ -1,4 +1,8 @@
 
+
+
+
+
 ##' Downward Longwave Radiation from a emissivity and a cloud cover schemes
 ##' 
 ##' @param data_ Data frame with column of date (date), temperature (Ta), 
@@ -229,7 +233,7 @@ split_stats <- function(data_ ,
 
     output <-
     data_ %>%
-        mutate(daytime = to.daylight(date,lon = lon,lat = lat,timezone = timezone)) #%>%
+        mutate(daytime = to.daylight(date,lon = lon,lat = lat,timezone = timezone)) %>%
         cutData(type = "season",hemisphere = hemisphere) %>%
         gather_(key_col = "params", value_col = "Sim",
                 gather_cols = names(data_)[!names(data_) %in% c("date",split_class,"Obs")]) %>%
@@ -248,6 +252,35 @@ split_stats <- function(data_ ,
 
     return(output)
     }
+
+
+
+#' Calculate statistical index 
+#' @param data_ Data frame with column Li observed and all series for each scheme.
+#' @param statistic Statistical index to calculate
+#' @param round Digits for round
+#' @importFrom tidyr gather separate spread
+#' @importFrom dplyr rename mutate %>% group_by_ summarise ungroup select starts_with
+#' @import hydroGOF
+#' @export
+table_stats <- function(data_, statistic = "rmse", round = 2){
+    statistic <- statistic[1]
+    
+    llply(data_,function(site){ 
+        site %>%
+            select(Li,starts_with("E",ignore.case = FALSE)) %>%
+            gather(SCHEMES, Sim, -Li) %>%
+            group_by(SCHEMES) %>%
+            summarise(RESULT = do.call(statistic, list(obs = Li, sim = Sim, na.rm = TRUE)) %>% round(round)) %>% 
+            separate(SCHEMES,into = c("Emissivity","CloudCover"),sep = "_") %>%
+            mutate(CloudCover = ifelse(is.na(CloudCover),"-",CloudCover)) %>%
+            spread(CloudCover,RESULT) 
+    },.progress = "text")
+    
+}
+
+
+
 
 # ##' Function for evaluation of all parameterizations
 # ##' @param data_ A data frame with all atmospherics variables and simulated series

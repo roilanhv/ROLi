@@ -260,8 +260,7 @@ split_stats <- function(data_ ,
 #' @param statistic Statistical index to calculate
 #' @param round Digits for round
 #' @importFrom tidyr gather separate spread
-#' @importFrom dplyr rename mutate %>% group_by_ summarise ungroup select starts_with
-#' @import hydroGOF
+#' @importFrom dplyr rename mutate %>% group_by_ summarise ungroup select
 #' @export
 table_stats <- function(data_, statistic = "rmse", round = 2){
     statistic <- statistic[1]

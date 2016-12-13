@@ -170,7 +170,7 @@ CalcStats <- function(data_li,
 #' @author Roilan Hernandez
 #' @export
 #' @importFrom dplyr bind_cols 
-#' @importFrom readr write_file write_lines
+#' @import readr
 get.AllSchems <- function(data,
                           Ovrcst_sch = c("CQB","CKC","CCB","CKZ","CWU","CJG", "CLM", "CFG"),
                           Emiss_sch  = c("EAN","EBR","EDO","EGR","EIJ","EID","EKZ","ENM",

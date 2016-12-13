@@ -20,7 +20,7 @@
 ##' head(Li_sm)
 ##' summary(Li_sm)
 ##' @export
-##' @importFrom readr write_lines
+##' @import readr
 get.Li <- function(data_,
                    E_fun = "EAN",C_fun = "CQB",
                    adjust = FALSE,

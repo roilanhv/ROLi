@@ -299,6 +299,105 @@ run_stats <- function(stats,obs,sim){
                     )
             )
 }
+
+
+
+
+##' MonteCarlo simulation for optimization
+##' 
+##' Make a MonteCarlo simulation from initial value on each schemes' coeficients. Initial sample 
+##' has a 'nsample'*10 population number for each parameter in scheme, determined by a LHS 
+##' (Latin Hypercubic Sample) with frontiers +- 5 times the value of coeficient:
+##' $$ A_i = [a_i-5a_i;a_i+5a_i] $$
+##' The MonteCarlo design follows a similar way in genetic algorithms, where a initial population 
+##' of value for  parameter produce a L_i serie that is evaluated with choosen estatistic (stats).
+##' Always two equal dimenson population are compared and choosen combinations of parameters that 
+##' produce a 'stats' minor than a o.5 quantile. That way ensures that best combinations be conserved
+##' if its performance is better than a half of total combinations 'stats' value. Finally a coeficients 
+##' combination with best performance prevales and is considered the optimization. Furthermore, 
+##' a 'nsample', 'max_iter' and 'stats' will define a result.  
+##' @param data Data frame with all atmospherics variables
+##' @param E_fun Function for emissivity 
+##' @param func Function from cloud cover calculation
+##' @param coefs Coeficients in E_fun function
+##' @param nsample Number of population individuous
+##' @param max_iter Maximun number of iterations
+##' @param stats Statistical index to be minimized
+##' @importFrom  parallel mclapply detectCores
+##' @importFrom  dplyr bind_rows arrange filter_
+##' @import stats
+##' @import utils
+##'  
+##' @return Vector with best combination of parameters
+
+MonteCarlo <- function(data,
+                       E_fun,
+                       func,
+                       coefs,
+                       nsample ,
+                       max_iter ,
+                       stats){
+    
+    params <- 
+        LHSU(xmax = coefs + coefs*5,
+             xmin = coefs - coefs*5,
+             nsample = nsample*10)  %>%
+        as.data.frame() %>%
+        setNames(names(coefs))                                                       ### **
+    
+    params[1,] <- coefs
+    
+    population_father <- NULL
+    
+    for(iter in 1:max_iter){
+        
+        population_child <- 
+            mclapply(1:length(params[[1]]),                                              ### **
+                     function(i){
+                         # i = 1
+                         emiss <- with(data = data, 
+                                       run_fun(E_fun = E_fun,
+                                               data = data, 
+                                               func = func,
+                                               new.coefs = params[i,]) )
+                         
+                         stats_emiss <- run_stats(stats = stats,
+                                                  sim = with(data, emiss * (sigma*Ta^4)) %>% as.numeric(),
+                                                  obs = with(data, Li) %>% as.numeric())
+                         
+                         return(cbind(params[i,], stats_var = stats_emiss) )
+                    
+                     },
+                     mc.cores = max( detectCores()-1,1),                       ### **
+                     mc.preschedule = FALSE) %>% 
+            bind_rows()                                      ### **
+        
+        if(!is.null(population_father)){ 
+            
+            population_child <- 
+                bind_rows(population_child,                                     ### **
+                          population_father) %>%
+                mutate(q.5 = quantile(stats_var , probs = 0.5, na.rm = TRUE))
+                filter_("stats_var" < q.5) %>%               ### **       ### **
+                arrange(stats_var)                                     ### **
+            
+        }
+        
+        params <- 
+            LHSU(xmax = apply(population_child, 2, max)[1:length(coefs)],                                     ### **
+                 xmin = apply(population_child, 2, min)[1:length(coefs)],                                     ### **
+                 nsample = nsample)  %>%
+            as.data.frame() %>%
+            setNames(names(coefs))                                     ### **
+        
+        population_father <- population_child
+        
+    } ## acaba o for 
+    
+    return(population_father[1,1:length(coefs)])
+}
+
+
 # ##' Function for evaluation of all parameterizations
 # ##' @param data_ A data frame with all atmospherics variables and simulated series
 # ##' @param lon Longitude from local analisys

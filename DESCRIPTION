@@ -15,7 +15,8 @@ Imports:
     plyr,
     readr,
     openair,
-    zoo
+    zoo,
+    parallel
 RoxygenNote: 5.0.1
 Suggests: knitr,
     rmarkdown

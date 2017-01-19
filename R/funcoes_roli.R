@@ -5,8 +5,7 @@
 
 ##
 #/////////////////////////////////////////////////////////////////////////////////////////
-                            #    PARAMETRIZAÇÔES DE 
-                            #    COBERTURA DE NUVENS
+#    PARAMETRIZAÇÔES DE  COBERTURA DE NUVENS
 
 ##' Amount of cloud estimatives functions.
 ##' @param data a data frame with all atmospherics variables
@@ -112,17 +111,34 @@ CFG <- function(data){
 ##' @param func Function for amount of cloud 
 ##' @param coef1,coef2,coef3,coef4,coef5 Scheme coeficients 
 ##' @param adjust FALSE, TRUE if nonlinear least square adjusting wanted
+##' @param method "non-linear" (default) for Non linear Least Square adjust, 
+##' "montecarlo" for MonteCarlo optimization. Later be usseful when a NLS can't 
+##' adjust observed data allowing optimization.
+##' @param nsample population number evaluated in each iteration 
+##' (only when method = "montecarlo").
+##' @param max_iter maximun number of iterations (only when method = "montecarlo").
+##' @param stats statistical function to be minimized (only when method = "montecarlo"),
+##' NOTE: the best result should be 0.0 (ex., if stats = r (correlation), then transform to 
+##' rMod = 1.0 - r, so the best result is when r== 1.0, so rMod == 0.0)
 ##' @return a vector with emissivity estimatives
 ##' @import stats
 ##' @import utils
 ##' @export
 ##' @references Angstrom, A. (1915) A study of the radiation of the atmosphere.
 ##' Smithsonian Miscellaneous Collections 65(3)
-EAN <- function(data,func = "-", 
-                coef1 = 0.83, coef2 = 0.18, coef3 = 0.067, 
-                coef4 = 0.22, coef5 = 1.0,
-                adjust = FALSE){ 
-        
+EAN <- function(data,
+                func = "-", 
+                coef1 = 0.83, 
+                coef2 = 0.18, 
+                coef3 = 0.067, 
+                coef4 = 0.22,
+                coef5 = 1.0,
+                adjust = FALSE,
+                method = "non-linear",
+                nsample = 100,
+                max_iter = 10,
+                stats = "rmse"){ 
+    
         sigma <- 5.67051*10^(-8)
 
     if(func != "-"){
@@ -134,7 +150,7 @@ EAN <- function(data,func = "-",
         start.coefs <- list(coef1 = coef1,coef2=coef2,coef3=coef3)
     }
         
-    if(adjust){
+    if(adjust & method == "non-linear"){
 
     tmp.nls <-
         nls( Li/(sigma*Ta^4) ~ 
@@ -143,16 +159,40 @@ EAN <- function(data,func = "-",
              start =  start.coefs)
         
         new.coefs <- coef(tmp.nls) 
-        new.emiss <- do.call(EAN,as.list(modifyList(formals(EAN),
-                                            c(list(data = data, func = func),
-                                              as.list(new.coefs)))))
+        new.emiss <-
+            with(data = data, 
+                 run_fun(E_fun = EAN,
+                         data = data, 
+                         func = func,
+                         new.coefs = new.coefs) )
 
         return(list(emiss = new.emiss, coefs = new.coefs))
         
-    } else {
+    } else if( adjust & method == "montecarlo" ){
+        
+        new.coefs <- 
+            MonteCarlo(data = data,
+                       E_fun = EAN,
+                       func = func,
+                       coefs = start.coefs %>% unlist(),
+                       nsample = nsample,
+                       max_iter = max_iter,
+                       stats = stats)
+        
+        new.emiss <-
+            with(data = data, 
+                 run_fun(E_fun = EAN,
+                         data = data, 
+                         func = func,
+                         new.coefs = new.coefs) )
+        
+        return(list(emiss = new.emiss, coefs = new.coefs)) 
+        
+    }else{
         
         return( with(data,
-                     maxlim( (coef1 - coef2*(10^(-coef3*es)))*(1+ coef4 * cp^coef5) )) )
+                     maxlim( (coef1 - coef2*(10^(-coef3*es)))*(1+ coef4 * cp^coef5) ))
+        )
         
     }
         

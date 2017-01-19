@@ -279,8 +279,26 @@ table_stats <- function(data_, statistic = "rmse", round = 2){
 }
 
 
+run_fun <- function(E_fun,data, func,new.coefs){
+    do.call(E_fun,
+            as.list(modifyList(formals(E_fun), 
+                               c(list(data = data, func = func), 
+                                 as.list(new.coefs)))))
+}
 
 
+
+run_stats <- function(stats,obs,sim){
+    do.call(stats,
+            as.list(modifyList(formals(stats), 
+                               c(list(sim = sim,
+                                      obs = obs, 
+                                      na.rm = TRUE)
+                                 )
+                               )
+                    )
+            )
+}
 # ##' Function for evaluation of all parameterizations
 # ##' @param data_ A data frame with all atmospherics variables and simulated series
 # ##' @param lon Longitude from local analisys

@@ -85,3 +85,28 @@ fCalcSunPosition <- function (DoY.V.n, Hour.V.n, Lat_deg.n, Long_deg.n, TimeZone
                           SolElev = SolElev_rad.V.n, SolAzim = SolAzim_rad.V.n)
     SolPosition.L
 }
+
+LHSU <- function(xmin,xmax,nsample) {
+    # Latin Hypercube sampling
+    
+    # Define the number of coeficents
+    nvar <- length(xmin)
+    # Initialize array ran with random numbers
+    ran <- matrix(rnorm(nsample*nvar),nsample,nvar)
+    # Initialize array s with zeros
+    x <- matrix(0,nsample,nvar)
+    # Now fill s
+    for (j in 1:nvar) {
+        # Random permutation
+        idx <- sample(nsample)
+        #
+        P =(matrix(idx,length(idx),1)-ran[,j])/nsample
+        #
+        x[,j] = xmin[j] + P*(xmax[j]-xmin[j])
+    }
+    return(x)
+}
+
+
+
+

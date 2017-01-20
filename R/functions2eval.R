@@ -207,12 +207,21 @@ CalcStats <- function(data_li,
     
 }
 
-#' Function to get all scheme calculation, adjust = TRUE make a adjusting NLS.
-#' @param data Data frame with atmospheric variables
-#' @param Ovrcst_sch Schemes for cloud cover index
-#' @param Emiss_sch Schemes of atmosphere emissivity 
-#' @param adjust FALSE, TRUE for NLS adjusting 
-#' @param log_file path to a log file
+##' Function to get all scheme calculation, adjust = TRUE make a adjusting NLS.
+##' @param data Data frame with atmospheric variables
+##' @param Ovrcst_sch Schemes for cloud cover index
+##' @param Emiss_sch Schemes of atmosphere emissivity
+##' @param adjust FALSE, TRUE for NLS adjusting
+##' @param log_file path to a log file
+##' @param method "non-linear" (default) for Non linear Least Square adjust,
+##' "montecarlo" for MonteCarlo optimization. Later be usseful when a NLS can't 
+##' adjust observed data allowing optimization.
+##' @param nsample population number evaluated in each iteration 
+##' (only when method = "montecarlo").
+##' @param max_iter maximun number of iterations (only when method = "montecarlo").
+##' @param stats statistical function to be minimized (only when method = "montecarlo"),
+##' NOTE: the best result should be 0.0 (ex., if stats = r (correlation), then transform to 
+##' rMod = 1.0 - r, so the best result is when r== 1.0, so rMod == 0.0)
 #' @return Data frame with Li observed and all combintions of schemes for calculations of Li
 #' @author Roilan Hernandez
 #' @export
@@ -221,8 +230,12 @@ CalcStats <- function(data_li,
 get.AllSchems <- function(data,
                           Ovrcst_sch = c("CQB","CKC","CCB","CKZ","CWU","CJG", "CLM", "CFG"),
                           Emiss_sch  = c("EAN","EBR","EDO","EGR","EIJ","EID","EKZ","ENM",
-                                         "EPR","EST","ESW","EAI"),
-                          adjust = FALSE, 
+                                         "EPR","EST","ESW"),
+                          adjust = FALSE,
+                          method = c("non-linear","montecarlo"),
+                          nsample = 1000,
+                          max_iter = 10,
+                          stats = "rmse",
                           log_file = NULL){
     
     roli_comb <- rbind(expand.grid(Emiss_sch,"-"), expand.grid(Emiss_sch, Ovrcst_sch) )
@@ -242,12 +255,16 @@ get.AllSchems <- function(data,
     
     Li.sims <- 
         lapply(1:nrow(roli_comb), function(i){
-            
+            # i = 1
             tmp.Li <- 
             get.Li(data_ = data,
                    E_fun = roli_comb[i,1] %>% as.character,
                    C_fun = roli_comb[i,2] %>% as.character,
                    adjust = adjust,
+                   method = method,
+                   nsample = nsample,
+                   max_iter = max_iter,
+                   stats = stats,
                    log_file = log_file)
             
             return(tmp.Li)
@@ -308,6 +325,7 @@ split_stats <- function(data_ ,
 #' @param round Digits for round
 #' @importFrom tidyr gather separate spread
 #' @importFrom dplyr rename mutate %>% group_by_ summarise ungroup select
+#' @import hydroGOF
 #' @export
 table_stats <- function(data_, statistic = "rmse", round = 2){
     statistic <- statistic[1]
@@ -325,7 +343,12 @@ table_stats <- function(data_, statistic = "rmse", round = 2){
     
 }
 
-
+##' Calculate emissivity
+##' @param E_fun qkbf
+##' @param data ADKVN
+##' @param func SLKDJhvb
+##' @param new.coefs qeohv
+##' @export
 run_fun <- function(E_fun,data, func,new.coefs){
     do.call(E_fun,
             as.list(modifyList(formals(E_fun), 
@@ -334,7 +357,12 @@ run_fun <- function(E_fun,data, func,new.coefs){
 }
 
 
-
+##' Calculate statistics
+##' @param stats qkbf
+##' @param obs ADKVN
+##' @param sim SLKDJhvb
+##' @import hydroGOF
+##' @export
 run_stats <- function(stats,obs,sim){
     do.call(stats,
             as.list(modifyList(formals(stats), 
@@ -374,9 +402,8 @@ run_stats <- function(stats,obs,sim){
 ##' @importFrom  dplyr bind_rows arrange filter_
 ##' @import stats
 ##' @import utils
-##'  
+##' @export
 ##' @return Vector with best combination of parameters
-
 MonteCarlo <- function(data,
                        E_fun,
                        func,
@@ -384,6 +411,8 @@ MonteCarlo <- function(data,
                        nsample ,
                        max_iter ,
                        stats){
+    
+    sigmaSB <- 5.67051 * 10^(-8)
     
     params <- 
         LHSU(xmax = coefs + coefs*5,
@@ -396,12 +425,14 @@ MonteCarlo <- function(data,
     
     population_father <- NULL
     
+        cat(" <")
+    
     for(iter in 1:max_iter){
-        
+        cat("-")
         population_child <- 
             mclapply(1:length(params[[1]]),                                              ### **
                      function(i){
-                         # i = 1
+                         # i = 100
                          emiss <- with(data = data, 
                                        run_fun(E_fun = E_fun,
                                                data = data, 
@@ -409,7 +440,8 @@ MonteCarlo <- function(data,
                                                new.coefs = params[i,]) )
                          
                          stats_emiss <- run_stats(stats = stats,
-                                                  sim = with(data, emiss * (sigma*Ta^4)) %>% as.numeric(),
+                                                  sim = with(data, emiss * (sigmaSB*Ta^4)) %>% 
+                                                      as.numeric(),
                                                   obs = with(data, Li) %>% as.numeric())
                          
                          return(cbind(params[i,], stats_var = stats_emiss) )
@@ -417,22 +449,23 @@ MonteCarlo <- function(data,
                      },
                      mc.cores = max( detectCores()-1,1),                       ### **
                      mc.preschedule = FALSE) %>% 
-            bind_rows()                                      ### **
+            bind_rows()  ### **
         
         if(!is.null(population_father)){ 
             
             population_child <- 
                 bind_rows(population_child,                                     ### **
                           population_father) %>%
-                mutate(q.5 = quantile(stats_var , probs = 0.5, na.rm = TRUE))
-                filter_("stats_var" < q.5) %>%               ### **       ### **
-                arrange(stats_var)                                     ### **
+                mutate(q.5 = quantile(stats_var , probs = 0.5, na.rm = TRUE)) %>%
+                subset(stats_var < q.5) %>%               ### **       ### **
+                arrange(stats_var) %>%
+                select(-q.5)                                   ### **
             
         }
         
         params <- 
-            LHSU(xmax = apply(population_child, 2, max)[1:length(coefs)],                                     ### **
-                 xmin = apply(population_child, 2, min)[1:length(coefs)],                                     ### **
+            LHSU(xmax = apply(population_child, 2, max, na.rm = TRUE)[1:length(coefs)],                                     ### **
+                 xmin = apply(population_child, 2, min, na.rm = TRUE)[1:length(coefs)],                                     ### **
                  nsample = nsample)  %>%
             as.data.frame() %>%
             setNames(names(coefs))                                     ### **
@@ -440,7 +473,7 @@ MonteCarlo <- function(data,
         population_father <- population_child
         
     } ## acaba o for 
-    
+    cat(">\n")
     return(population_father[1,1:length(coefs)])
 }
 

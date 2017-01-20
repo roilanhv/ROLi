@@ -86,9 +86,17 @@ fCalcSunPosition <- function (DoY.V.n, Hour.V.n, Lat_deg.n, Long_deg.n, TimeZone
     SolPosition.L
 }
 
+
+
+##' Create a LHS sequence from a interval for each parameter
+##' @param xmin qkbf
+##' @param xmax ADKVN
+##' @param nsample SLKDJhvb
+##' @export
 LHSU <- function(xmin,xmax,nsample) {
     # Latin Hypercube sampling
-    
+    xmin <- c(t(xmin))
+    xmax <- c(t(xmax))
     # Define the number of coeficents
     nvar <- length(xmin)
     # Initialize array ran with random numbers

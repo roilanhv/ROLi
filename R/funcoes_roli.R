@@ -174,7 +174,7 @@ EAN <- function(data,
             MonteCarlo(data = data,
                        E_fun = EAN,
                        func = func,
-                       coefs = start.coefs %>% unlist(),
+                       coefs = unlist(start.coefs),
                        nsample = nsample,
                        max_iter = max_iter,
                        stats = stats)
@@ -204,16 +204,32 @@ EAN <- function(data,
 ##' @param func a function for amount of cloud 
 ##' @param coef1,coef2,coef3,coef4 Scheme coeficients 
 ##' @param adjust FALSE, TRUE if nonlinear least square adjusting wanted
+##' @param method "non-linear" (default) for Non linear Least Square adjust, 
+##' "montecarlo" for MonteCarlo optimization. Later be usseful when a NLS can't 
+##' adjust observed data allowing optimization.
+##' @param nsample population number evaluated in each iteration 
+##' (only when method = "montecarlo").
+##' @param max_iter maximun number of iterations (only when method = "montecarlo").
+##' @param stats statistical function to be minimized (only when method = "montecarlo"),
+##' NOTE: the best result should be 0.0 (ex., if stats = r (correlation), then transform to 
+##' rMod = 1.0 - r, so the best result is when r== 1.0, so rMod == 0.0)
 ##' @return a vector with emissivity estimatives
 ##' @import stats
 ##' @import utils
 ##' @export
 ##' @references Brunt D (1932) Notes on radiation in the atmosphere I. Q J Roy
 ##' Meteor Soc 58:389–420
-EBR <- function(data,func = "-",
-                coef1 = 0.51, coef2 = 0.066,
-                coef3 = 0.22, coef4 = 1.0,
-                adjust = FALSE){
+EBR <- function(data,
+                func = "-",
+                coef1 = 0.51, 
+                coef2 = 0.066,
+                coef3 = 0.22,
+                coef4 = 1.0,
+                adjust = FALSE,
+                method = "non-linear",
+                nsample = 100,
+                max_iter = 10,
+                stats = "rmse"){
    
     sigma <- 5.67051*10^(-8)
     
@@ -226,7 +242,7 @@ EBR <- function(data,func = "-",
         start.coefs <- list(coef1 = coef1,coef2=coef2)
     }
     
-    if(adjust){
+    if(adjust & method == "non-linear"){
         
         tmp.nls <- nls( Li/(sigma*Ta^4) ~ 
                             maxlim( (coef1 + coef2*sqrt(es))*(1+coef3*cp^coef4)  ),
@@ -234,12 +250,34 @@ EBR <- function(data,func = "-",
                         start = start.coefs )
         
         new.coefs <- coef(tmp.nls) 
-        new.emiss <- do.call(EBR,as.list(modifyList(formals(EBR),
-                                                    c(list(data = data, func = func),
-                                                      as.list(new.coefs)))))
+        new.emiss <-
+            with(data = data, 
+                 run_fun(E_fun = EBR,
+                         data = data, 
+                         func = func,
+                         new.coefs = new.coefs) )
         
         return(list(emiss = new.emiss, coefs = new.coefs))
-
+        
+    } else if( adjust & method == "montecarlo" ){
+        
+        new.coefs <- 
+            MonteCarlo(data = data,
+                       E_fun = EBR,   ####
+                       func = func,
+                       coefs = unlist(start.coefs),
+                       nsample = nsample,
+                       max_iter = max_iter,
+                       stats = stats)
+        
+        new.emiss <-
+            with(data = data, 
+                 run_fun(E_fun = EBR, ####
+                         data = data, 
+                         func = func,
+                         new.coefs = new.coefs) )
+        return(list(emiss = new.emiss, coefs = new.coefs)) 
+        
     } else {
     
         return(with(data,maxlim( (coef1 + coef2*sqrt(es))*(1+coef3*cp^coef4) )) )
@@ -254,16 +292,32 @@ EBR <- function(data,func = "-",
 ##' @param func a function for amount of cloud
 ##' @param coef1,coef2,coef3,coef4 Scheme coeficients  
 ##' @param adjust FALSE, TRUE if nonlinear least square adjusting wanted
+##' @param method "non-linear" (default) for Non linear Least Square adjust, 
+##' "montecarlo" for MonteCarlo optimization. Later be usseful when a NLS can't 
+##' adjust observed data allowing optimization.
+##' @param nsample population number evaluated in each iteration 
+##' (only when method = "montecarlo").
+##' @param max_iter maximun number of iterations (only when method = "montecarlo").
+##' @param stats statistical function to be minimized (only when method = "montecarlo"),
+##' NOTE: the best result should be 0.0 (ex., if stats = r (correlation), then transform to 
+##' rMod = 1.0 - r, so the best result is when r== 1.0, so rMod == 0.0)
 ##' @return a vector with emissivity estimatives
 ##' @import stats
 ##' @import utils
 ##' @export
 ##' @references Brutsaert W (1975) On a derivable formula for long-wave radiation
 ##' from clear skies. Water Resour Res 11:742–744
-EBT <- function(data,func = "-",
-                coef1 = 1.24, coef2 = 1/7,
-                coef3 = 0.22, coef4 = 1.0,
-                adjust = FALSE){ 
+EBT <- function(data,
+                func = "-",
+                coef1 = 1.24, 
+                coef2 = 1/7,
+                coef3 = 0.22,
+                coef4 = 1.0,
+                adjust = FALSE,
+                method = "non-linear",
+                nsample = 100,
+                max_iter = 10,
+                stats = "rmse"){ 
     
     sigma <- 5.67051*10^(-8)
     
@@ -276,7 +330,7 @@ EBT <- function(data,func = "-",
         start.coefs <- list(coef1 = coef1,coef2=coef2)
     }
     
-    if(adjust){
+    if(adjust & method == "non-linear"){
         
         tmp.nls <- nls( Li/(sigma*Ta^4) ~ 
                             maxlim( coef1*(es/Ta)^(coef2)*(1.0+ coef3*cp^coef4) ) ,
@@ -284,11 +338,33 @@ EBT <- function(data,func = "-",
                         start = start.coefs )
         
         new.coefs <- coef(tmp.nls) 
-        new.emiss <- do.call(EBT,as.list(modifyList(formals(EBT),
-                                                    c(list(data = data, func = func),
-                                                      as.list(new.coefs)))))
+        new.emiss <-
+            with(data = data, 
+                 run_fun(E_fun = EBT, #####
+                         data = data, 
+                         func = func,
+                         new.coefs = new.coefs) )
         
         return(list(emiss = new.emiss, coefs = new.coefs))
+    
+    } else if( adjust & method == "montecarlo" ){
+        
+        new.coefs <- 
+            MonteCarlo(data = data,
+                       E_fun = EBT,   ####
+                       func = func,
+                       coefs = unlist(start.coefs),
+                       nsample = nsample,
+                       max_iter = max_iter,
+                       stats = stats)
+        
+        new.emiss <-
+            with(data = data, 
+                 run_fun(E_fun = EBT, ####
+                         data = data, 
+                         func = func,
+                         new.coefs = new.coefs) )    
+        return(list(emiss = new.emiss, coefs = new.coefs)) 
         
     } else {
         return(with(data,maxlim(coef1*(es/Ta)^(coef2)*(1.0+ coef3*cp^coef4) ))    )
@@ -303,6 +379,15 @@ EBT <- function(data,func = "-",
 ##' @param func a function for amount of cloud 
 ##' @param coef1,coef2,coef3,coef4,coef5 Scheme coeficients 
 ##' @param adjust FALSE, TRUE if nonlinear least square adjusting wanted
+##' ##' @param method "non-linear" (default) for Non linear Least Square adjust, 
+##' "montecarlo" for MonteCarlo optimization. Later be usseful when a NLS can't 
+##' adjust observed data allowing optimization.
+##' @param nsample population number evaluated in each iteration 
+##' (only when method = "montecarlo").
+##' @param max_iter maximun number of iterations (only when method = "montecarlo").
+##' @param stats statistical function to be minimized (only when method = "montecarlo"),
+##' NOTE: the best result should be 0.0 (ex., if stats = r (correlation), then transform to 
+##' rMod = 1.0 - r, so the best result is when r== 1.0, so rMod == 0.0)
 ##' @return a vector with emissivity estimatives
 ##' @import stats
 ##' @import utils
@@ -310,10 +395,18 @@ EBT <- function(data,func = "-",
 ##' @references Dilley , A. C. (1998) Estimating downward clear-sky long-wave 
 ##' irradiance at the surface from screen temperature and precpitable water. 
 ##' Q. J. R. Meteorol. Soc., 96, 313-319.
-EDO <- function(data,func = "-",
-                coef1 = 59.38, coef2 = 113.7, coef3 = 96.96,
-                coef4 = 0.22, coef5 = 1.0, 
-                adjust = FALSE){ 
+EDO <- function(data,
+                func = "-",
+                coef1 = 59.38, 
+                coef2 = 113.7, 
+                coef3 = 96.96,
+                coef4 = 0.22, 
+                coef5 = 1.0, 
+                adjust = FALSE,
+                method = "non-linear",
+                nsample = 100,
+                max_iter = 10,
+                stats = "rmse"){ 
     
     sigma <- 5.67051*10^(-8)
     
@@ -326,7 +419,7 @@ EDO <- function(data,func = "-",
         start.coefs <- list(coef1 = coef1, coef2 = coef2, coef3 = coef3)
     }
     
-    if(adjust){
+    if(adjust & method == "non-linear"){
         
         tmp.nls <- nls( Li ~ ((1.0+coef4*cp^coef5)*(  coef1+  
                               coef2*(Ta/273.15)^6 + coef3 * sqrt((465/25)*(es/Ta))))  ,
@@ -334,11 +427,35 @@ EDO <- function(data,func = "-",
                         start = start.coefs)
         
         new.coefs <- coef(tmp.nls) 
-        new.emiss <- do.call(EDO,as.list(modifyList(formals(EDO),
-                                                    c(list(data = data, func = func),
-                                                      as.list(new.coefs)))))
+        
+        new.emiss <-
+            with(data = data, 
+                 run_fun(E_fun = EDO, #####
+                         data = data, 
+                         func = func,
+                         new.coefs = new.coefs) )
         
         return(list(emiss = new.emiss, coefs = new.coefs))
+        
+    } else if( adjust & method == "montecarlo" ){
+        
+        new.coefs <- 
+            MonteCarlo(data = data,
+                       E_fun = EDO,   ####
+                       func = func,
+                       coefs = unlist(start.coefs),
+                       nsample = nsample,
+                       max_iter = max_iter,
+                       stats = stats)
+        
+        new.emiss <-
+            with(data = data, 
+                 run_fun(E_fun = EDO, ####
+                         data = data, 
+                         func = func,
+                         new.coefs = new.coefs) )
+        
+        return(list(emiss = new.emiss, coefs = new.coefs)) 
         
     } else {
         
@@ -357,6 +474,15 @@ EDO <- function(data,func = "-",
 ##' @param func a function for amount of cloud 
 ##' @param coef1,coef2,coef3,coef4 Scheme coeficients 
 ##' @param adjust FALSE, TRUE if nonlinear least square adjusting wanted
+##' @param method "non-linear" (default) for Non linear Least Square adjust, 
+##' "montecarlo" for MonteCarlo optimization. Later be usseful when a NLS can't 
+##' adjust observed data allowing optimization.
+##' @param nsample population number evaluated in each iteration 
+##' (only when method = "montecarlo").
+##' @param max_iter maximun number of iterations (only when method = "montecarlo").
+##' @param stats statistical function to be minimized (only when method = "montecarlo"),
+##' NOTE: the best result should be 0.0 (ex., if stats = r (correlation), then transform to 
+##' rMod = 1.0 - r, so the best result is when r== 1.0, so rMod == 0.0)
 ##' @return a vector with emissivity estimatives
 ##' @import stats
 ##' @import utils
@@ -364,10 +490,17 @@ EDO <- function(data,func = "-",
 ##' @references Gabathuler M, Marty CA, Hanselmann KW (2001) Parameterization
 ##' of incoming longwave radiation in high-mountain environments.
 ##' Phys Geogr 22,99–114
-EGB <- function(data,func = "-",
-                coef1 = 0.84, coef2 = 21.,
-                coef3 = 0.22, coef4 = 1.,
-                adjust = FALSE){
+EGB <- function(data,
+                func = "-",
+                coef1 = 0.84, 
+                coef2 = 21.,
+                coef3 = 0.22, 
+                coef4 = 1.,
+                adjust = FALSE,
+                method = "non-linear",
+                nsample = 100,
+                max_iter = 10,
+                stats = "rmse"){ 
     
     sigma <- 5.67051*10^(-8)
     
@@ -380,7 +513,7 @@ EGB <- function(data,func = "-",
         start.coefs <- list(coef1 = coef1, coef2 = coef2)
     }
     
-    if(adjust){
+    if(adjust & method == "non-linear"){
         
         tmp.nls <- nls( Li/(sigma*Ta^4) ~ 
                             maxlim( ((coef1*(rh-68))/(sigma*Ta^4) + 
@@ -389,11 +522,34 @@ EGB <- function(data,func = "-",
                         start = start.coefs )
         
         new.coefs <- coef(tmp.nls) 
-        new.emiss <- do.call(EGB,as.list(modifyList(formals(EGB),
-                                                    c(list(data = data, func = func),
-                                                      as.list(new.coefs)))))
+        new.emiss <-
+            with(data = data, 
+                 run_fun(E_fun = EGB, #####
+                         data = data, 
+                         func = func,
+                         new.coefs = new.coefs) )
         
         return(list(emiss = new.emiss, coefs = new.coefs))
+        
+    } else if( adjust & method == "montecarlo" ){
+        
+        new.coefs <- 
+            MonteCarlo(data = data,
+                       E_fun = EGB,   ####
+                       func = func,
+                       coefs = unlist(start.coefs),
+                       nsample = nsample,
+                       max_iter = max_iter,
+                       stats = stats)
+        
+        new.emiss <-
+            with(data = data, 
+                 run_fun(E_fun = EGB, ####
+                         data = data, 
+                         func = func,
+                         new.coefs = new.coefs) )
+        
+        return(list(emiss = new.emiss, coefs = new.coefs))     
         
     } else {
         
@@ -410,6 +566,15 @@ EGB <- function(data,func = "-",
 ##' @param func a function for amount of cloud
 ##' @param coef1,coef2,coef3,coef4,coef5 Scheme coeficients  
 ##' @param adjust FALSE, TRUE if nonlinear least square adjusting wanted
+##' @param method "non-linear" (default) for Non linear Least Square adjust, 
+##' "montecarlo" for MonteCarlo optimization. Later be usseful when a NLS can't 
+##' adjust observed data allowing optimization.
+##' @param nsample population number evaluated in each iteration 
+##' (only when method = "montecarlo").
+##' @param max_iter maximun number of iterations (only when method = "montecarlo").
+##' @param stats statistical function to be minimized (only when method = "montecarlo"),
+##' NOTE: the best result should be 0.0 (ex., if stats = r (correlation), then transform to 
+##' rMod = 1.0 - r, so the best result is when r== 1.0, so rMod == 0.0)
 ##' @return a vector with emissivity estimatives
 ##' @import stats
 ##' @import utils
@@ -417,9 +582,16 @@ EGB <- function(data,func = "-",
 ##' @references Garratt, J.A. (1992), Extreme maximun land surface temperatures,
 ##' J. Appl. Meteorol., 31, 1096-1105.
 EGR <- function(data,func = "-",
-                coef1 = 0.79, coef2 = 0.17, coef3 = 0.096,
-                coef4 = 0.22, coef5 = 1.0,
-                adjust = FALSE){ 
+                coef1 = 0.79,
+                coef2 = 0.17,
+                coef3 = 0.096,
+                coef4 = 0.22,
+                coef5 = 1.0,
+                adjust = FALSE,
+                method = "non-linear",
+                nsample = 100,
+                max_iter = 10,
+                stats = "rmse"){ 
     
     sigma <- 5.67051*10^(-8)
     
@@ -432,7 +604,7 @@ EGR <- function(data,func = "-",
         start.coefs <- list(coef1 = coef1, coef2 = coef2, coef3 = coef3) 
     }
     
-    if(adjust){
+    if(adjust & method == "non-linear"){
         
         tmp.nls <- nls( Li/(sigma*Ta^4) ~ 
                             maxlim( (coef1 - coef2*exp(-coef3*es) )*(1.0+ coef4*cp^coef5) ),
@@ -440,12 +612,34 @@ EGR <- function(data,func = "-",
                         start = start.coefs)
         
         new.coefs <- coef(tmp.nls) 
-        new.emiss <- do.call(EGR,as.list(modifyList(formals(EGR),
-                                                    c(list(data = data, func = func),
-                                                      as.list(new.coefs)))))
+        new.emiss <-
+            with(data = data, 
+                 run_fun(E_fun = EGR, #####
+                         data = data, 
+                         func = func,
+                         new.coefs = new.coefs) )
         
         return(list(emiss = new.emiss, coefs = new.coefs))
+    
+    } else if( adjust & method == "montecarlo" ){
         
+        new.coefs <- 
+            MonteCarlo(data = data,
+                       E_fun = EGR,   ####
+                       func = func,
+                       coefs = unlist(start.coefs),
+                       nsample = nsample,
+                       max_iter = max_iter,
+                       stats = stats)
+        
+        new.emiss <-
+            with(data = data, 
+                 run_fun(E_fun = EGR, ####
+                         data = data, 
+                         func = func,
+                         new.coefs = new.coefs) )
+        
+        return(list(emiss = new.emiss, coefs = new.coefs))     
     } else {
         return(with(data,maxlim((coef1 - coef2*exp(-coef3*es) )*(1.0+ coef3*cp^coef4) )))
     }
@@ -458,6 +652,15 @@ EGR <- function(data,func = "-",
 ##' @param func a function for amount of cloud 
 ##' @param coef1,coef2,coef3,coef4 Scheme coeficients 
 ##' @param adjust FALSE, TRUE if nonlinear least square adjusting wanted
+##' @param method "non-linear" (default) for Non linear Least Square adjust, 
+##' "montecarlo" for MonteCarlo optimization. Later be usseful when a NLS can't 
+##' adjust observed data allowing optimization.
+##' @param nsample population number evaluated in each iteration 
+##' (only when method = "montecarlo").
+##' @param max_iter maximun number of iterations (only when method = "montecarlo").
+##' @param stats statistical function to be minimized (only when method = "montecarlo"),
+##' NOTE: the best result should be 0.0 (ex., if stats = r (correlation), then transform to 
+##' rMod = 1.0 - r, so the best result is when r== 1.0, so rMod == 0.0)
 ##' @return a vector with emissivity estimatives
 ##' @import stats
 ##' @import utils
@@ -465,9 +668,15 @@ EGR <- function(data,func = "-",
 ##' @references Idso SB, Jackson RD (1969) Thermal radiation from the atmosphere.
 ##' J Geophys Res 74:5397–5403
 EIJ <- function(data,func = "-", 
-                coef1 = 0.261, coef2 = 0.000777,
-                coef3 = 0.22, coef4 = 1.0,
-                adjust = FALSE){
+                coef1 = 0.261, 
+                coef2 = 0.000777,
+                coef3 = 0.22, 
+                coef4 = 1.0,
+                adjust = FALSE,
+                method = "non-linear",
+                nsample = 100,
+                max_iter = 10,
+                stats = "rmse"){
     
     sigma <- 5.67051*10^(-8)
     
@@ -480,7 +689,7 @@ EIJ <- function(data,func = "-",
         start.coefs <- list(coef1 = coef1, coef2 = coef2)
     }
     
-    if(adjust){
+    if(adjust & method == "non-linear"){
         
         tmp.nls <- nls( Li/(sigma*Ta^4) ~ 
                         maxlim((1.-coef1*exp(-coef2*(273.15-Ta)^2))*(1.+coef3*cp^coef4)),
@@ -488,11 +697,34 @@ EIJ <- function(data,func = "-",
                         start =  start.coefs)
         
         new.coefs <- coef(tmp.nls) 
-        new.emiss <- do.call(EIJ,as.list(modifyList(formals(EIJ),
-                                                    c(list(data = data, func = func),
-                                                      as.list(new.coefs)))))
+        new.emiss <-
+            with(data = data, 
+                 run_fun(E_fun = EIJ, #####
+                         data = data, 
+                         func = func,
+                         new.coefs = new.coefs) )
         
         return(list(emiss = new.emiss, coefs = new.coefs))
+        
+    } else if( adjust & method == "montecarlo" ){
+        
+        new.coefs <- 
+            MonteCarlo(data = data,
+                       E_fun = EIJ,   ####
+                       func = func,
+                       coefs = unlist(start.coefs),
+                       nsample = nsample,
+                       max_iter = max_iter,
+                       stats = stats)
+        
+        new.emiss <-
+            with(data = data, 
+                 run_fun(E_fun = EIJ, ####
+                         data = data, 
+                         func = func,
+                         new.coefs = new.coefs) )
+        
+        return(list(emiss = new.emiss, coefs = new.coefs)) 
         
     } else {
         return(with(data,maxlim((1.-coef1*exp(coef2*(273.15-Ta)^2))*(1.+coef3*cp^coef4))) )
@@ -514,9 +746,15 @@ EIJ <- function(data,func = "-",
 ##'  and 10.5- to 12.5-um thermal radiation from cloudless skies.
 ##'  Water Resour Res 17:295–304
 EID <- function(data,func = "-",
-                coef1 = 0.7, coef2 = 0.0000595,
-                coef3 = 0.22, coef4 = 1.0,
-                adjust = FALSE){ 
+                coef1 = 0.7,
+                coef2 = 0.0000595,
+                coef3 = 0.22, 
+                coef4 = 1.0,
+                adjust = FALSE,
+                method = "non-linear",
+                nsample = 100,
+                max_iter = 10,
+                stats = "rmse"){ 
     
     sigma <- 5.67051*10^(-8)
     
@@ -529,7 +767,7 @@ EID <- function(data,func = "-",
         start.coefs <- list(coef1 = coef1, coef2 = coef2)
     }
     
-    if(adjust){
+    if(adjust & method == "non-linear"){
         
         tmp.nls <- nls( Li/(sigma*Ta^4) ~ 
                             maxlim( (coef1 + coef2*es*exp(1500/Ta))*(1.+coef3*cp^coef4) )  ,
@@ -537,11 +775,33 @@ EID <- function(data,func = "-",
                         start = start.coefs )
         
         new.coefs <- coef(tmp.nls) 
-        new.emiss <- do.call(EID,as.list(modifyList(formals(EID),
-                                                    c(list(data = data, func = func),
-                                                      as.list(new.coefs)))))
-        
+        new.emiss <-
+            with(data = data, 
+                 run_fun(E_fun = EID, #####
+                         data = data, 
+                         func = func,
+                         new.coefs = new.coefs) )
         return(list(emiss = new.emiss, coefs = new.coefs))
+        
+    } else if( adjust & method == "montecarlo" ){
+        
+        new.coefs <- 
+            MonteCarlo(data = data,
+                       E_fun = EID,   ####
+                       func = func,
+                       coefs = unlist(start.coefs),
+                       nsample = nsample,
+                       max_iter = max_iter,
+                       stats = stats)
+        
+        new.emiss <-
+            with(data = data, 
+                 run_fun(E_fun = EID, ####
+                         data = data, 
+                         func = func,
+                         new.coefs = new.coefs) )
+        
+        return(list(emiss = new.emiss, coefs = new.coefs)) 
         
     } else {
         
@@ -558,6 +818,15 @@ EID <- function(data,func = "-",
 ##' @param func a function for amount of cloud 
 ##' @param coef1,coef2,coef3,coef4,coef5 Scheme coeficients 
 ##' @param adjust FALSE, TRUE if nonlinear least square adjusting wanted
+##' @param method "non-linear" (default) for Non linear Least Square adjust, 
+##' "montecarlo" for MonteCarlo optimization. Later be usseful when a NLS can't 
+##' adjust observed data allowing optimization.
+##' @param nsample population number evaluated in each iteration 
+##' (only when method = "montecarlo").
+##' @param max_iter maximun number of iterations (only when method = "montecarlo").
+##' @param stats statistical function to be minimized (only when method = "montecarlo"),
+##' NOTE: the best result should be 0.0 (ex., if stats = r (correlation), then transform to 
+##' rMod = 1.0 - r, so the best result is when r== 1.0, so rMod == 0.0)
 ##' @return a vector with emissivity estimatives
 ##' @import stats
 ##' @import utils
@@ -567,9 +836,16 @@ EID <- function(data,func = "-",
 ##' longwave incoming radiation for the Greenland Ice Sheet. Glob
 ##' Planet Chang 9:143–164
 EKZ <- function(data,func = "-",
-                coef1 = 0.23, coef2 = 0.484, coef3 = 1/8,
-                coef4 = 0.22, coef5 = 1.,
-                adjust = FALSE) {
+                coef1 = 0.23, 
+                coef2 = 0.484,
+                coef3 = 1/8,
+                coef4 = 0.22,
+                coef5 = 1.,
+                adjust = FALSE,
+                method = "non-linear",
+                nsample = 100,
+                max_iter = 10,
+                stats = "rmse") {
     
     sigma <- 5.67051*10^(-8)
     
@@ -584,7 +860,7 @@ EKZ <- function(data,func = "-",
     }
     
     
-    if(adjust){
+    if(adjust & method == "non-linear"){
         
         tmp.nls <- nls( Li/(sigma*Ta^4) ~ 
                             maxlim( (coef1 + coef2*(es/Ta)^(coef3))*(1.+coef4*cp^coef5) )  ,
@@ -592,11 +868,34 @@ EKZ <- function(data,func = "-",
                         start = start.coefs )
         
         new.coefs <- coef(tmp.nls) 
-        new.emiss <- do.call(EKZ,as.list(modifyList(formals(EKZ),
-                                                    c(list(data = data, func = func),
-                                                      as.list(new.coefs)))))
+        new.emiss <-
+            with(data = data, 
+                 run_fun(E_fun = EKZ, #####
+                         data = data, 
+                         func = func,
+                         new.coefs = new.coefs) )
         
         return(list(emiss = new.emiss, coefs = new.coefs))
+        
+    } else if( adjust & method == "montecarlo" ){
+        
+        new.coefs <- 
+            MonteCarlo(data = data,
+                       E_fun = EKZ,   ####
+                       func = func,
+                       coefs = unlist(start.coefs),
+                       nsample = nsample,
+                       max_iter = max_iter,
+                       stats = stats)
+        
+        new.emiss <-
+            with(data = data, 
+                 run_fun(E_fun = EKZ, ####
+                         data = data, 
+                         func = func,
+                         new.coefs = new.coefs) )
+        
+        return(list(emiss = new.emiss, coefs = new.coefs))   
         
     } else {
         
@@ -612,6 +911,15 @@ EKZ <- function(data,func = "-",
 ##' @param func a function for amount of cloud 
 ##' @param coef1,coef2,coef3,coef4,coef5 Scheme coeficients 
 ##' @param adjust FALSE, TRUE if nonlinear least square adjusting wanted
+##' @param method "non-linear" (default) for Non linear Least Square adjust, 
+##' "montecarlo" for MonteCarlo optimization. Later be usseful when a NLS can't 
+##' adjust observed data allowing optimization.
+##' @param nsample population number evaluated in each iteration 
+##' (only when method = "montecarlo").
+##' @param max_iter maximun number of iterations (only when method = "montecarlo").
+##' @param stats statistical function to be minimized (only when method = "montecarlo"),
+##' NOTE: the best result should be 0.0 (ex., if stats = r (correlation), then transform to 
+##' rMod = 1.0 - r, so the best result is when r== 1.0, so rMod == 0.0)
 ##' @return a vector with emissivity estimatives
 ##' @import stats
 ##' @import utils
@@ -619,9 +927,16 @@ EKZ <- function(data,func = "-",
 ##' @references Niemala, S. (2001) Comparison of surface radiative flux 
 ##' parameterizations part I: Longwave radiation. Atmos. Res., 58, 1-18.
 ENM <- function(data,func = "-",
-                coef1 = 0.72, coef2 = 0.09, coef3 = 0.76,
-                coef4 = 0.22, coef5 = 1.0,
-                adjust = FALSE){ 
+                coef1 = 0.72,
+                coef2 = 0.09,
+                coef3 = 0.76,
+                coef4 = 0.22,
+                coef5 = 1.0,
+                adjust = FALSE,
+                method = "non-linear",
+                nsample = 100,
+                max_iter = 10,
+                stats = "rmse"){ 
     
     sigma <- 5.67051*10^(-8)
     
@@ -634,7 +949,7 @@ ENM <- function(data,func = "-",
         start.coefs <- list(coef1 = coef1, coef2 = coef2,coef3 = coef3)
     }
     
-    if(adjust){
+    if(adjust & method == "non-linear"){
         
     tmp.nls <- nls( Li/(sigma*Ta^4) ~ 
                         maxlim((coef1 +
@@ -644,11 +959,35 @@ ENM <- function(data,func = "-",
                     start = start.coefs )
     
         new.coefs <- coef(tmp.nls) 
-        new.emiss <- do.call(ENM,as.list(modifyList(formals(ENM),
-                                                    c(list(data = data, func = func),
-                                                      as.list(new.coefs)))))
+        
+        new.emiss <-
+            with(data = data, 
+                 run_fun(E_fun = ENM, #####
+                         data = data, 
+                         func = func,
+                         new.coefs = new.coefs) )
         
         return(list(emiss = new.emiss, coefs = new.coefs))
+        
+    } else if( adjust & method == "montecarlo" ){
+        
+        new.coefs <- 
+            MonteCarlo(data = data,
+                       E_fun = ENM,   ####
+                       func = func,
+                       coefs = unlist(start.coefs),
+                       nsample = nsample,
+                       max_iter = max_iter,
+                       stats = stats)
+        
+        new.emiss <-
+            with(data = data, 
+                 run_fun(E_fun = ENM, ####
+                         data = data, 
+                         func = func,
+                         new.coefs = new.coefs) )
+        
+        return(list(emiss = new.emiss, coefs = new.coefs)) 
         
     } else {
         
@@ -666,6 +1005,15 @@ ENM <- function(data,func = "-",
 ##' @param func a function for amount of cloud 
 ##' @param coef1,coef2,coef3,coef4,coef5 Scheme coeficients 
 ##' @param adjust FALSE, TRUE if nonlinear least square adjusting wanted
+##' @param method "non-linear" (default) for Non linear Least Square adjust, 
+##' "montecarlo" for MonteCarlo optimization. Later be usseful when a NLS can't 
+##' adjust observed data allowing optimization.
+##' @param nsample population number evaluated in each iteration 
+##' (only when method = "montecarlo").
+##' @param max_iter maximun number of iterations (only when method = "montecarlo").
+##' @param stats statistical function to be minimized (only when method = "montecarlo"),
+##' NOTE: the best result should be 0.0 (ex., if stats = r (correlation), then transform to 
+##' rMod = 1.0 - r, so the best result is when r== 1.0, so rMod == 0.0)
 ##' @return a vector with emissivity estimatives
 ##' @import stats
 ##' @import utils
@@ -673,9 +1021,16 @@ ENM <- function(data,func = "-",
 ##' @references Prata AJ (1996) A new long-wave formula for estimating downward clearsky
 ##' radiation at the surface. Q J Roy Meteor Soc 122:1127–1151
 EPR <- function(data,func = "-",
-                coef1 = 1, coef2 = 1.2, coef3 = 3,
-                coef4 = 0.22, coef5 =1.,
-                adjust = FALSE) {
+                coef1 = 1, 
+                coef2 = 1.2, 
+                coef3 = 3,
+                coef4 = 0.22, 
+                coef5 =1.,
+                adjust = FALSE,
+                method = "non-linear",
+                nsample = 100,
+                max_iter = 10,
+                stats = "rmse") {
     
     sigma <- 5.67051*10^(-8)
     
@@ -688,7 +1043,7 @@ EPR <- function(data,func = "-",
         start.coefs <- list(coef1 = coef1,  coef3 = coef3)
     }
     
-    if(adjust){
+    if(adjust & method == "non-linear"){
         
         tmp.nls <- nls( Li/(sigma*Ta^4) ~ 
                             maxlim( (1 - ((coef1+46.5*es/Ta) * 
@@ -698,11 +1053,34 @@ EPR <- function(data,func = "-",
                         start = start.coefs )
         
         new.coefs <- coef(tmp.nls) 
-        new.emiss <- do.call(EPR,as.list(modifyList(formals(EPR),
-                                                    c(list(data = data, func = func),
-                                                      as.list(new.coefs)))))
+        new.emiss <-
+            with(data = data, 
+                 run_fun(E_fun = EPR, #####
+                         data = data, 
+                         func = func,
+                         new.coefs = new.coefs) )
         
         return(list(emiss = new.emiss, coefs = new.coefs))
+    
+    } else if( adjust & method == "montecarlo" ){
+        
+        new.coefs <- 
+            MonteCarlo(data = data,
+                       E_fun = EPR,   ####
+                       func = func,
+                       coefs = unlist(start.coefs),
+                       nsample = nsample,
+                       max_iter = max_iter,
+                       stats = stats)
+        
+        new.emiss <-
+            with(data = data, 
+                 run_fun(E_fun = EPR, ####
+                         data = data, 
+                         func = func,
+                         new.coefs = new.coefs) )
+        
+        return(list(emiss = new.emiss, coefs = new.coefs))     
         
     } else {
         
@@ -723,16 +1101,32 @@ EPR <- function(data,func = "-",
 ##' @param func a function for amount of cloud 
 ##' @param coef1,coef2,coef3,coef4 Scheme coeficients 
 ##' @param adjust FALSE, TRUE if nonlinear least square adjusting wanted
+##' @param method "non-linear" (default) for Non linear Least Square adjust, 
+##' "montecarlo" for MonteCarlo optimization. Later be usseful when a NLS can't 
+##' adjust observed data allowing optimization.
+##' @param nsample population number evaluated in each iteration 
+##' (only when method = "montecarlo").
+##' @param max_iter maximun number of iterations (only when method = "montecarlo").
+##' @param stats statistical function to be minimized (only when method = "montecarlo"),
+##' NOTE: the best result should be 0.0 (ex., if stats = r (correlation), then transform to 
+##' rMod = 1.0 - r, so the best result is when r== 1.0, so rMod == 0.0)
 ##' @return a vector with emissivity estimatives
 ##' @import stats
 ##' @import utils
 ##' @export
 ##' @references Sutterlund, D. R. (1979) An improved equation for estimating longwave 
 ##' radiation from the atmosphere, Water Res. Res., 15, 1649-1650.
-EST <- function(data,func = "-",
-                coef1 = 1.08,coef2 = 2016, 
-                coef3 = 0.22, coef4 = 1.0, 
-                adjust = FALSE){ 
+EST <- function(data,
+                func = "-",
+                coef1 = 1.08,
+                coef2 = 2016, 
+                coef3 = 0.22, 
+                coef4 = 1.0, 
+                adjust = FALSE,
+                method = "non-linear",
+                nsample = 100,
+                max_iter = 10,
+                stats = "rmse"){ 
     
     sigma <- 5.67051*10^(-8)
     
@@ -745,7 +1139,7 @@ EST <- function(data,func = "-",
         start.coefs <- list(coef1 = coef1,coef2 = coef2)
     }
     
-    if(adjust){
+    if(adjust & method == "non-linear"){
         
         tmp.nls <- nls( Li/(sigma*Ta^4) ~ 
                             maxlim(coef1*(1.-exp(-es^(Ta/coef2)))*(1.0+coef3*cp^coef4)),
@@ -753,11 +1147,33 @@ EST <- function(data,func = "-",
                         start = start.coefs )
         
         new.coefs <- coef(tmp.nls) 
-        new.emiss <- do.call(EST,as.list(modifyList(formals(EST),
-                                                    c(list(data = data, func = func),
-                                                      as.list(new.coefs)))))
+        new.emiss <-
+            with(data = data, 
+                 run_fun(E_fun = EST, #####
+                         data = data, 
+                         func = func,
+                         new.coefs = new.coefs) )
         
         return(list(emiss = new.emiss, coefs = new.coefs))
+    } else if( adjust & method == "montecarlo" ){
+        
+        new.coefs <- 
+            MonteCarlo(data = data,
+                       E_fun = EST,   ####
+                       func = func,
+                       coefs = unlist(start.coefs),
+                       nsample = nsample,
+                       max_iter = max_iter,
+                       stats = stats)
+        
+        new.emiss <-
+            with(data = data, 
+                 run_fun(E_fun = EST, ####
+                         data = data, 
+                         func = func,
+                         new.coefs = new.coefs) )
+        
+        return(list(emiss = new.emiss, coefs = new.coefs)) 
         
     } else {
         
@@ -773,16 +1189,31 @@ EST <- function(data,func = "-",
 ##' @param func a function for amount of cloud 
 ##' @param coef1,coef2,coef3 Scheme coeficients 
 ##' @param adjust FALSE, TRUE if nonlinear least square adjusting wanted
+##' @param method "non-linear" (default) for Non linear Least Square adjust, 
+##' "montecarlo" for MonteCarlo optimization. Later be usseful when a NLS can't 
+##' adjust observed data allowing optimization.
+##' @param nsample population number evaluated in each iteration 
+##' (only when method = "montecarlo").
+##' @param max_iter maximun number of iterations (only when method = "montecarlo").
+##' @param stats statistical function to be minimized (only when method = "montecarlo"),
+##' NOTE: the best result should be 0.0 (ex., if stats = r (correlation), then transform to 
+##' rMod = 1.0 - r, so the best result is when r== 1.0, so rMod == 0.0)
 ##' @return a vector with emissivity estimatives
 ##' @import stats
 ##' @import utils
 ##' @export
 ##' @references Swinbank WC (1963) Long-wave radiation from clear skies. Q J Roy
 ##' Meteor Soc 89:339–348
-ESW <- function(data,func = "-",
+ESW <- function(data,
+                func = "-",
                 coef1 = 0.0000092,
-                coef2 = 0.22, coef3 = 1.0, 
-                adjust = FALSE){ 
+                coef2 = 0.22,
+                coef3 = 1.0, 
+                adjust = FALSE,
+                method = "non-linear",
+                nsample = 100,
+                max_iter = 10,
+                stats = "rmse"){ 
     
     sigma <- 5.67051*10^(-8)
     
@@ -794,16 +1225,39 @@ ESW <- function(data,func = "-",
         start.coefs <- list(coef1 = coef1)
     }
     
-    if(adjust){
+    if(adjust & method == "non-linear"){
         
         tmp.nls <- nls( Li/(sigma*Ta^4) ~ maxlim(coef1*Ta^2*(1.0+coef2*cp^coef3)),
                         data = data, 
                         start = start.coefs )
         
         new.coefs <- coef(tmp.nls) 
-        new.emiss <- do.call(ESW,as.list(modifyList(formals(ESW),
-                                                    c(list(data = data, func = func),
-                                                      as.list(new.coefs)))))
+        new.emiss <-
+            with(data = data, 
+                 run_fun(E_fun = ESW, #####
+                         data = data, 
+                         func = func,
+                         new.coefs = new.coefs) )
+        
+        return(list(emiss = new.emiss, coefs = new.coefs))
+        
+    } else if( adjust & method == "montecarlo" ){
+        
+        new.coefs <- 
+            MonteCarlo(data = data,
+                       E_fun = ESW,   ####
+                       func = func,
+                       coefs = unlist(start.coefs),
+                       nsample = nsample,
+                       max_iter = max_iter,
+                       stats = stats)
+        
+        new.emiss <-
+            with(data = data, 
+                 run_fun(E_fun = ESW, ####
+                         data = data, 
+                         func = func,
+                         new.coefs = new.coefs) )
         
         return(list(emiss = new.emiss, coefs = new.coefs))
         
@@ -821,15 +1275,31 @@ ESW <- function(data,func = "-",
 ##' @param func a function for amount of cloud 
 ##' @param coef1,coef2,coef3,coef4,coef5 Scheme coeficients 
 ##' @param adjust FALSE, TRUE if nonlinear least square adjusting wanted
+##' @param method "non-linear" (default) for Non linear Least Square adjust, 
+##' "montecarlo" for MonteCarlo optimization. Later be usseful when a NLS can't 
+##' adjust observed data allowing optimization.
+##' @param nsample population number evaluated in each iteration 
+##' (only when method = "montecarlo").
+##' @param max_iter maximun number of iterations (only when method = "montecarlo").
+##' @param stats statistical function to be minimized (only when method = "montecarlo"),
+##' NOTE: the best result should be 0.0 (ex., if stats = r (correlation), then transform to 
+##' rMod = 1.0 - r, so the best result is when r== 1.0, so rMod == 0.0)
 ##' @return a vector with emissivity estimatives
 ##' @import stats
 ##' @import utils
 ##' @export
 ##' @references Aimi, D. (2017); TODO 
 EAI <- function(data,func = "-",
-                coef1 = 0.52843, coef2 = -0.00820,coef3 = 24242.65010,
-                coef4 = 0.22, coef5 = 1.,
-                adjust = FALSE) {
+                coef1 = 0.52843, 
+                coef2 = -0.00820,
+                coef3 = 24242.65010,
+                coef4 = 0.22, 
+                coef5 = 1.,
+                adjust = FALSE,
+                method = "non-linear",
+                nsample = 100,
+                max_iter = 10,
+                stats = "rmse") {
     
     sigma <- 5.67051*10^(-8)
     
@@ -842,7 +1312,7 @@ EAI <- function(data,func = "-",
         start.coefs <- list(coef1 = coef1,  coef2 = coef2, coef3 = coef3)
     }
     
-    if(adjust){
+    if(adjust & method == "non-linear"){
         
         tmp.nls <- nls( Li/(sigma*Ta^4) ~ 
                             maxlim( (coef1 + ( coef2 * (es - 20.0)) + 
@@ -852,11 +1322,34 @@ EAI <- function(data,func = "-",
                         start =  start.coefs)
         
         new.coefs <- coef(tmp.nls) 
-        new.emiss <- do.call(EAI,as.list(modifyList(formals(EAI),
-                                                    c(list(data = data, func = func),
-                                                      as.list(new.coefs)))))
+        new.emiss <-
+            with(data = data, 
+                 run_fun(E_fun = EAI, #####
+                         data = data, 
+                         func = func,
+                         new.coefs = new.coefs) )
         
         return(list(emiss = new.emiss, coefs = new.coefs))
+    
+    } else if( adjust & method == "montecarlo" ){
+        
+        new.coefs <- 
+            MonteCarlo(data = data,
+                       E_fun = EAI,   ####
+                       func = func,
+                       coefs = unlist(start.coefs),
+                       nsample = nsample,
+                       max_iter = max_iter,
+                       stats = stats)
+        
+        new.emiss <-
+            with(data = data, 
+                 run_fun(E_fun = EAI, ####
+                         data = data, 
+                         func = func,
+                         new.coefs = new.coefs) )
+        
+        return(list(emiss = new.emiss, coefs = new.coefs))     
         
     } else {
         

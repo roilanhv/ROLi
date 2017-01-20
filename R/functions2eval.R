@@ -11,41 +11,88 @@
 ##' @param E_fun Emissivity scheme
 ##' @param C_fun Cloud cover scheme
 ##' @param adjust FALSE, TRUE if nonlinear least square adjusting wanted
+##' @param method "non-linear" (default) for Non linear Least Square adjust, 
+##' "montecarlo" for MonteCarlo optimization. Later be usseful when a NLS can't 
+##' adjust observed data allowing optimization.
+##' @param nsample population number evaluated in each iteration 
+##' (only when method = "montecarlo").
+##' @param max_iter maximun number of iterations (only when method = "montecarlo").
+##' @param stats statistical function to be minimized (only when method = "montecarlo"),
+##' NOTE: the best result should be 0.0 (ex., if stats = r (correlation), then transform to 
+##' rMod = 1.0 - r, so the best result is when r== 1.0, so rMod == 0.0)
 ##' @param log_file path to a log file
 ##' @return Vector with Downward Longwave Radiation time series
-##' @examples 
-##' # Downward longwave for Santa Maria site, January and July of  2014
-##' # without adjusting
-##' Li_sm <- get.Li(data = data2,E_fun = "EAN",C_fun = "CQB")
-##' head(Li_sm)
-##' summary(Li_sm)
 ##' @export
 ##' @import readr
 get.Li <- function(data_,
-                   E_fun = "EAN",C_fun = "CQB",
+                   E_fun = "EAN",
+                   C_fun = "-",
                    adjust = FALSE,
+                   method = c("non-linear","montecarlo"),
+                   nsample = 1000,
+                   max_iter = 10,
+                   stats = "rmse",
                    log_file = NULL){
     
     sigma <- 5.67051*10^(-8) # W m^(-2) T^(-4)
+    
         message("Combining emissivity: ", E_fun, ", whith cloud from: ", C_fun)
     
-    emis_ <- try(do.call(E_fun,list(data=data_,func = C_fun, adjust = adjust)),silent = TRUE)
-    
-    if(adjust){
+        if(adjust){
+            message("      Making adjusting.")
+            
+            if( method[1] == "non-linear" ){
+                message("           Non-Linear Adjusting")
+                emis_ <- try( do.call(E_fun,list(data=data_, func = C_fun, adjust = adjust)),
+                              silent = TRUE)
+                
+            } else if ( method[1] == "montecarlo" ){ 
+                
+                message("           MonteCarlo Adjusting")
+                emis_ <- do.call(E_fun,list(data=data_, 
+                                            func = C_fun, 
+                                            adjust = adjust,
+                                            nsample = nsample,
+                                            method = "montecarlo",
+                                            max_iter = max_iter,
+                                            stats = stats))
+                
+            }
+            
+            
+            if(class(emis_) == "try-error" & !is.na(method[2] == "montecarlo") ){
+                
+                message("           Error in NLS, passing to MonteCarlo approach >")
+                emis_ <- do.call(E_fun,list(data=data_, 
+                                            func = C_fun, 
+                                            adjust = adjust,
+                                            nsample = nsample,
+                                            method = "montecarlo",
+                                            max_iter = max_iter,
+                                            stats = stats))
+                
+            }
+            
+        } else {
+            
+            emis_ <- try( do.call(E_fun,list(data=data_, func = C_fun)), silent = TRUE)
+            
+        }
+        
         
         if(class(emis_) == "try-error") {
             emis_ <- list(emiss = NA,coefs = NA)
             roli_est <-  with(data_, emis_$emiss*sigma*Ta^4)
-        } else {  roli_est <-  with(data_, emis_$emiss*sigma*Ta^4) }
-        
-    } else {
-        if(class(emis_) == "try-error") emis_ <- NA
-        roli_est <-  with(data_, emis_*sigma*Ta^4)   
-    }
+        } else {  
+            roli_est <-  with(data_, emis_$emiss*sigma*Ta^4) 
+        }
+    #     
+    # } else {
+    #     if(class(emis_) == "try-error") emis_ <- NA
+    #     roli_est <-  with(data_, emis_*sigma*Ta^4)   
+    # }
     
     if(!is.null(log_file)){
-        # write_lines(x = paste0("\n Emissivity: ", E_fun, ", Cloud Cover: ", C_fun), path = "./AJUST.log", append = TRUE )
-        # write_lines(x = paste0("\t",names(emis_$coefs),collapse = "\t\t"), path = "./AJUST.log", append = TRUE)
         write_lines(x = paste(E_fun,C_fun, paste0(emis_$coefs %>% round(7),collapse = " ")), path = log_file, append = TRUE)
     }
     

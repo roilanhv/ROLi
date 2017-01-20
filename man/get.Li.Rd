@@ -4,8 +4,9 @@
 \alias{get.Li}
 \title{Downward Longwave Radiation from a emissivity and a cloud cover schemes}
 \usage{
-get.Li(data_, E_fun = "EAN", C_fun = "CQB", adjust = FALSE,
-  log_file = NULL)
+get.Li(data_, E_fun = "EAN", C_fun = "-", adjust = FALSE,
+  method = c("non-linear", "montecarlo"), nsample = 1000, max_iter = 10,
+  stats = "rmse", log_file = NULL)
 }
 \arguments{
 \item{data_}{Data frame with column of date (date), temperature (Ta), 
@@ -18,6 +19,19 @@ atennuation index (K)}
 
 \item{adjust}{FALSE, TRUE if nonlinear least square adjusting wanted}
 
+\item{method}{"non-linear" (default) for Non linear Least Square adjust, 
+"montecarlo" for MonteCarlo optimization. Later be usseful when a NLS can't 
+adjust observed data allowing optimization.}
+
+\item{nsample}{population number evaluated in each iteration 
+(only when method = "montecarlo").}
+
+\item{max_iter}{maximun number of iterations (only when method = "montecarlo").}
+
+\item{stats}{statistical function to be minimized (only when method = "montecarlo"),
+NOTE: the best result should be 0.0 (ex., if stats = r (correlation), then transform to 
+rMod = 1.0 - r, so the best result is when r== 1.0, so rMod == 0.0)}
+
 \item{log_file}{path to a log file}
 }
 \value{
@@ -25,12 +39,5 @@ Vector with Downward Longwave Radiation time series
 }
 \description{
 Downward Longwave Radiation from a emissivity and a cloud cover schemes
-}
-\examples{
-# Downward longwave for Santa Maria site, January and July of  2014
-# without adjusting
-Li_sm <- get.Li(data = data2,E_fun = "EAN",C_fun = "CQB")
-head(Li_sm)
-summary(Li_sm)
 }
 

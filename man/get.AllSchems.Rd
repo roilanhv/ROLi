@@ -6,8 +6,9 @@
 \usage{
 get.AllSchems(data, Ovrcst_sch = c("CQB", "CKC", "CCB", "CKZ", "CWU", "CJG",
   "CLM", "CFG"), Emiss_sch = c("EAN", "EBR", "EDO", "EGR", "EIJ", "EID",
-  "EKZ", "ENM", "EPR", "EST", "ESW", "EAI"), adjust = FALSE,
-  log_file = NULL)
+  "EKZ", "ENM", "EPR", "EST", "ESW"), adjust = FALSE,
+  method = c("non-linear", "montecarlo"), nsample = 1000, max_iter = 10,
+  stats = "rmse", log_file = NULL)
 }
 \arguments{
 \item{data}{Data frame with atmospheric variables}
@@ -17,6 +18,19 @@ get.AllSchems(data, Ovrcst_sch = c("CQB", "CKC", "CCB", "CKZ", "CWU", "CJG",
 \item{Emiss_sch}{Schemes of atmosphere emissivity}
 
 \item{adjust}{FALSE, TRUE for NLS adjusting}
+
+\item{method}{"non-linear" (default) for Non linear Least Square adjust,
+"montecarlo" for MonteCarlo optimization. Later be usseful when a NLS can't 
+adjust observed data allowing optimization.}
+
+\item{nsample}{population number evaluated in each iteration 
+(only when method = "montecarlo").}
+
+\item{max_iter}{maximun number of iterations (only when method = "montecarlo").}
+
+\item{stats}{statistical function to be minimized (only when method = "montecarlo"),
+NOTE: the best result should be 0.0 (ex., if stats = r (correlation), then transform to 
+rMod = 1.0 - r, so the best result is when r== 1.0, so rMod == 0.0)}
 
 \item{log_file}{path to a log file}
 }

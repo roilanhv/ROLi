@@ -84,7 +84,7 @@ get.Li <- function(data_,
             emis_ <- list(emiss = NA,coefs = NA)
             roli_est <-  with(data_, emis_$emiss*sigma*Ta^4)
         } else {  
-            roli_est <-  with(data_, emis_$emiss*sigma*Ta^4) 
+            roli_est <-  with(data_, emis_*sigma*Ta^4) 
         }
     #     
     # } else {

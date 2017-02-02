@@ -1,7 +1,0 @@
-"0","  "
-"0","    scatterPlot(mydata = Li_sim_obs_adj,"
-"0","                x = ""Li"", y = ""FAN_CQB_adj"","
-"0","                linear = TRUE,mod.line = TRUE,"
-"0","                pch = 8, col = ""red"","
-"0","                type = ""season"", hemisphere = ""southern"""
-"0","                )"

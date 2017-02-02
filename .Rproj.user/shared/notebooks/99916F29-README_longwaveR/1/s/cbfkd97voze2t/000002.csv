@@ -1,5 +1,0 @@
-"0","    # Function for statistical analysis"
-"0","    #   CalcStats"
-"0","    CalcStats(data_li = Li_sim_obs,"
-"0","          statistic = c(""rmse"",""pbias"",""NSE"",""nrmse"",""rSD""),"
-"0","          avg.time = ""hourly"") #%>% kable( )"

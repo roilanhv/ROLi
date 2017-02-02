@@ -1,8 +1,0 @@
-"0","    # Li calculated by FAN emissivity combined with CQB cloud cover scheme"
-"0","    # ADJUSTING mode"
-"0","    Li_sim_adj <- get.Li(data = data_atmos, E_fun = ""FAN"", C_fun = ""CQB"","
-"0","                         adjust = TRUE)"
-"0","    names(Li_sim_adj) <- paste0(names(Li_sim_adj),""_adj"")"
-"0","    # Observed and calculated Li:"
-"0","    Li_sim_obs_adj <- cbind(data_atmos %>% select(date,Li), Li_sim,Li_sim_adj)"
-"0","    head(Li_sim_obs_adj[complete.cases(Li_sim_obs_adj),]) #%>% kable()"

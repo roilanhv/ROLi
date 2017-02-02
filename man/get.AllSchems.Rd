@@ -5,9 +5,10 @@
 \title{Function to get all scheme calculation, adjust = TRUE make a adjusting NLS.}
 \usage{
 get.AllSchems(data, Ovrcst_sch = c("CQB", "CKC", "CCB", "CKZ", "CWU", "CJG",
-  "CLM", "CFG"), Emiss_sch = c("EAN", "EBR", "EDO", "EGR", "EIJ", "EID",
-  "EKZ", "ENM", "EPR", "EST", "ESW"), adjust = FALSE, method = "non-linear",
-  nsample = 1000, max_iter = 10, stats = "rmse", log_file = NULL)
+  "CLM", "CFG"), Emiss_sch = c("EAN", "EBR", "EBT", "EDO", "EGR", "EIJ",
+  "EID", "EKZ", "ENM", "EPR", "EST", "ESW"), adjust = FALSE,
+  method = "non-linear", nsample = 1000, max_iter = 10, stats = "rmse",
+  log_file = NULL)
 }
 \arguments{
 \item{data}{Data frame with atmospheric variables}

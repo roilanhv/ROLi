@@ -1,0 +1,16 @@
+"0","  "
+"0","    scatterPlot(mydata = Li_sim_obs,"
+"0","                x = ""Li"", y = ""FAN_CQB"","
+"0","                linear = TRUE,mod.line = TRUE,"
+"0","                pch = 8, col = ""red"","
+"0","                type = ""season"", hemisphere = ""southern"","
+"0","                avg.time = ""day"""
+"0","                )"
+"2","
+Using 'season' in data frame and not date-based openair version. 
+This may result in different behaviour compared with openair calculations.
+"
+"2","
+Using 'season' in data frame and not date-based openair version. 
+This may result in different behaviour compared with openair calculations.
+"

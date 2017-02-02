@@ -1,0 +1,11 @@
+"0","LI_DA_ALL %>% 
+    as.data.frame() %>% 
+    filter(ID == ""NaoADJ"") %>%
+    rename(Obs = Li) %>% 
+    select(date,Obs,ID,starts_with(""E"",ignore.case = FALSE)) %>% 
+    select(-contains(""_""))  %>%
+    split_stats(split_class = ""ID"") %>%
+    select(params,RMSE,PBIAS,R2) %>%
+    write.csv(file = ""../ARTIGO_LONGWAVER_SM/estatistica_coef_originais.txt"",sep = "" "")
+"
+"2","attempt to set 'sep' ignored"

@@ -1,6 +1,8 @@
-.Rproj.user
+*.Rproj
 .Rhistory
 .RData
 .Ruserdata
-.Rmd
-.html
+*.Rmd
+*.html
+*.md
+README_files/

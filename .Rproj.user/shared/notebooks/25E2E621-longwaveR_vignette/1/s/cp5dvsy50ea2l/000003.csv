@@ -1,0 +1,5 @@
+"0","    timePlot(mydata = Li_sim_obs_adj,"
+"0","             pollutant = c(""Li"",""FAN_CQB"",""FAN_CQB_adj""), "
+"0","             group = TRUE, "
+"0","             lty = 1, lwd = 1, "
+"0","             col = 1:3, avg.time = ""day"")"

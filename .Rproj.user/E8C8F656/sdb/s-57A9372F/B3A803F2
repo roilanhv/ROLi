@@ -1,14 +1,14 @@
 {
     "collab_server" : "",
-    "contents" : ".Rproj\n.Rhistory\n.RData\n.Ruserdata\n*.Rmd\n*.html\n*.md\nREADME_files/",
+    "contents" : "*.Rproj*\n.Rhistory\n.RData\n.Ruserdata\n*.Rmd\n*.html\n*.md\nREADME_files/",
     "created" : 1486036029929.000,
     "dirty" : false,
     "encoding" : "UTF-8",
     "folds" : "",
-    "hash" : "3942369789",
+    "hash" : "2791704887",
     "id" : "B3A803F2",
-    "lastKnownWriteTime" : 1486036267,
-    "last_content_update" : 1486036267753,
+    "lastKnownWriteTime" : 1486036724,
+    "last_content_update" : 1486036725001,
     "path" : "~/A_DOUTORADO/CODE_WORK/OnGitHub_ROLi/ROLi/.gitignore",
     "project_path" : ".gitignore",
     "properties" : {

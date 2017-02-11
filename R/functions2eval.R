@@ -365,20 +365,60 @@ run_fun <- function(E_fun,data, func,new.coefs){
 ##' @param sim SLKDJhvb
 ##' @import hydroGOF
 ##' @export
-run_stats <- function(stats,obs,sim){
+run_stats <- function(stats,obs,sim, ...){
     do.call(stats,
             as.list(modifyList(formals(stats), 
                                c(list(sim = sim,
                                       obs = obs, 
-                                      na.rm = TRUE)
+                                      na.rm = TRUE,
+                                      ...)
                                  )
                                )
                     )
             )
 }
 
+#' Linear Regression Coeficient
+#' @param sim Simulation
+#' @param obs Observation
+#' @param na.rm preferible TRUE
+#' @import hydroGOF
+#' @export
+R2 <- function(sim,obs,na.rm =TRUE){ 
+    data_e <- data.frame(obs = obs, sim = sim)
+    if(all(is.na(data_e$sim))){ return(NA)}
+    summary(lm(obs ~ sim, data = data_e[ valindex(obs,sim),]))$r.squared
+}
 
+#' Normalized Root Mean Square Error
+#' @param sim Simulation
+#' @param obs Observation
+#' @param na.rm preferible TRUE
+#' @param norm character, indicating the value to be used for normalising the root mean square error (RMSE). Valid values are:
+#' -) sd : standard deviation of observations (default). 
+#' -) maxmin: difference between the maximum and minimum observed values
+#' @export
+NRMSE <- function(sim,obs,na.rm =TRUE, norm = "maxmin"){ 
 
+    if (norm == "sd") {
+        cte <- sd(obs, na.rm = na.rm)
+    }
+    else if (norm == "maxmin") {
+        cte <- (max(obs, na.rm = na.rm) - min(obs, na.rm = na.rm))
+    }
+    
+    rmse <- rmse(sim, obs, na.rm)
+    
+    if (max(obs, na.rm = na.rm) - min(obs, na.rm = na.rm) != 0) {
+        nrmse <- rmse/cte
+    }
+    else {
+        nrmse <- NA
+        warning("'obs' is constant, it is not possible to compute 'nrmse'")
+    }
+    return(round(100 * nrmse, 1))
+        
+}
 
 ##' MonteCarlo simulation for optimization
 ##' 

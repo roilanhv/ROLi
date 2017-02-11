@@ -1,6 +1,9 @@
 
-#  FUNÇÕES NECESSÁRIAS
-#
+#' Limits vector values between interval
+#' @param i vector
+#' @param max_ Maximum value
+#' @param min_ Minimum value
+#' @export
 maxlim <- function(i,max_=1,min_=0){ 
     sapply(i,function(i) min(max(i,min_),max_) ) 
 }

@@ -4,7 +4,7 @@
 \alias{run_stats}
 \title{Calculate statistics}
 \usage{
-run_stats(stats, obs, sim)
+run_stats(stats, obs, sim, ...)
 }
 \arguments{
 \item{stats}{qkbf}

@@ -1,6 +1,10 @@
 {
-    "path" : "~/A_DOUTORADO/CODE_WORK/OnGitHub_ROLi/ROLi",
+    "path" : "~/A_DOUTORADO/CODE_WORK/OnGitHub_ROLi/ROLi/R",
     "sortOrder" : [
+        {
+            "ascending" : false,
+            "columnIndex" : 4
+        },
         {
             "ascending" : true,
             "columnIndex" : 2

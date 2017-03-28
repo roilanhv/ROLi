@@ -105,21 +105,17 @@ CFG <- function(data){
 #/////////////////////////////////////////////////////////////////////////////////////////
                                 # PARAMETRIZAÇÔES DE 
                                 #    EMISSIVIDADE 
+Ofun <- function(Li,Ta){
+    sigma <- 5.67051*10^(-8)
+    maxlim(Li/(sigma*Ta^4))
+}
+
 
 ##' Emissivity from atmosphere
 ##' @param data Data frame with all atmospherics variables
 ##' @param func Function for amount of cloud 
 ##' @param coef1,coef2,coef3,coef4,coef5 Scheme coeficients 
 ##' @param adjust FALSE, TRUE if nonlinear least square adjusting wanted
-##' @param method "non-linear" (default) for Non linear Least Square adjust, 
-##' "montecarlo" for MonteCarlo optimization. Later be usseful when a NLS can't 
-##' adjust observed data allowing optimization.
-##' @param nsample population number evaluated in each iteration 
-##' (only when method = "montecarlo").
-##' @param max_iter maximun number of iterations (only when method = "montecarlo").
-##' @param stats statistical function to be minimized (only when method = "montecarlo"),
-##' NOTE: the best result should be 0.0 (ex., if stats = r (correlation), then transform to 
-##' rMod = 1.0 - r, so the best result is when r== 1.0, so rMod == 0.0)
 ##' @return a vector with emissivity estimatives
 ##' @import stats
 ##' @import utils

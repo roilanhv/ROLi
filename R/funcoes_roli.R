@@ -129,52 +129,62 @@ EAN <- function(data,
                 coef3 = 0.067, 
                 coef4 = 0.22,
                 coef5 = 1.0,
-                adjust = FALSE,
-                method = "non-linear",
-                nsample = 100,
-                max_iter = 10,
-                stats = "rmse"){ 
+                adjust = FALSE){ 
     
-        sigma <- 5.67051*10^(-8)
-
     if(func != "-"){
         data$cp <- do.call(func , args = list(data = data)) 
-        start.coefs <- list(coef1 = coef1,coef2=coef2,coef3=coef3, 
-                            coef4 = coef4,coef5= coef5)
-    } else { 
+        start.coefs <- c(c1 = coef1, c2 = coef2, c3 = coef3,ct = coef4, ce = coef5)
+    } else {
         data$cp <- 0
-        start.coefs <- list(coef1 = coef1,coef2=coef2,coef3=coef3)
+        start.coefs <- c(c1 = coef1, c2 = coef2, c3 = coef3)
     }
+    
+    
+    if(adjust ){
         
-    if(adjust & method == "non-linear"){
-
-    tmp.nls <-
-        nls( Li/(sigma*Ta^4) ~ 
-                 maxlim( (coef1 - coef2*( 10^(-coef3*es)))*(1+ coef4 * cp^coef5)  ),
-             data = data, 
-             start =  start.coefs)
-        
-        new.coefs <- coef(tmp.nls) 
-        new.emiss <-
-            with(data = data, 
-                 run_fun(E_fun = EAN,
-                         data = data, 
-                         func = func,
-                         new.coefs = new.coefs) )
-
-        return(list(emiss = new.emiss, coefs = new.coefs))
-        
-    } else if( adjust & method == "montecarlo" ){
-        
-        new.coefs <- 
-            MonteCarlo(data = data,
-                       E_fun = EAN,
-                       func = func,
-                       coefs = unlist(start.coefs),
-                       nsample = nsample,
-                       max_iter = max_iter,
-                       stats = stats)
-        
+        if(func != "-"){
+            
+            nls.out <- try(nls( Ofun(Li,Ta) ~ ean(es,Ta,rh,cp,c1,c2,c3,ct,ce),
+                                data = data,  start = start.coefs ))
+            
+            if(class(nls.out) == "try-error"){
+                
+                resEOfun <- function(par , idata = data) {
+                    idata <- cbind(idata,data.frame(t(par)))
+                    out <- with(idata, Ofun(Li,Ta) - ean(es,Ta,rh,cp,c1,c2,c3,ct,ce))
+                    out[!is.na(out)]  }
+                
+                nls.out <- 
+                    nls.lm(fn = resEOfun,
+                           par = start.coefs,
+                           idata = data, 
+                           control = nls.lm.control(nprint = 1,maxiter = 1000))
+            }
+            
+        } else {
+            
+            nls.out <- try(nls( Ofun(Li,Ta) ~ ean(es,Ta,rh,cp,c1,c2,c3),
+                                data = data, 
+                                start = start.coefs ))
+            
+            if(class(nls.out) == "try-error"){
+                
+                resEOfun <- function(par , idata = data) {
+                    idata <- cbind(idata,data.frame(t(par)))
+                    out <- with(idata, Ofun(Li,Ta) - ean(es,Ta,rh,cp,c1,c2,c3))
+                    out[!is.na(out)]  }
+                
+                nls.out <- 
+                    nls.lm(fn = resEOfun,
+                           par = start.coefs,
+                           idata = data, 
+                           control = nls.lm.control(nprint = 1,maxiter = 1000))
+            }
+        }   
+            
+            new.coefs <- coef(nls.out) %>%
+                setNames(paste0("coef",1:length(.)))
+            
         new.emiss <-
             with(data = data, 
                  run_fun(E_fun = EAN,

@@ -192,17 +192,26 @@ EAN <- function(data,
                          func = func,
                          new.coefs = new.coefs) )
         
-        return(list(emiss = new.emiss, coefs = new.coefs)) 
+        return(list(emiss = new.emiss, coefs = new.coefs))
         
-    }else{
+    }  else {
         
-        return( with(data,
-                     maxlim( (coef1 - coef2*(10^(-coef3*es)))*(1+ coef4 * cp^coef5) ))
-        )
+        return(with(data, ean(es,Ta,rh,cp, c1=coef1,c2 = coef2, c3= coef3,ct= coef4,ce = coef5) ))
         
     }
-        
+    
 }   ## Angstrom (1915)
+
+ean <- function(es, Ta,rh,cp,
+                c1 = 0.83, 
+                c2 = 0.18, 
+                c3 = 0.067, 
+                ct = 0.22,
+                ce = 1.0){
+    
+    maxlim( (c1 - c2*(10^(-c3*es)))*(1+ ct * cp^ce) )
+    
+}
 
     
 ##' Emissivity from atmosphere

@@ -21,6 +21,8 @@
 ##' NOTE: the best result should be 0.0 (ex., if stats = r (correlation), then transform to 
 ##' rMod = 1.0 - r, so the best result is when r== 1.0, so rMod == 0.0)
 ##' @param log_file path to a log file
+##' @param ret_coefs Return coeficients from adjusting, in this case a list contein both information:
+##' estimated Li and coeficients used or determined.
 ##' @return Vector with Downward Longwave Radiation time series
 ##' @export
 ##' @import readr
@@ -32,7 +34,8 @@ get.Li <- function(data_,
                    nsample = 1000,
                    max_iter = 10,
                    stats = "rmse",
-                   log_file = NULL){
+                   log_file = NULL, 
+                   ret_coefs = FALSE){
     
     sigma <- 5.67051*10^(-8) # W m^(-2) T^(-4)
     
@@ -100,7 +103,14 @@ get.Li <- function(data_,
     
     out_rol <- data.frame(ROL = roli_est) 
     names(out_rol) <- paste(E_fun,C_fun,sep = "_")
-    out_rol
+    
+    if(ret_coefs){
+        return(list(EMISS = out_rol,
+                    COEFS = emis_$coefs))
+    } else {
+        return(out_rol)   
+    }
+    
 }
 
 

@@ -145,7 +145,7 @@ EAN <- function(data,
         if(func != "-"){
             
             nls.out <- try(nls( Ofun(Li,Ta) ~ ean(es,Ta,rh,cp,c1,c2,c3,ct,ce),
-                                data = data,  start = start.coefs ))
+                                data = data,  start = start.coefs ),silent = TRUE)
             
             if(class(nls.out) == "try-error"){
                 
@@ -165,7 +165,7 @@ EAN <- function(data,
             
             nls.out <- try(nls( Ofun(Li,Ta) ~ ean(es,Ta,rh,cp,c1,c2,c3),
                                 data = data, 
-                                start = start.coefs ))
+                                start = start.coefs ),silent = TRUE)
             
             if(class(nls.out) == "try-error"){
                 
@@ -256,7 +256,7 @@ EBR <- function(data,
         if(func != "-"){
             
             nls.out <- try(nls( Ofun(Li,Ta) ~ ebr(es,Ta,rh,cp,c1,c2,ct,ce),
-                                data = data,  start = start.coefs ))
+                                data = data,  start = start.coefs ),silent = TRUE)
             
             if(class(nls.out) == "try-error"){
                 
@@ -275,7 +275,7 @@ EBR <- function(data,
         } else {
             nls.out <- try(nls( Ofun(Li,Ta) ~ ebr(es,Ta,rh,cp,c1,c2),
                                 data = data, 
-                                start = start.coefs ))
+                                start = start.coefs ),silent = TRUE)
             
             if(class(nls.out) == "try-error"){
                 
@@ -302,16 +302,26 @@ EBR <- function(data,
                          data = data, 
                          func = func,
                          new.coefs = new.coefs) )
+        
         return(list(emiss = new.emiss, coefs = new.coefs)) 
         
     } else {
     
-        return(with(data,maxlim( (coef1 + coef2*sqrt(es))*(1+coef3*cp^coef4) )) )
+        return(with(data,ebr(es,Ta,rh,cp,c1 = coef1,c2 = coef2, ct = coef3, ce = coef4)) )
         
     }
     
 }    ## Brunt (1932)
 
+ebr <- function(es,Ta,rh,cp,
+                c1 = 0.51, 
+                c2 = 0.066,
+                ct = 0.22,
+                ce = 1.0){
+    
+    maxlim( (c1 + c2*sqrt(es))*(1+ct*cp^ce) )
+    
+}
 
 ##' Emissivity from atmosphere
 ##' @param data a data frame with all atmospherics variables

@@ -6,6 +6,6 @@
 *.html
 *.md
 README_files/
-.Rproj.user
+.Rproj.user/*
 
 *.pper

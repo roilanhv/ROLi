@@ -1,36 +1,6 @@
 {
     "debugBreakpointsState" : {
         "breakpoints" : [
-            {
-                "editor_line_number" : 865,
-                "editor_state" : 2,
-                "function_name" : "EID",
-                "function_steps" : "",
-                "id" : 1,
-                "is_package_breakpoint" : true,
-                "is_pending_debug_completion" : false,
-                "line_number" : 865,
-                "needs_updated_steps" : false,
-                "package_name" : "longwaveR",
-                "path" : "~/A_DOUTORADO/CODE_WORK/OnGitHub_ROLi/ROLi/R/funcoes_roli.R",
-                "state" : 2,
-                "type" : 0
-            },
-            {
-                "editor_line_number" : 864,
-                "editor_state" : 2,
-                "function_name" : "EID",
-                "function_steps" : "",
-                "id" : 2,
-                "is_package_breakpoint" : true,
-                "is_pending_debug_completion" : false,
-                "line_number" : 864,
-                "needs_updated_steps" : false,
-                "package_name" : "longwaveR",
-                "path" : "~/A_DOUTORADO/CODE_WORK/OnGitHub_ROLi/ROLi/R/funcoes_roli.R",
-                "state" : 2,
-                "type" : 0
-            }
         ]
     }
 }

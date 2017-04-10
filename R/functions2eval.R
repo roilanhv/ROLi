@@ -373,6 +373,7 @@ run_fun <- function(E_fun,data, func,new.coefs){
 ##' @param stats qkbf
 ##' @param obs ADKVN
 ##' @param sim SLKDJhvb
+##' @param ... Other argument for stats, see HydroGOF package
 ##' @import hydroGOF
 ##' @export
 run_stats <- function(stats,obs,sim, ...){

@@ -12,6 +12,8 @@ run_stats(stats, obs, sim, ...)
 \item{obs}{ADKVN}
 
 \item{sim}{SLKDJhvb}
+
+\item{...}{Other argument for stats, see HydroGOF package}
 }
 \description{
 Calculate statistics

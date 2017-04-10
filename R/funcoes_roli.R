@@ -955,10 +955,10 @@ EKZ <- function(data,func = "-",
     
     if(func != "-"){
         data$cp <- do.call(func , args = list(data = data)) 
-        start.coefs <- c(c1 = coef1, c2 = coef2,   ct = coef4, ce = coef5)
+        start.coefs <- c(c1 = coef1, c2 = coef2, c3 = coef3,  ct = coef4, ce = coef5)
     } else { 
         data$cp <- 0
-        start.coefs <- c(c1 = coef1, c2 = coef2)
+        start.coefs <- c(c1 = coef1, c2 = coef2, c3 = coef3)
     }
     
     

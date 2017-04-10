@@ -7,3 +7,5 @@
 *.md
 README_files/
 .Rproj.user
+
+*.pper

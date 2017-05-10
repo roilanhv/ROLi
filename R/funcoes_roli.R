@@ -116,6 +116,7 @@ Ofun <- function(Li,Ta){
 ##' @param func Function for amount of cloud 
 ##' @param coef1,coef2,coef3,coef4,coef5 Scheme coeficients 
 ##' @param adjust FALSE, TRUE if nonlinear least square adjusting wanted
+##' @param forced Forced adjust, default TRUE
 ##' @return a vector with emissivity estimatives
 ##' @import stats
 ##' @import utils
@@ -130,7 +131,8 @@ EAN <- function(data,
                 coef3 = 0.067, 
                 coef4 = 0.22,
                 coef5 = 1.0,
-                adjust = FALSE){ 
+                adjust = FALSE,
+                forced = TRUE){ 
     
     if(func != "-"){
         data$cp <- do.call(func , args = list(data = data)) 
@@ -148,18 +150,20 @@ EAN <- function(data,
             nls.out <- try(nls( Ofun(Li,Ta) ~ ean(es,Ta,rh,cp,c1,c2,c3,ct,ce),
                                 data = data,  start = start.coefs ),silent = TRUE)
             
-            if(class(nls.out) == "try-error"){
-                
-                resEOfun <- function(par , idata = data) {
-                    idata <- cbind(idata,data.frame(t(par)))
-                    out <- with(idata, Ofun(Li,Ta) - ean(es,Ta,rh,cp,c1,c2,c3,ct,ce))
-                    out[!is.na(out)]  }
-                
-                nls.out <- 
-                    nls.lm(fn = resEOfun,
-                           par = start.coefs,
-                           idata = data, 
-                           control = nls.lm.control(nprint = 1,maxiter = 75))
+            if(forced){
+                if(class(nls.out) == "try-error"){
+                    
+                    resEOfun <- function(par , idata = data) {
+                        idata <- cbind(idata,data.frame(t(par)))
+                        out <- with(idata, Ofun(Li,Ta) - ean(es,Ta,rh,cp,c1,c2,c3,ct,ce))
+                        out[!is.na(out)]  }
+                    
+                    nls.out <- 
+                        nls.lm(fn = resEOfun,
+                               par = start.coefs,
+                               idata = data, 
+                               control = nls.lm.control(nprint = 1,maxiter = 75))
+                }
             }
             
         } else {
@@ -167,34 +171,42 @@ EAN <- function(data,
             nls.out <- try(nls( Ofun(Li,Ta) ~ ean(es,Ta,rh,cp,c1,c2,c3),
                                 data = data, 
                                 start = start.coefs ),silent = TRUE)
-            
-            if(class(nls.out) == "try-error"){
-                
-                resEOfun <- function(par , idata = data) {
-                    idata <- cbind(idata,data.frame(t(par)))
-                    out <- with(idata, Ofun(Li,Ta) - ean(es,Ta,rh,cp,c1,c2,c3))
-                    out[!is.na(out)]  }
-                
-                nls.out <- 
-                    nls.lm(fn = resEOfun,
-                           par = start.coefs,
-                           idata = data, 
-                           control = nls.lm.control(nprint = 1,maxiter = 1000))
+            if(forced){
+                if(class(nls.out) == "try-error"){
+                    
+                    resEOfun <- function(par , idata = data) {
+                        idata <- cbind(idata,data.frame(t(par)))
+                        out <- with(idata, Ofun(Li,Ta) - ean(es,Ta,rh,cp,c1,c2,c3))
+                        out[!is.na(out)]  }
+                    
+                    nls.out <- 
+                        nls.lm(fn = resEOfun,
+                               par = start.coefs,
+                               idata = data, 
+                               control = nls.lm.control(nprint = 1,maxiter = 1000))
+                }
             }
         }   
+        
+        if(class(nls.out) != "try-error"){
             
             new.coefs <- coef(nls.out) %>%
                 setNames(paste0("coef",1:length(.)))
             
-        new.emiss <-
-            with(data = data, 
-                 run_fun(E_fun = EAN,
-                         data = data, 
-                         func = func,
-                         new.coefs = new.coefs) )
-        
-        return(list(emiss = new.emiss, coefs = new.coefs))
-        
+            new.emiss <-
+                with(data = data, 
+                     run_fun(E_fun = EAN,
+                             data = data, 
+                             func = func,
+                             new.coefs = new.coefs) )
+            
+            return(list(emiss = new.emiss, coefs = new.coefs))
+            
+        } else {
+            
+            return(list(emiss = NA, coefs = NA))
+            
+        }
     }  else {
         
         return(with(data, ean(es,Ta,rh,cp, c1=coef1,c2 = coef2, c3= coef3,ct= coef4,ce = coef5) ))
@@ -220,6 +232,7 @@ ean <- function(es, Ta,rh,cp,
 ##' @param func a function for amount of cloud 
 ##' @param coef1,coef2,coef3,coef4 Scheme coeficients 
 ##' @param adjust FALSE, TRUE if nonlinear least square adjusting wanted
+##' @param forced Forced adjust, default TRUE
 ##' @return a vector with emissivity estimatives
 ##' @import stats
 ##' @import utils
@@ -233,9 +246,10 @@ EBR <- function(data,
                 coef2 = 0.066,
                 coef3 = 0.22,
                 coef4 = 1.0,
-                adjust = FALSE){
-   
-
+                adjust = FALSE,
+                forced = TRUE){
+    
+    
     if(func != "-"){
         data$cp <- do.call(func , args = list(data = data)) 
         start.coefs <- c(c1 = coef1, c2 = coef2,ct = coef3, ce = coef4)
@@ -250,56 +264,62 @@ EBR <- function(data,
             
             nls.out <- try(nls( Ofun(Li,Ta) ~ ebr(es,Ta,rh,cp,c1,c2,ct,ce),
                                 data = data,  start = start.coefs ),silent = TRUE)
-            
-            if(class(nls.out) == "try-error"){
-                
-                resEOfun <- function(par , idata = data) {
-                    idata <- cbind(idata,data.frame(t(par)))
-                    out <- with(idata, Ofun(Li,Ta) - ebr(es,Ta,rh,cp,c1,c2,ct,ce))
-                    out[!is.na(out)]  }
-                
-                nls.out <- 
-                    nls.lm(fn = resEOfun,
-                           par = start.coefs,
-                           idata = data, 
-                           control = nls.lm.control(nprint = 1,maxiter = 75))
+            if(forced){
+                if(class(nls.out) == "try-error"){
+                    
+                    resEOfun <- function(par , idata = data) {
+                        idata <- cbind(idata,data.frame(t(par)))
+                        out <- with(idata, Ofun(Li,Ta) - ebr(es,Ta,rh,cp,c1,c2,ct,ce))
+                        out[!is.na(out)]  }
+                    
+                    nls.out <- 
+                        nls.lm(fn = resEOfun,
+                               par = start.coefs,
+                               idata = data, 
+                               control = nls.lm.control(nprint = 1,maxiter = 75))
+                }
             }
-            
         } else {
             nls.out <- try(nls( Ofun(Li,Ta) ~ ebr(es,Ta,rh,cp,c1,c2),
                                 data = data, 
                                 start = start.coefs ),silent = TRUE)
-            
-            if(class(nls.out) == "try-error"){
-                
-                resEOfun <- function(par , idata = data) {
-                    idata <- cbind(idata,data.frame(t(par)))
-                    out <- with(idata, Ofun(Li,Ta) - ebr(es,Ta,rh,cp,c1,c2))
-                    out[!is.na(out)]  }
-                
-                nls.out <- 
-                    nls.lm(fn = resEOfun,
-                           par = start.coefs,
-                           idata = data, 
-                           control = nls.lm.control(nprint = 1,maxiter = 75))
+            if(forced){
+                if(class(nls.out) == "try-error"){
+                    
+                    resEOfun <- function(par , idata = data) {
+                        idata <- cbind(idata,data.frame(t(par)))
+                        out <- with(idata, Ofun(Li,Ta) - ebr(es,Ta,rh,cp,c1,c2))
+                        out[!is.na(out)]  }
+                    
+                    nls.out <- 
+                        nls.lm(fn = resEOfun,
+                               par = start.coefs,
+                               idata = data, 
+                               control = nls.lm.control(nprint = 1,maxiter = 75))
+                }
             }
         }   
         
-        new.coefs <- coef(nls.out) %>%
-            setNames(paste0("coef",1:length(.)))
-        
-        
-        new.emiss <-
-            with(data = data, 
-                 run_fun(E_fun = EBR, ####
-                         data = data, 
-                         func = func,
-                         new.coefs = new.coefs) )
-        
-        return(list(emiss = new.emiss, coefs = new.coefs)) 
+        if(class(nls.out) != "try-error"){
+            new.coefs <- coef(nls.out) %>%
+                setNames(paste0("coef",1:length(.)))
+            
+            
+            new.emiss <-
+                with(data = data, 
+                     run_fun(E_fun = EBR, ####
+                             data = data, 
+                             func = func,
+                             new.coefs = new.coefs) )
+            
+            return(list(emiss = new.emiss, coefs = new.coefs)) 
+            
+        } else { 
+            return(list(emiss = NA, coefs = NA))
+        }
         
     } else {
-    
+        
         return(with(data,ebr(es,Ta,rh,cp,c1 = coef1,c2 = coef2, ct = coef3, ce = coef4)) )
         
     }
@@ -321,6 +341,7 @@ ebr <- function(es,Ta,rh,cp,
 ##' @param func a function for amount of cloud
 ##' @param coef1,coef2,coef3,coef4 Scheme coeficients  
 ##' @param adjust FALSE, TRUE if nonlinear least square adjusting wanted
+##' @param forced Forced adjust, default TRUE
 ##' @return a vector with emissivity estimatives
 ##' @import stats
 ##' @import utils
@@ -334,7 +355,8 @@ EBT <- function(data,
                 coef2 = 1/7,
                 coef3 = 0.22,
                 coef4 = 1.0,
-                adjust = FALSE){ 
+                adjust = FALSE,
+                forced = TRUE){ 
     
     
     if(func != "-"){
@@ -351,53 +373,58 @@ EBT <- function(data,
             
             nls.out <- try(nls( Ofun(Li,Ta) ~ ebt(es,Ta,rh,cp,c1,c2,ct,ce),
                                 data = data,  start = start.coefs ),silent = TRUE)
-            
-            if(class(nls.out) == "try-error"){
-                
-                resEOfun <- function(par , idata = data) {
-                    idata <- cbind(idata,data.frame(t(par)))
-                    out <- with(idata, Ofun(Li,Ta) - ebt(es,Ta,rh,cp,c1,c2,ct,ce))
-                    out[!is.na(out)]  }
-                
-                nls.out <- 
-                    nls.lm(fn = resEOfun,
-                           par = start.coefs,
-                           idata = data, 
-                           control = nls.lm.control(nprint = 1,maxiter = 75))
+            if(forced){
+                if(class(nls.out) == "try-error"){
+                    
+                    resEOfun <- function(par , idata = data) {
+                        idata <- cbind(idata,data.frame(t(par)))
+                        out <- with(idata, Ofun(Li,Ta) - ebt(es,Ta,rh,cp,c1,c2,ct,ce))
+                        out[!is.na(out)]  }
+                    
+                    nls.out <- 
+                        nls.lm(fn = resEOfun,
+                               par = start.coefs,
+                               idata = data, 
+                               control = nls.lm.control(nprint = 1,maxiter = 75))
+                }
             }
-            
         } else {
             nls.out <- try(nls( Ofun(Li,Ta) ~ ebt(es,Ta,rh,cp,c1,c2),
                                 data = data, 
                                 start = start.coefs ),silent = TRUE)
-            
-            if(class(nls.out) == "try-error"){
-                
-                resEOfun <- function(par , idata = data) {
-                    idata <- cbind(idata,data.frame(t(par)))
-                    out <- with(idata, Ofun(Li,Ta) - ebt(es,Ta,rh,cp,c1,c2))
-                    out[!is.na(out)]  }
-                
-                nls.out <- 
-                    nls.lm(fn = resEOfun,
-                           par = start.coefs,
-                           idata = data, 
-                           control = nls.lm.control(nprint = 1,maxiter = 75))
+            if(forced){
+                if(class(nls.out) == "try-error"){
+                    
+                    resEOfun <- function(par , idata = data) {
+                        idata <- cbind(idata,data.frame(t(par)))
+                        out <- with(idata, Ofun(Li,Ta) - ebt(es,Ta,rh,cp,c1,c2))
+                        out[!is.na(out)]  }
+                    
+                    nls.out <- 
+                        nls.lm(fn = resEOfun,
+                               par = start.coefs,
+                               idata = data, 
+                               control = nls.lm.control(nprint = 1,maxiter = 75))
+                }
             }
+            
         }   
         
-        new.coefs <- coef(nls.out) %>%
-            setNames(paste0("coef",1:length(.)))
-        
-        new.emiss <-
-            with(data = data, 
-                 run_fun(E_fun = EBT, ####
-                         data = data, 
-                         func = func,
-                         new.coefs = new.coefs) )
-        
-        return(list(emiss = new.emiss, coefs = new.coefs)) 
-        
+        if(class(nls.out) != "try-error"){
+            new.coefs <- coef(nls.out) %>%
+                setNames(paste0("coef",1:length(.)))
+            
+            new.emiss <-
+                with(data = data, 
+                     run_fun(E_fun = EBT, ####
+                             data = data, 
+                             func = func,
+                             new.coefs = new.coefs) )
+            
+            return(list(emiss = new.emiss, coefs = new.coefs)) 
+        } else {
+            return(list(emiss = NA, coefs = NA)) 
+        }
     } else {
         return(with(data,ebt(es,Ta,rh,cp,c1 = coef1,c2= coef2,ct=coef3,ce=coef4))    )
     }
@@ -420,6 +447,7 @@ ebt <- function(es,Ta,rh,cp,
 ##' @param func a function for amount of cloud 
 ##' @param coef1,coef2,coef3,coef4,coef5 Scheme coeficients 
 ##' @param adjust FALSE, TRUE if nonlinear least square adjusting wanted
+##' @param forced Forced adjust, default TRUE
 ##' @return a vector with emissivity estimatives
 ##' @import stats
 ##' @import utils
@@ -435,7 +463,8 @@ EDO <- function(data,
                 coef3 = 96.96,
                 coef4 = 0.22, 
                 coef5 = 1.0, 
-                adjust = FALSE){ 
+                adjust = FALSE,
+                forced = TRUE){ 
     
     if(func != "-"){
         data$cp <- do.call(func , args = list(data = data)) 
@@ -446,7 +475,7 @@ EDO <- function(data,
     }
     
     if(adjust){
-         # backup >>
+        # backup >>
         # tmp.nls <- nls( Li ~ ((1.0+coef4*cp^coef5)*(  coef1+  
         #                       coef2*(Ta/273.15)^6 + coef3 * sqrt((465/25)*(es/Ta))))  ,
         #                 data = data , 
@@ -456,53 +485,58 @@ EDO <- function(data,
             
             nls.out <- try(nls( Li ~ edo(es,Ta,rh,cp,c1,c2,c3,ct,ce),
                                 data = data,  start = start.coefs ),silent = TRUE)
-            
-            if(class(nls.out) == "try-error"){
-                
-                resEOfun <- function(par , idata = data) {
-                    idata <- cbind(idata,data.frame(t(par)))
-                    out <- with(idata, Li - edo(es,Ta,rh,cp,c1,c2,c3,ct,ce))
-                    out[!is.na(out)]  }
-                
-                nls.out <- 
-                    nls.lm(fn = resEOfun,
-                           par = start.coefs,
-                           idata = data, 
-                           control = nls.lm.control(nprint = 1,maxiter = 75))
+            if(forced){    
+                if(class(nls.out) == "try-error"){
+                    
+                    resEOfun <- function(par , idata = data) {
+                        idata <- cbind(idata,data.frame(t(par)))
+                        out <- with(idata, Li - edo(es,Ta,rh,cp,c1,c2,c3,ct,ce))
+                        out[!is.na(out)]  }
+                    
+                    nls.out <- 
+                        nls.lm(fn = resEOfun,
+                               par = start.coefs,
+                               idata = data, 
+                               control = nls.lm.control(nprint = 1,maxiter = 75))
+                }
             }
-            
         } else {
             nls.out <- try(nls(  Li ~ edo(es,Ta,rh,cp,c1,c2,c3),
-                                data = data, 
-                                start = start.coefs ),silent = TRUE)
-            
-            if(class(nls.out) == "try-error"){
-                
-                resEOfun <- function(par , idata = data) {
-                    idata <- cbind(idata,data.frame(t(par)))
-                    out <- with(idata, Li - edo(es,Ta,rh,cp,c1,c2,c3))
-                    out[!is.na(out)]  }
-                
-                nls.out <- 
-                    nls.lm(fn = resEOfun,
-                           par = start.coefs,
-                           idata = data, 
-                           control = nls.lm.control(nprint = 1,maxiter = 75))
+                                 data = data, 
+                                 start = start.coefs ),silent = TRUE)
+            if(forced){
+                if(class(nls.out) == "try-error"){
+                    
+                    resEOfun <- function(par , idata = data) {
+                        idata <- cbind(idata,data.frame(t(par)))
+                        out <- with(idata, Li - edo(es,Ta,rh,cp,c1,c2,c3))
+                        out[!is.na(out)]  }
+                    
+                    nls.out <- 
+                        nls.lm(fn = resEOfun,
+                               par = start.coefs,
+                               idata = data, 
+                               control = nls.lm.control(nprint = 1,maxiter = 75))
+                }
             }
+            
         }   
         
-        new.coefs <- coef(nls.out) %>%
-            setNames(paste0("coef",1:length(.)))
-        
-        new.emiss <-
-            with(data = data, 
-                 run_fun(E_fun = EDO, ####
-                         data = data, 
-                         func = func,
-                         new.coefs = new.coefs) )
-        
-        return(list(emiss = new.emiss, coefs = new.coefs)) 
-        
+        if(class(nls.out) != "try-error"){
+            new.coefs <- coef(nls.out) %>%
+                setNames(paste0("coef",1:length(.)))
+            
+            new.emiss <-
+                with(data = data, 
+                     run_fun(E_fun = EDO, ####
+                             data = data, 
+                             func = func,
+                             new.coefs = new.coefs) )
+            
+            return(list(emiss = new.emiss, coefs = new.coefs)) 
+        } else {
+            return(list(emiss = NA, coefs = NA)) 
+        }
     } else {
         
         sigma <- 5.67051*10^(-8)
@@ -532,6 +566,7 @@ edo <- function(es, Ta,rh,cp,
 ##' @param func a function for amount of cloud 
 ##' @param coef1,coef2,coef3,coef4 Scheme coeficients 
 ##' @param adjust FALSE, TRUE if nonlinear least square adjusting wanted
+##' @param forced Forced adjust, default TRUE
 ##' @return a vector with emissivity estimatives
 ##' @import stats
 ##' @import utils
@@ -546,7 +581,8 @@ EGB <- function(data,
                 coef2 = 21.,
                 coef3 = 0.22, 
                 coef4 = 1.,
-                adjust = FALSE){ 
+                adjust = FALSE,
+                forced = TRUE){ 
     
     
     if(func != "-"){
@@ -564,56 +600,61 @@ EGB <- function(data,
             nls.out <- try(nls( Ofun(Li,Ta) ~ egb(es,Ta,rh,cp,K,c1,c2,ct,ce),
                                 data = data,  start = start.coefs ),silent = TRUE)
             
-            if(class(nls.out) == "try-error"){
-                
-                resEOfun <- function(par , idata = data) {
-                    idata <- cbind(idata,data.frame(t(par)))
-                    out <- with(idata, Ofun(Li,Ta) - egb(es,Ta,rh,cp,K,c1,c2,ct,ce))
-                    out[!is.na(out)]  }
-                
-                nls.out <- 
-                    nls.lm(fn = resEOfun,
-                           par = start.coefs,
-                           idata = data, 
-                           control = nls.lm.control(nprint = 1,maxiter = 75))
+            if(forced){
+                if(class(nls.out) == "try-error"){
+                    
+                    resEOfun <- function(par , idata = data) {
+                        idata <- cbind(idata,data.frame(t(par)))
+                        out <- with(idata, Ofun(Li,Ta) - egb(es,Ta,rh,cp,K,c1,c2,ct,ce))
+                        out[!is.na(out)]  }
+                    
+                    nls.out <- 
+                        nls.lm(fn = resEOfun,
+                               par = start.coefs,
+                               idata = data, 
+                               control = nls.lm.control(nprint = 1,maxiter = 75))
+                }
             }
-            
         } else {
             
             nls.out <- try(nls( Ofun(Li,Ta) ~ egb(es,Ta,rh,cp,K,c1,c2),
                                 data = data, 
                                 start = start.coefs ),silent = TRUE)
-            
-            if(class(nls.out) == "try-error"){
-                
-                resEOfun <- function(par , idata = data) {
-                    idata <- cbind(idata,data.frame(t(par)))
-                    out <- with(idata, Ofun(Li,Ta) - egb(es,Ta,rh,cp,K,c1,c2))
-                    out[!is.na(out)]  }
-                
-                nls.out <- 
-                    nls.lm(fn = resEOfun,
-                           par = start.coefs,
-                           idata = data, 
-                           control = nls.lm.control(nprint = 1,maxiter = 75))
+            if(forced){
+                if(class(nls.out) == "try-error"){
+                    
+                    resEOfun <- function(par , idata = data) {
+                        idata <- cbind(idata,data.frame(t(par)))
+                        out <- with(idata, Ofun(Li,Ta) - egb(es,Ta,rh,cp,K,c1,c2))
+                        out[!is.na(out)]  }
+                    
+                    nls.out <- 
+                        nls.lm(fn = resEOfun,
+                               par = start.coefs,
+                               idata = data, 
+                               control = nls.lm.control(nprint = 1,maxiter = 75))
+                }
             }
         }   
         
-        new.coefs <- coef(nls.out) %>%
-            setNames(paste0("coef",1:length(.)))
-        
-        new.emiss <-
-            with(data = data, 
-                 run_fun(E_fun = EGB, ####
-                         data = data, 
-                         func = func,
-                         new.coefs = new.coefs) )
-        
-        return(list(emiss = new.emiss, coefs = new.coefs))     
-        
+        if(class(nls.out) != 'try-error'){
+            new.coefs <- coef(nls.out) %>%
+                setNames(paste0("coef",1:length(.)))
+            
+            new.emiss <-
+                with(data = data, 
+                     run_fun(E_fun = EGB, ####
+                             data = data, 
+                             func = func,
+                             new.coefs = new.coefs) )
+            
+            return(list(emiss = new.emiss, coefs = new.coefs))     
+        } else {
+            return(list(emiss = NA, coefs = NA))     
+        }
     } else {
         
-       return(with(data,egb(es,Ta,rh,cp,K,c1 = coef1,c2=coef2,ct=coef3,ce=coef4)))
+        return(with(data,egb(es,Ta,rh,cp,K,c1 = coef1,c2=coef2,ct=coef3,ce=coef4)))
         
     }
     
@@ -635,6 +676,7 @@ egb <- function(es,Ta,rh,cp,K,
 ##' @param func a function for amount of cloud
 ##' @param coef1,coef2,coef3,coef4,coef5 Scheme coeficients  
 ##' @param adjust FALSE, TRUE if nonlinear least square adjusting wanted
+##' @param forced Forced adjust, default TRUE
 ##' @return a vector with emissivity estimatives
 ##' @import stats
 ##' @import utils
@@ -648,7 +690,8 @@ EGR <- function(data,func = "-",
                 coef3 = 0.096,
                 coef4 = 0.22,
                 coef5 = 1.0,
-                adjust = FALSE){ 
+                adjust = FALSE,
+                forced = TRUE){ 
     
     
     if(func != "-"){
@@ -665,53 +708,58 @@ EGR <- function(data,func = "-",
             
             nls.out <- try(nls( Ofun(Li,Ta) ~ egr(es,Ta,rh,cp,c1,c2,c3,ct,ce),
                                 data = data,  start = start.coefs ),silent = TRUE)
-            
-            if(class(nls.out) == "try-error"){
-                
-                resEOfun <- function(par , idata = data) {
-                    idata <- cbind(idata,data.frame(t(par)))
-                    out <- with(idata, Ofun(Li,Ta) - egr(es,Ta,rh,cp,c1,c2,c3,ct,ce))
-                    out[!is.na(out)]  }
-                
-                nls.out <- 
-                    nls.lm(fn = resEOfun,
-                           par = start.coefs,
-                           idata = data, 
-                           control = nls.lm.control(nprint = 1,maxiter = 75))
+            if(forced){
+                if(class(nls.out) == "try-error"){
+                    
+                    resEOfun <- function(par , idata = data) {
+                        idata <- cbind(idata,data.frame(t(par)))
+                        out <- with(idata, Ofun(Li,Ta) - egr(es,Ta,rh,cp,c1,c2,c3,ct,ce))
+                        out[!is.na(out)]  }
+                    
+                    nls.out <- 
+                        nls.lm(fn = resEOfun,
+                               par = start.coefs,
+                               idata = data, 
+                               control = nls.lm.control(nprint = 1,maxiter = 75))
+                }
             }
-            
         } else {
             nls.out <- try(nls( Ofun(Li,Ta) ~ egr(es,Ta,rh,cp,c1,c2,c3),
                                 data = data, 
                                 start = start.coefs ),silent = TRUE)
-            
-            if(class(nls.out) == "try-error"){
-                
-                resEOfun <- function(par , idata = data) {
-                    idata <- cbind(idata,data.frame(t(par)))
-                    out <- with(idata, Ofun(Li,Ta) - egr(es,Ta,rh,cp,c1,c2,c3))
-                    out[!is.na(out)]  
+            if(forced){
+                if(class(nls.out) == "try-error"){
+                    
+                    resEOfun <- function(par , idata = data) {
+                        idata <- cbind(idata,data.frame(t(par)))
+                        out <- with(idata, Ofun(Li,Ta) - egr(es,Ta,rh,cp,c1,c2,c3))
+                        out[!is.na(out)]  
+                    }
+                    
+                    nls.out <- 
+                        nls.lm(fn = resEOfun,
+                               par = start.coefs,
+                               idata = data, 
+                               control = nls.lm.control(nprint = 1,maxiter = 75))
                 }
-                
-                nls.out <- 
-                    nls.lm(fn = resEOfun,
-                           par = start.coefs,
-                           idata = data, 
-                           control = nls.lm.control(nprint = 1,maxiter = 75))
             }
         }   
         
-        new.coefs <- coef(nls.out) %>%
-            setNames(paste0("coef",1:length(.)))
-        
-        new.emiss <-
-            with(data = data, 
-                 run_fun(E_fun = EGR, ####
-                         data = data, 
-                         func = func,
-                         new.coefs = new.coefs) )
-        
-        return(list(emiss = new.emiss, coefs = new.coefs))     
+        if(class(nls.out) != "try-error"){
+            new.coefs <- coef(nls.out) %>%
+                setNames(paste0("coef",1:length(.)))
+            
+            new.emiss <-
+                with(data = data, 
+                     run_fun(E_fun = EGR, ####
+                             data = data, 
+                             func = func,
+                             new.coefs = new.coefs) )
+            
+            return(list(emiss = new.emiss, coefs = new.coefs))     
+        } else {
+            return(list(emiss = NA, coefs = NA))     
+        }
     } else {
         return(with(data,egr(es,Ta,rh,cp,c1=coef1,c2=coef2,c3=coef3,ct=coef4,ce=coef5)))
     }
@@ -734,6 +782,7 @@ egr <- function(es,Ta,rh,cp,
 ##' @param func a function for amount of cloud 
 ##' @param coef1,coef2,coef3,coef4 Scheme coeficients 
 ##' @param adjust FALSE, TRUE if nonlinear least square adjusting wanted
+##' @param forced Forced adjust, default TRUE
 ##' @return a vector with emissivity estimatives
 ##' @import stats
 ##' @import utils
@@ -746,7 +795,8 @@ EIJ <- function(data,func = "-",
                 coef2 = 0.0007,
                 coef3 = 0.22, 
                 coef4 = 1.0,
-                adjust = FALSE){
+                adjust = FALSE,
+                forced = TRUE){
     
     
     if(func != "-"){
@@ -764,52 +814,57 @@ EIJ <- function(data,func = "-",
             nls.out <- try(nls( Ofun(Li,Ta) ~ eij(es,Ta,rh,cp,c1,c2,ct,ce),
                                 data = data,  start = start.coefs ),silent = TRUE)
             
-            if(class(nls.out) == "try-error"){
-                
-                resEOfun <- function(par , idata = data) {
-                    idata <- cbind(idata,data.frame(t(par)))
-                    out <- with(idata, Ofun(Li,Ta) - eij(es,Ta,rh,cp,c1,c2,ct,ce))
-                    out[!is.na(out)]  }
-                
-                nls.out <- 
-                    nls.lm(fn = resEOfun,
-                           par = start.coefs,
-                           idata = data, 
-                           control = nls.lm.control(nprint = 1,maxiter = 75))
+            if(forced){
+                if(class(nls.out) == "try-error"){
+                    
+                    resEOfun <- function(par , idata = data) {
+                        idata <- cbind(idata,data.frame(t(par)))
+                        out <- with(idata, Ofun(Li,Ta) - eij(es,Ta,rh,cp,c1,c2,ct,ce))
+                        out[!is.na(out)]  }
+                    
+                    nls.out <- 
+                        nls.lm(fn = resEOfun,
+                               par = start.coefs,
+                               idata = data, 
+                               control = nls.lm.control(nprint = 1,maxiter = 75))
+                }
             }
-            
         } else {
             nls.out <- try(nls( Ofun(Li,Ta) ~ eij(es,Ta,rh,cp,c1,c2),
                                 data = data, 
                                 start = start.coefs ),silent = TRUE)
-            
-            if(class(nls.out) == "try-error"){
-                
-                resEOfun <- function(par , idata = data) {
-                    idata <- cbind(idata,data.frame(t(par)))
-                    out <- with(idata, Ofun(Li,Ta) - eij(es,Ta,rh,cp,c1,c2))
-                    out[!is.na(out)]  }
-                
-                nls.out <- 
-                    nls.lm(fn = resEOfun,
-                           par = start.coefs,
-                           idata = data, 
-                           control = nls.lm.control(nprint = 1,maxiter = 75))
+            if(forced){
+                if(class(nls.out) == "try-error"){
+                    
+                    resEOfun <- function(par , idata = data) {
+                        idata <- cbind(idata,data.frame(t(par)))
+                        out <- with(idata, Ofun(Li,Ta) - eij(es,Ta,rh,cp,c1,c2))
+                        out[!is.na(out)]  }
+                    
+                    nls.out <- 
+                        nls.lm(fn = resEOfun,
+                               par = start.coefs,
+                               idata = data, 
+                               control = nls.lm.control(nprint = 1,maxiter = 75))
+                }
             }
         }   
         
-        new.coefs <- coef(nls.out) %>%
-            setNames(paste0("coef",1:length(.)))
-        
-        new.emiss <-
-            with(data = data, 
-                 run_fun(E_fun = EIJ, ####
-                         data = data, 
-                         func = func,
-                         new.coefs = new.coefs) )
-        
-        return(list(emiss = new.emiss, coefs = new.coefs)) 
-        
+        if(class(nls.out) != "try-error"){
+            new.coefs <- coef(nls.out) %>%
+                setNames(paste0("coef",1:length(.)))
+            
+            new.emiss <-
+                with(data = data, 
+                     run_fun(E_fun = EIJ, ####
+                             data = data, 
+                             func = func,
+                             new.coefs = new.coefs) )
+            
+            return(list(emiss = new.emiss, coefs = new.coefs)) 
+        } else {
+            return(list(emiss = NA, coefs = NA)) 
+        }
     } else {
         return(with(data,eij(es,Ta,rh,cp,c1=coef1,c2=coef2,ct=coef3,ce=coef4)) )
     }
@@ -832,6 +887,7 @@ eij <- function(es,Ta,rh,cp,
 ##' @param func a function for amount of cloud 
 ##' @param coef1,coef2,coef3,coef4 Scheme coeficients 
 ##' @param adjust FALSE, TRUE if nonlinear least square adjusting wanted
+##' @param forced Forced adjust, default TRUE
 ##' @return a vector with emissivity estimatives
 ##' @import stats
 ##' @import utils
@@ -845,7 +901,8 @@ EID <- function(data,func = "-",
                 coef2 = 0.0000595,
                 coef3 = 0.22, 
                 coef4 = 1.0,
-                adjust = FALSE){ 
+                adjust = FALSE,
+                forced = TRUE){ 
     
     
     
@@ -858,58 +915,62 @@ EID <- function(data,func = "-",
     }
     
     if(adjust){
-    
+        
         if(func != "-"){
             
             nls.out <- try(nls( Ofun(Li,Ta) ~ eid(es,Ta,rh,cp,c1,c2,ct,ce),
                                 data = data,  start = start.coefs ),silent = TRUE)
-            
-            if(class(nls.out) == "try-error"){
-                
-                resEOfun <- function(par , idata = data) {
-                    idata <- cbind(idata,data.frame(t(par)))
-                    out <- with(idata, Ofun(Li,Ta) - eid(es,Ta,rh,cp,c1,c2,ct,ce))
-                    out[!is.na(out)]  }
-                
-                nls.out <- 
-                    nls.lm(fn = resEOfun,
-                           par = start.coefs,
-                           idata = data, 
-                           control = nls.lm.control(nprint = 1,maxiter = 75))
+            if(forced){
+                if(class(nls.out) == "try-error"){
+                    
+                    resEOfun <- function(par , idata = data) {
+                        idata <- cbind(idata,data.frame(t(par)))
+                        out <- with(idata, Ofun(Li,Ta) - eid(es,Ta,rh,cp,c1,c2,ct,ce))
+                        out[!is.na(out)]  }
+                    
+                    nls.out <- 
+                        nls.lm(fn = resEOfun,
+                               par = start.coefs,
+                               idata = data, 
+                               control = nls.lm.control(nprint = 1,maxiter = 75))
+                }
             }
-            
         } else {
             nls.out <- try(nls( Ofun(Li,Ta) ~ eid(es,Ta,rh,cp,c1,c2),
                                 data = data, 
                                 start = start.coefs ),silent = TRUE)
-            
-            if(class(nls.out) == "try-error"){
-                
-                resEOfun <- function(par , idata = data) {
-                    idata <- cbind(idata,data.frame(t(par)))
-                    out <- with(idata, Ofun(Li,Ta) - eid(es,Ta,rh,cp,c1,c2))
-                    out[!is.na(out)]  }
-                
-                nls.out <- 
-                    nls.lm(fn = resEOfun,
-                           par = start.coefs,
-                           idata = data, 
-                           control = nls.lm.control(nprint = 1,maxiter = 75))
+            if(forced){
+                if(class(nls.out) == "try-error"){
+                    
+                    resEOfun <- function(par , idata = data) {
+                        idata <- cbind(idata,data.frame(t(par)))
+                        out <- with(idata, Ofun(Li,Ta) - eid(es,Ta,rh,cp,c1,c2))
+                        out[!is.na(out)]  }
+                    
+                    nls.out <- 
+                        nls.lm(fn = resEOfun,
+                               par = start.coefs,
+                               idata = data, 
+                               control = nls.lm.control(nprint = 1,maxiter = 75))
+                }
             }
         }   
         
-        new.coefs <- coef(nls.out) %>%
-            setNames(paste0("coef",1:length(.)))
-        
-        new.emiss <-
-            with(data = data, 
-                 run_fun(E_fun = EID, ####
-                         data = data, 
-                         func = func,
-                         new.coefs = new.coefs) )
-        
-        return(list(emiss = new.emiss, coefs = new.coefs)) 
-        
+        if(class(nls.out) != "try-error"){
+            new.coefs <- coef(nls.out) %>%
+                setNames(paste0("coef",1:length(.)))
+            
+            new.emiss <-
+                with(data = data, 
+                     run_fun(E_fun = EID, ####
+                             data = data, 
+                             func = func,
+                             new.coefs = new.coefs) )
+            
+            return(list(emiss = new.emiss, coefs = new.coefs)) 
+        } else {
+            return(list(emiss = NA, coefs = NA)) 
+        }
     } else {
         
         return( with(data,eid(es,Ta,rh,cp,c1=coef1,c2=coef2,ct=coef3,ce=coef4))  )
@@ -935,6 +996,7 @@ eid <- function(es,Ta,rh,cp,
 ##' @param func a function for amount of cloud 
 ##' @param coef1,coef2,coef3,coef4,coef5 Scheme coeficients 
 ##' @param adjust FALSE, TRUE if nonlinear least square adjusting wanted
+##' @param forced Forced adjust, default TRUE
 ##' @return a vector with emissivity estimatives
 ##' @import stats
 ##' @import utils
@@ -950,7 +1012,8 @@ EKZ <- function(data,func = "-",
                 coef3 = 1/8,
                 coef4 = 0.22,
                 coef5 = 1.,
-                adjust = FALSE) {
+                adjust = FALSE,
+                forced = TRUE) {
     
     
     if(func != "-"){
@@ -968,7 +1031,7 @@ EKZ <- function(data,func = "-",
             
             nls.out <- try(nls( Ofun(Li,Ta) ~ ekz(es,Ta,rh,cp,c1,c2,c3,ct,ce),
                                 data = data,  start = start.coefs ),silent = TRUE)
-            
+            if(forced){
             if(class(nls.out) == "try-error"){
                 
                 resEOfun <- function(par , idata = data) {
@@ -982,12 +1045,12 @@ EKZ <- function(data,func = "-",
                            idata = data, 
                            control = nls.lm.control(nprint = 1,maxiter = 75))
             }
-            
+            }
         } else {
             nls.out <- try(nls( Ofun(Li,Ta) ~ ekz(es,Ta,rh,cp,c1,c2,c3),
                                 data = data, 
                                 start = start.coefs ),silent = TRUE)
-            
+            if(forced){
             if(class(nls.out) == "try-error"){
                 
                 resEOfun <- function(par , idata = data) {
@@ -1001,8 +1064,10 @@ EKZ <- function(data,func = "-",
                            idata = data, 
                            control = nls.lm.control(nprint = 1,maxiter = 75))
             }
+                }
         }   
         
+        if(class(nls.out) != "try-error"){
         new.coefs <- coef(nls.out) %>%
             setNames(paste0("coef",1:length(.)))
         
@@ -1014,7 +1079,9 @@ EKZ <- function(data,func = "-",
                          new.coefs = new.coefs) )
         
         return(list(emiss = new.emiss, coefs = new.coefs))   
-        
+        } else {
+            return(list(emiss = NA, coefs = NA))   
+        }
     } else {
         
         return( with(data,ekz(es,Ta,rh,cp,c1=coef1,c2=coef2,c3=coef3,ct=coef4,ce=coef5))  )
@@ -1042,6 +1109,7 @@ ekz <- function(es,Ta,rh,cp,
 ##' @param func a function for amount of cloud 
 ##' @param coef1,coef2,coef3,coef4,coef5 Scheme coeficients 
 ##' @param adjust FALSE, TRUE if nonlinear least square adjusting wanted
+##' @param forced Forced adjust, default TRUE
 ##' @return a vector with emissivity estimatives
 ##' @import stats
 ##' @import utils
@@ -1055,7 +1123,8 @@ ENM <- function(data,func = "-",
                 coef3 = 0.76,
                 coef4 = 0.22,
                 coef5 = 1.0,
-                adjust = FALSE){ 
+                adjust = FALSE,
+                forced = TRUE){ 
     
     if(func != "-"){
         data$cp <- do.call(func , args = list(data = data)) 
@@ -1071,59 +1140,66 @@ ENM <- function(data,func = "-",
             
             nls.out <- try(nls( Ofun(Li,Ta) ~ enm(es,Ta,rh,cp,c1,c2,c3,ct,ce),
                                 data = data,  start = start.coefs ),silent = TRUE)
-            
-            if(class(nls.out) == "try-error"){
-                
-                resEOfun <- function(par , idata = data) {
-                    idata <- cbind(idata,data.frame(t(par)))
-                    out <- with(idata, Ofun(Li,Ta) - enm(es,Ta,rh,cp,c1,c2,c3,ct,ce))
-                    out[!is.na(out)]  }
-                
-                nls.out <- 
-                    nls.lm(fn = resEOfun,
-                           par = start.coefs,
-                           idata = data, 
-                           control = nls.lm.control(nprint = 1,maxiter = 75))
+            if(forced){
+                if(class(nls.out) == "try-error"){
+                    
+                    resEOfun <- function(par , idata = data) {
+                        idata <- cbind(idata,data.frame(t(par)))
+                        out <- with(idata, Ofun(Li,Ta) - enm(es,Ta,rh,cp,c1,c2,c3,ct,ce))
+                        out[!is.na(out)]  }
+                    
+                    nls.out <- 
+                        nls.lm(fn = resEOfun,
+                               par = start.coefs,
+                               idata = data, 
+                               control = nls.lm.control(nprint = 1,maxiter = 75))
+                }
             }
-            
         } else {
             nls.out <- try(nls( Ofun(Li,Ta) ~ enm(es,Ta,rh,cp,c1,c2,c3),
                                 data = data, 
                                 start = start.coefs ),silent = TRUE)
             
-            if(class(nls.out) == "try-error"){
-                
-                resEOfun <- function(par , idata = data) {
-                    idata <- cbind(idata,data.frame(t(par)))
-                    out <- with(idata, Ofun(Li,Ta) - enm(es,Ta,rh,cp,c1,c2,c3))
-                    out[!is.na(out)]  }
-                
-                nls.out <- 
-                    nls.lm(fn = resEOfun,
-                           par = start.coefs,
-                           idata = data, 
-                           control = nls.lm.control(nprint = 1,maxiter = 75))
+            if(forced){
+                if(class(nls.out) == "try-error"){
+                    
+                    resEOfun <- function(par , idata = data) {
+                        idata <- cbind(idata,data.frame(t(par)))
+                        out <- with(idata, Ofun(Li,Ta) - enm(es,Ta,rh,cp,c1,c2,c3))
+                        out[!is.na(out)]  }
+                    
+                    nls.out <- 
+                        nls.lm(fn = resEOfun,
+                               par = start.coefs,
+                               idata = data, 
+                               control = nls.lm.control(nprint = 1,maxiter = 75))
+                }
             }
         }   
         
-        new.coefs <- coef(nls.out) %>%
-            setNames(paste0("coef",1:length(.)))
-    
-        new.emiss <-
-            with(data = data, 
-                 run_fun(E_fun = ENM, ####
-                         data = data, 
-                         func = func,
-                         new.coefs = new.coefs) )
-        
-        return(list(emiss = new.emiss, coefs = new.coefs)) 
+        if(class(nls.out) != "try-error"){
+            new.coefs <- coef(nls.out) %>%
+                setNames(paste0("coef",1:length(.)))
+            
+            new.emiss <-
+                with(data = data, 
+                     run_fun(E_fun = ENM, ####
+                             data = data, 
+                             func = func,
+                             new.coefs = new.coefs) )
+            
+            return(list(emiss = new.emiss, coefs = new.coefs))
+            
+        } else {
+            return(list(emiss = NA, coefs = NA)) 
+        }
         
     } else {
         
         return(with(data,enm(es,Ta,rh,cp,c1=coef1,c2=coef2,c3=coef3,ct=coef4,ce=coef5)))
         
     }
-
+    
 }   ## Niemala (2001)
 
 enm <- function(es,Ta,rh,cp,
@@ -1142,6 +1218,7 @@ enm <- function(es,Ta,rh,cp,
 ##' @param func a function for amount of cloud 
 ##' @param coef1,coef2,coef3,coef4,coef5 Scheme coeficients 
 ##' @param adjust FALSE, TRUE if nonlinear least square adjusting wanted
+##' @param forced Forced adjust, default TRUE
 ##' @return a vector with emissivity estimatives
 ##' @import stats
 ##' @import utils
@@ -1155,7 +1232,8 @@ EPR <- function(data,func = "-",
                 coef3 = 3,
                 coef4 = 0.22, 
                 coef5 =1.,
-                adjust = FALSE) {
+                adjust = FALSE,
+                forced = TRUE) {
     
     if(func != "-"){
         data$cp <- do.call(func , args = list(data = data)) 
@@ -1172,52 +1250,57 @@ EPR <- function(data,func = "-",
             nls.out <- try(nls( Ofun(Li,Ta) ~ epr(es,Ta,rh,cp,c1,c3,ct,ce),
                                 data = data,  start = start.coefs ),silent = TRUE)
             
-            if(class(nls.out) == "try-error"){
-                
-                resEOfun <- function(par , idata = data) {
-                    idata <- cbind(idata,data.frame(t(par)))
-                    out <- with(idata, Ofun(Li,Ta) - epr(es,Ta,rh,cp,c1,c3,ct,ce))
-                    out[!is.na(out)]  }
-                
-                nls.out <- 
-                    nls.lm(fn = resEOfun,
-                           par = start.coefs,
-                           idata = data, 
-                           control = nls.lm.control(nprint = 1,maxiter = 75))
+            if(forced){
+                if(class(nls.out) == "try-error"){
+                    
+                    resEOfun <- function(par , idata = data) {
+                        idata <- cbind(idata,data.frame(t(par)))
+                        out <- with(idata, Ofun(Li,Ta) - epr(es,Ta,rh,cp,c1,c3,ct,ce))
+                        out[!is.na(out)]  }
+                    
+                    nls.out <- 
+                        nls.lm(fn = resEOfun,
+                               par = start.coefs,
+                               idata = data, 
+                               control = nls.lm.control(nprint = 1,maxiter = 75))
+                }
             }
-            
         } else {
             nls.out <- try(nls( Ofun(Li,Ta) ~ epr(es,Ta,rh,cp,c1,c3),
                                 data = data, 
                                 start = start.coefs ),silent = TRUE)
-            
-            if(class(nls.out) == "try-error"){
-                
-                resEOfun <- function(par , idata = data) {
-                    idata <- cbind(idata,data.frame(t(par)))
-                    out <- with(idata, Ofun(Li,Ta) - epr(es,Ta,rh,cp,c1,c3))
-                    out[!is.na(out)]  }
-                
-                nls.out <- 
-                    nls.lm(fn = resEOfun,
-                           par = start.coefs,
-                           idata = data, 
-                           control = nls.lm.control(nprint = 1,maxiter = 75))
+            if(forced){
+                if(class(nls.out) == "try-error"){
+                    
+                    resEOfun <- function(par , idata = data) {
+                        idata <- cbind(idata,data.frame(t(par)))
+                        out <- with(idata, Ofun(Li,Ta) - epr(es,Ta,rh,cp,c1,c3))
+                        out[!is.na(out)]  }
+                    
+                    nls.out <- 
+                        nls.lm(fn = resEOfun,
+                               par = start.coefs,
+                               idata = data, 
+                               control = nls.lm.control(nprint = 1,maxiter = 75))
+                }
             }
         }   
         
-        new.coefs <- coef(nls.out) %>%
-            setNames(paste0("coef",1:length(.)))
-        
-        new.emiss <-
-            with(data = data, 
-                 run_fun(E_fun = EPR, ####
-                         data = data, 
-                         func = func,
-                         new.coefs = new.coefs) )
-        
-        return(list(emiss = new.emiss, coefs = new.coefs))     
-        
+        if(class(nls.out) != "try-error"){
+            new.coefs <- coef(nls.out) %>%
+                setNames(paste0("coef",1:length(.)))
+            
+            new.emiss <-
+                with(data = data, 
+                     run_fun(E_fun = EPR, ####
+                             data = data, 
+                             func = func,
+                             new.coefs = new.coefs) )
+            
+            return(list(emiss = new.emiss, coefs = new.coefs))     
+        } else {
+            return(list(emiss = NA, coefs = NA))     
+        }
     } else {
         
         return( with(data, epr(es,Ta,rh,cp,c1=coef1,c2=coef2,c3=coef3,ct=coef4,ce=coef5)) )
@@ -1243,6 +1326,7 @@ epr <- function(es,Ta,rh,cp,
 ##' @param func a function for amount of cloud 
 ##' @param coef1,coef2,coef3,coef4 Scheme coeficients 
 ##' @param adjust FALSE, TRUE if nonlinear least square adjusting wanted
+##' @param forced Forced adjust, default TRUE
 ##' @return a vector with emissivity estimatives
 ##' @import stats
 ##' @import utils
@@ -1256,7 +1340,8 @@ EST <- function(data,
                 coef2 = 2016, 
                 coef3 = 0.22, 
                 coef4 = 1.0, 
-                adjust = FALSE){ 
+                adjust = FALSE,
+                forced = TRUE){ 
     
     
     if(func != "-"){
@@ -1274,53 +1359,59 @@ EST <- function(data,
             nls.out <- try(nls( Ofun(Li,Ta) ~ est(es,Ta,rh,cp,c1,c2,ct,ce),
                                 data = data,  start = start.coefs ),silent = TRUE)
             
-            if(class(nls.out) == "try-error"){
-                
-                resEOfun <- function(par , idata = data) {
-                    idata <- cbind(idata,data.frame(t(par)))
-                    out <- with(idata, Ofun(Li,Ta) - est(es,Ta,rh,cp,c1,c2,ct,ce))
-                    out[!is.na(out)]  }
-                
-                nls.out <- 
-                    nls.lm(fn = resEOfun,
-                           par = start.coefs,
-                           idata = data, 
-                           control = nls.lm.control(nprint = 1,maxiter = 75))
+            if(forced){
+                if(class(nls.out) == "try-error"){
+                    
+                    resEOfun <- function(par , idata = data) {
+                        idata <- cbind(idata,data.frame(t(par)))
+                        out <- with(idata, Ofun(Li,Ta) - est(es,Ta,rh,cp,c1,c2,ct,ce))
+                        out[!is.na(out)]  }
+                    
+                    nls.out <- 
+                        nls.lm(fn = resEOfun,
+                               par = start.coefs,
+                               idata = data, 
+                               control = nls.lm.control(nprint = 1,maxiter = 75))
+                }
             }
-            
         } else {
             nls.out <- try(nls( Ofun(Li,Ta) ~ est(es,Ta,rh,cp,c1,c2),
                                 data = data, 
                                 start = start.coefs ),silent = TRUE)
             
-            if(class(nls.out) == "try-error"){
-                
-                resEOfun <- function(par , idata = data) {
-                    idata <- cbind(idata,data.frame(t(par)))
-                    out <- with(idata, Ofun(Li,Ta) - est(es,Ta,rh,cp,c1,c2))
-                    out[!is.na(out)]  }
-                
-                nls.out <- 
-                    nls.lm(fn = resEOfun,
-                           par = start.coefs,
-                           idata = data, 
-                           control = nls.lm.control(nprint = 1,maxiter = 75))
+            if(forced){
+                if(class(nls.out) == "try-error"){
+                    
+                    resEOfun <- function(par , idata = data) {
+                        idata <- cbind(idata,data.frame(t(par)))
+                        out <- with(idata, Ofun(Li,Ta) - est(es,Ta,rh,cp,c1,c2))
+                        out[!is.na(out)]  }
+                    
+                    nls.out <- 
+                        nls.lm(fn = resEOfun,
+                               par = start.coefs,
+                               idata = data, 
+                               control = nls.lm.control(nprint = 1,maxiter = 75))
+                }
             }
+            
         }   
         
-        new.coefs <- coef(nls.out) %>%
-            setNames(paste0("coef",1:length(.)))
-        
-        
-        new.emiss <-
-            with(data = data, 
-                 run_fun(E_fun = EST, ####
-                         data = data, 
-                         func = func,
-                         new.coefs = new.coefs) )
-        
-        return(list(emiss = new.emiss, coefs = new.coefs)) 
-        
+        if(class(nls.out) == "try-error"){
+            new.coefs <- coef(nls.out) %>%
+                setNames(paste0("coef",1:length(.)))
+            
+            new.emiss <-
+                with(data = data, 
+                     run_fun(E_fun = EST, ####
+                             data = data, 
+                             func = func,
+                             new.coefs = new.coefs) )
+            
+            return(list(emiss = new.emiss, coefs = new.coefs)) 
+        } else {
+            return(list(emiss = NA, coefs = NA)) 
+        }
     } else {
         
         return( with(data,est(es,Ta,rh,cp,c1 = coef1,c2 = coef2, ct = coef3, ce = coef4)) )    
@@ -1345,6 +1436,7 @@ est <- function(es,Ta,rh,cp,
 ##' @param func a function for amount of cloud 
 ##' @param coef1,coef2,coef3 Scheme coeficients 
 ##' @param adjust FALSE, TRUE if nonlinear least square adjusting wanted
+##' @param forced Forced adjust, default TRUE
 ##' @return a vector with emissivity estimatives
 ##' @import stats
 ##' @import utils
@@ -1357,7 +1449,8 @@ ESW <- function(data,
                 coef1 = 0.0000092,
                 coef2 = 0.22,
                 coef3 = 1.0, 
-                adjust = FALSE){ 
+                adjust = FALSE,
+                forced = TRUE){ 
     
     
     if(func != "-"){
@@ -1374,7 +1467,7 @@ ESW <- function(data,
             
             nls.out <- try(nls( Ofun(Li,Ta) ~ esw(es,Ta,rh,cp,c1,ct,ce),
                                 data = data,  start = start.coefs ),silent = TRUE)
-            
+            if(forced){
             if(class(nls.out) == "try-error"){
                 
                 resEOfun <- function(par , idata = data) {
@@ -1388,12 +1481,12 @@ ESW <- function(data,
                            idata = data, 
                            control = nls.lm.control(nprint = 1,maxiter = 75))
             }
-            
+            }
         } else {
             nls.out <- try(nls( Ofun(Li,Ta) ~ esw(es,Ta,rh,cp,c1),
                                 data = data, 
                                 start = start.coefs ),silent = TRUE)
-            
+            if(forced){
             if(class(nls.out) == "try-error"){
                 
                 resEOfun <- function(par , idata = data) {
@@ -1406,13 +1499,12 @@ ESW <- function(data,
                            par = start.coefs,
                            idata = data, 
                            control = nls.lm.control(nprint = 1,maxiter = 75))
-            }
+            }}
         }   
         
+        if(class(nls.out) != "try-error"){
         new.coefs <- coef(nls.out) %>%
             setNames(paste0("coef",1:length(.)))
-        
-        
         
         new.emiss <-
             with(data = data, 
@@ -1422,7 +1514,9 @@ ESW <- function(data,
                          new.coefs = new.coefs) )
         
         return(list(emiss = new.emiss, coefs = new.coefs))
-        
+        } else {
+            return(list(emiss = NA, coefs = NA))
+        }
     } else {
         
         return( with(data,esw(es,Ta,rh,cp,c1 = coef1,ct = coef2,ce = coef3)) )    
@@ -1446,15 +1540,7 @@ esw <- function(es,Ta,rh,cp,
 ##' @param func a function for amount of cloud 
 ##' @param coef1,coef2,coef3,coef4,coef5 Scheme coeficients 
 ##' @param adjust FALSE, TRUE if nonlinear least square adjusting wanted
-##' @param method "non-linear" (default) for Non linear Least Square adjust, 
-##' "montecarlo" for MonteCarlo optimization. Later be usseful when a NLS can't 
-##' adjust observed data allowing optimization.
-##' @param nsample population number evaluated in each iteration 
-##' (only when method = "montecarlo").
-##' @param max_iter maximun number of iterations (only when method = "montecarlo").
-##' @param stats statistical function to be minimized (only when method = "montecarlo"),
-##' NOTE: the best result should be 0.0 (ex., if stats = r (correlation), then transform to 
-##' rMod = 1.0 - r, so the best result is when r== 1.0, so rMod == 0.0)
+##' @param forced Forced adjust, default TRUE
 ##' @return a vector with emissivity estimatives
 ##' @import stats
 ##' @import utils
@@ -1468,73 +1554,204 @@ EAI <- function(data,func = "-",
                 coef4 = 0.22, 
                 coef5 = 1.,
                 adjust = FALSE,
-                method = "non-linear",
-                nsample = 100,
-                max_iter = 10,
-                stats = "rmse") {
-    
-    sigma <- 5.67051*10^(-8)
+                forced = TRUE) {
     
     if(func != "-"){
         data$cp <- do.call(func , args = list(data = data)) 
-        start.coefs <- list(coef1 = coef1,  coef2 = coef2, coef3 = coef3,
-                            coef4 = coef4, coef5 = coef5)
+        start.coefs <- list(c1 = coef1,  c2 = coef2, c3 = coef3,
+                            ct = coef4, ce = coef5)
     } else {
         data$cp <- 0
-        start.coefs <- list(coef1 = coef1,  coef2 = coef2, coef3 = coef3)
+        start.coefs <- list(c1 = coef1,  c2 = coef2, c3 = coef3)
     }
     
-    if(adjust & method == "non-linear"){
+    if(adjust ){
+        if(func != "-"){
+            
+            nls.out <- try(nls( Ofun(Li,Ta) ~ eai(es,Ta,rh,cp,c1,c2,c3,ct,ce),
+                                data = data, start = start.coefs ),silent = TRUE)
+            if(forced){
+                if(class(nls.out) == "try-error"){
+                    
+                    resEOfun <- function(par , idata = data) {
+                        idata <- cbind(idata,data.frame(t(par)))
+                        out <- with(idata, Ofun(Li,Ta) - eai(es,Ta,rh,cp,c1,c2,c3,ct,ce))
+                        out[!is.na(out)]  }
+                    
+                    nls.out <- 
+                        nls.lm(fn = resEOfun,
+                               par = start.coefs,
+                               idata = data, 
+                               control = nls.lm.control(nprint = 1,maxiter = 75))
+                }
+            }
+        } else {
+            
+            nls.out <- try(nls( Ofun(Li,Ta) ~ eai(es,Ta,rh,cp,c1,c2,c3),
+                                data = data, start = start.coefs ),
+                           silent = TRUE)
+            if(forced){
+                if(class(nls.out) == "try-error"){
+                    
+                    resEOfun <- function(par , idata = data) {
+                        idata <- cbind(idata,data.frame(t(par)))
+                        out <- with(idata, Ofun(Li,Ta) - eai(es,Ta,rh,cp,c1,c2,c3))
+                        out[!is.na(out)]  }
+                    
+                    nls.out <- 
+                        nls.lm(fn = resEOfun,
+                               par = start.coefs,
+                               idata = data, 
+                               control = nls.lm.control(nprint = 1,maxiter = 75))
+                }}
+        }
         
-        tmp.nls <- nls( Li/(sigma*Ta^4) ~ 
-                            maxlim( (coef1 + ( coef2 * (es - 20.0)) + 
-                                         coef3 / (sigma * Ta^5 )) 
-                                    *(1.0+coef4*cp^coef5) ), #
-                        data = data,
-                        start =  start.coefs)
-        
-        new.coefs <- coef(tmp.nls) 
-        new.emiss <-
-            with(data = data, 
-                 run_fun(E_fun = EAI, #####
-                         data = data, 
-                         func = func,
-                         new.coefs = new.coefs) )
-        
-        return(list(emiss = new.emiss, coefs = new.coefs))
-    
-    } else if( adjust & method == "montecarlo" ){
-        
-        new.coefs <- 
-            MonteCarlo(data = data,
-                       E_fun = EAI,   ####
-                       func = func,
-                       coefs = unlist(start.coefs),
-                       nsample = nsample,
-                       max_iter = max_iter,
-                       stats = stats)
-        
-        new.emiss <-
-            with(data = data, 
-                 run_fun(E_fun = EAI, ####
-                         data = data, 
-                         func = func,
-                         new.coefs = new.coefs) )
-        
-        return(list(emiss = new.emiss, coefs = new.coefs))     
+        if(class(nls.out) != "try-error"){
+            new.coefs <- coef(nls.out) %>%
+                setNames(paste0("coef",1:length(.)))
+            
+            new.emiss <-
+                with(data = data, 
+                     run_fun(E_fun = EAI, ####
+                             data = data, 
+                             func = func,
+                             new.coefs = new.coefs) )
+            
+            return(list(emiss = new.emiss, coefs = new.coefs))
+        } else {
+            return(list(emiss = NA, coefs = NA))
+        }
         
     } else {
         
-        return( with(data,
-                     maxlim( (coef1 + ( coef2 * (es - 20.0)) + 
-                                  coef3 / (sigma * Ta^5 ))  
-                             *(1.0+coef4*cp^coef5)) # 
-        ))
+        return( with(data,eai(es,Ta,rh,cp,c1= coef1,c2= coef2,c3= coef3,ct= coef4,ce= coef5))) # 
         
     }
     
 } ## Aimi (2017)
 
+eai <- function(es,Ta,rh,cp,
+                c1 = 0.52843, 
+                c2 = -0.00820,
+                c3 = 24242.65010,
+                # c3 = 1.5, 
+                ct = 0.22, 
+                ce = 1.){
+    sigma <- 5.67051*10^(-8)
+    maxlim((c1 + ( c2 * (es - 20.0) ) + c3 / (sigma * Ta^5) )*(1.0+ct*cp^ce))
+    # maxlim((c1 + ( c2 * (es - 20) ) + c3 * (273.15/Ta)^5 )*(1.0+ct*cp^ce))
+    
+}
+
+
+
+##' Emissivity from atmosphere
+##' @param data a data frame with all atmospherics variables
+##' @param func a function for amount of cloud 
+##' @param coef1,coef2,coef3,coef4,coef5 Scheme coeficients 
+##' @param adjust FALSE, TRUE if nonlinear least square adjusting wanted
+##' @param forced Forced adjust, default TRUE
+##' @return a vector with emissivity estimatives
+##' @import stats
+##' @import utils
+##' @importFrom  minpack.lm nls.lm
+##' @export
+##' @references Aimi, D. (2017); TODO 
+EAM <- function(data,func = "-",
+                coef1 = 0.52843, 
+                coef2 = 0.0820,
+                coef3 = 0.028,
+                coef4 = 0.22, 
+                coef5 = 1.,
+                adjust = FALSE,
+                forced = TRUE) {
+    
+    if(func != "-"){
+        data$cp <- do.call(func , args = list(data = data)) 
+        start.coefs <- list(c1 = coef1,  c2 = coef2, c3 = coef3,
+                            ct = coef4, ce = coef5)
+    } else {
+        data$cp <- 0
+        start.coefs <- list(c1 = coef1,  c2 = coef2, c3 = coef3)
+    }
+    
+    if(adjust ){
+        if(func != "-"){
+            
+            nls.out <- try(nls( Ofun(Li,Ta) ~ eam(es,Ta,rh,cp,c1,c2,c3,ct,ce),
+                                data = data, start = start.coefs ),silent = TRUE)
+            if(forced){
+                if(class(nls.out) == "try-error"){
+                    
+                    resEOfun <- function(par , idata = data) {
+                        idata <- cbind(idata,data.frame(t(par)))
+                        out <- with(idata, Ofun(Li,Ta) - eam(es,Ta,rh,cp,c1,c2,c3,ct,ce))
+                        out[!is.na(out)]  }
+                    
+                    nls.out <- 
+                        nls.lm(fn = resEOfun,
+                               par = start.coefs,
+                               idata = data, 
+                               control = nls.lm.control(nprint = 1,maxiter = 75))
+                }
+            }
+        } else {
+            
+            nls.out <- try(nls( Ofun(Li,Ta) ~ eam(es,Ta,rh,cp,c1,c2,c3),
+                                data = data, start = start.coefs ),
+                           silent = TRUE)
+            if(forced){
+                if(class(nls.out) == "try-error"){
+                    
+                    resEOfun <- function(par , idata = data) {
+                        idata <- cbind(idata,data.frame(t(par)))
+                        out <- with(idata, Ofun(Li,Ta) - eam(es,Ta,rh,cp,c1,c2,c3))
+                        out[!is.na(out)]  }
+                    
+                    nls.out <- 
+                        nls.lm(fn = resEOfun,
+                               par = start.coefs,
+                               idata = data, 
+                               control = nls.lm.control(nprint = 1,maxiter = 75))
+                }}
+        }
+        
+        if(class(nls.out) != "try-error"){
+            new.coefs <- coef(nls.out) %>%
+                setNames(paste0("coef",1:length(.)))
+            
+            new.emiss <-
+                with(data = data, 
+                     run_fun(E_fun = EAM, ####
+                             data = data, 
+                             func = func,
+                             new.coefs = new.coefs) )
+            
+            return(list(emiss = new.emiss, coefs = new.coefs))
+        } else {
+            return(list(emiss = NA, coefs = NA))
+        }
+        
+    } else {
+        
+        return( with(data,eam(es,Ta,rh,cp,c1= coef1,c2= coef2,c3= coef3, ct= coef4,ce= coef5))) # 
+        
+    }
+    
+} ## Aimi (2017)
+
+
+
+eam <- function(es,Ta,rh,cp,
+                c1 = 0.52843, 
+                c2 = 0.820,
+                c3 = 0.028,
+                ct = 0.22, 
+                ce = 1.){
+    
+    maxlim(c1*(Ta - 273.16)/es +  c2 * rh/100  + c3 * (Ta/273.16) )*(1.0+ct*cp^ce)   ####         !!!!
+    
+}
 
 #/////////////////////////////////////////////////////////////////////////////////////////////////
 # Parametrizações de ...

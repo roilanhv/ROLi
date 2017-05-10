@@ -19,4 +19,3 @@ split_stats(data_, split_class = c("daytime", "season", "Cover", "ID"),
 \description{
 Split data and Li series by time factor (ex., "daytime", "season", "cover")
 }
-

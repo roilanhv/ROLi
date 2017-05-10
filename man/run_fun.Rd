@@ -18,4 +18,3 @@ run_fun(E_fun, data, func, new.coefs)
 \description{
 Calculate emissivity
 }
-

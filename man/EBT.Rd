@@ -5,7 +5,7 @@
 \title{Emissivity from atmosphere}
 \usage{
 EBT(data, func = "-", coef1 = 1.24, coef2 = 1/7, coef3 = 0.22,
-  coef4 = 1, adjust = FALSE)
+  coef4 = 1, adjust = FALSE, forced = TRUE)
 }
 \arguments{
 \item{data}{a data frame with all atmospherics variables}
@@ -15,6 +15,8 @@ EBT(data, func = "-", coef1 = 1.24, coef2 = 1/7, coef3 = 0.22,
 \item{coef1, coef2, coef3, coef4}{Scheme coeficients}
 
 \item{adjust}{FALSE, TRUE if nonlinear least square adjusting wanted}
+
+\item{forced}{Forced adjust, default TRUE}
 }
 \value{
 a vector with emissivity estimatives
@@ -26,4 +28,3 @@ Emissivity from atmosphere
 Brutsaert W (1975) On a derivable formula for long-wave radiation
 from clear skies. Water Resour Res 11:742–744
 }
-

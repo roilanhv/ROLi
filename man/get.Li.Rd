@@ -6,7 +6,7 @@
 \usage{
 get.Li(data_, E_fun = "EAN", C_fun = "-", adjust = FALSE,
   method = c("non-linear", "montecarlo"), nsample = 1000, max_iter = 10,
-  stats = "rmse", log_file = NULL, ret_coefs = FALSE)
+  stats = "rmse", log_file = NULL, ret_coefs = FALSE, forced = TRUE)
 }
 \arguments{
 \item{data_}{Data frame with column of date (date), temperature (Ta), 
@@ -36,6 +36,8 @@ rMod = 1.0 - r, so the best result is when r== 1.0, so rMod == 0.0)}
 
 \item{ret_coefs}{Return coeficients from adjusting, in this case a list contein both information:
 estimated Li and coeficients used or determined.}
+
+\item{forced}{Forced adjust, default TRUE}
 }
 \value{
 Vector with Downward Longwave Radiation time series
@@ -43,4 +45,3 @@ Vector with Downward Longwave Radiation time series
 \description{
 Downward Longwave Radiation from a emissivity and a cloud cover schemes
 }
-

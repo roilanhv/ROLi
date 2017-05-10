@@ -24,4 +24,3 @@ Function for day and nigth identification
 \author{
 Roilan Hernandez
 }
-

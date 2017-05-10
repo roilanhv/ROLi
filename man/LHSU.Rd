@@ -16,4 +16,3 @@ LHSU(xmin, xmax, nsample)
 \description{
 Create a LHS sequence from a interval for each parameter
 }
-

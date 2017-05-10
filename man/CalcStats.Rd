@@ -20,4 +20,3 @@ Recommended use of function from hydroGOF package (ex., rmse, mae, pbias, me, nr
 LiStats <- CalcStats(data_li = data_li, statistic = "pbias",avg.time = "daily")
 LiStats
 }
-

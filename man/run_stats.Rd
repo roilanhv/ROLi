@@ -18,4 +18,3 @@ run_stats(stats, obs, sim, ...)
 \description{
 Calculate statistics
 }
-

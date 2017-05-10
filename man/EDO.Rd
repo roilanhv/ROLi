@@ -5,7 +5,7 @@
 \title{Emissivity from atmosphere}
 \usage{
 EDO(data, func = "-", coef1 = 59.38, coef2 = 113.7, coef3 = 96.96,
-  coef4 = 0.22, coef5 = 1, adjust = FALSE)
+  coef4 = 0.22, coef5 = 1, adjust = FALSE, forced = TRUE)
 }
 \arguments{
 \item{data}{a data frame with all atmospherics variables}
@@ -15,6 +15,8 @@ EDO(data, func = "-", coef1 = 59.38, coef2 = 113.7, coef3 = 96.96,
 \item{coef1, coef2, coef3, coef4, coef5}{Scheme coeficients}
 
 \item{adjust}{FALSE, TRUE if nonlinear least square adjusting wanted}
+
+\item{forced}{Forced adjust, default TRUE}
 }
 \value{
 a vector with emissivity estimatives
@@ -27,4 +29,3 @@ Dilley , A. C. (1998) Estimating downward clear-sky long-wave
 irradiance at the surface from screen temperature and precpitable water. 
 Q. J. R. Meteorol. Soc., 96, 313-319.
 }
-

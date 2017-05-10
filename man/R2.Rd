@@ -16,4 +16,3 @@ R2(sim, obs, na.rm = TRUE)
 \description{
 Linear Regression Coeficient
 }
-

@@ -5,7 +5,7 @@
 \title{Emissivity from atmosphere}
 \usage{
 EAN(data, func = "-", coef1 = 0.83, coef2 = 0.18, coef3 = 0.067,
-  coef4 = 0.22, coef5 = 1, adjust = FALSE)
+  coef4 = 0.22, coef5 = 1, adjust = FALSE, forced = TRUE)
 }
 \arguments{
 \item{data}{Data frame with all atmospherics variables}
@@ -15,6 +15,8 @@ EAN(data, func = "-", coef1 = 0.83, coef2 = 0.18, coef3 = 0.067,
 \item{coef1, coef2, coef3, coef4, coef5}{Scheme coeficients}
 
 \item{adjust}{FALSE, TRUE if nonlinear least square adjusting wanted}
+
+\item{forced}{Forced adjust, default TRUE}
 }
 \value{
 a vector with emissivity estimatives
@@ -26,4 +28,3 @@ Emissivity from atmosphere
 Angstrom, A. (1915) A study of the radiation of the atmosphere.
 Smithsonian Miscellaneous Collections 65(3)
 }
-

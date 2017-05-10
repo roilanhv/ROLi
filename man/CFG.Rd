@@ -19,4 +19,3 @@ Amount of cloud estimatives functions.
 Flerchinger, G. N. (2009) Comparison of algoritmhs for incoming 
 atmospheric long-wave radiation, Water Resources Res., 45, W0342.
 }
-

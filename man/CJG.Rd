@@ -20,4 +20,3 @@ Jegede, O. O., Ogolo, E.O., Aregbesola, T.O. (2006) Estimating net
 radiation using routine meteorological data at a tropical location
 in Nigeria. Int J Sustain Energy 25:107–115
 }
-

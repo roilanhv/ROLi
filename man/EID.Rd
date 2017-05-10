@@ -5,7 +5,7 @@
 \title{Emissivity from atmosphere}
 \usage{
 EID(data, func = "-", coef1 = 0.7, coef2 = 5.95e-05, coef3 = 0.22,
-  coef4 = 1, adjust = FALSE)
+  coef4 = 1, adjust = FALSE, forced = TRUE)
 }
 \arguments{
 \item{data}{a data frame with all atmospherics variables}
@@ -15,6 +15,8 @@ EID(data, func = "-", coef1 = 0.7, coef2 = 5.95e-05, coef3 = 0.22,
 \item{coef1, coef2, coef3, coef4}{Scheme coeficients}
 
 \item{adjust}{FALSE, TRUE if nonlinear least square adjusting wanted}
+
+\item{forced}{Forced adjust, default TRUE}
 }
 \value{
 a vector with emissivity estimatives
@@ -27,4 +29,3 @@ Idso SB (1981) A set of equations for full spectrum and 8- to 14-um
  and 10.5- to 12.5-um thermal radiation from cloudless skies.
  Water Resour Res 17:295–304
 }
-

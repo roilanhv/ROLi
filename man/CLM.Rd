@@ -20,4 +20,3 @@ Stockli R (2007) LBA-MIP driver data gap filling algorithms.
 Unpublished. http://www.climatemodeling.org/lba-mip/LBAmipDriverDataFillingMethods.pdf
 Accessed 7 May 2011
 }
-

@@ -18,4 +18,3 @@ Amount of cloud estimatives functions.
 \references{
 Campbell, G.S. (1985) Soil physics with BASIC. Elsevier, Amsterdam
 }
-

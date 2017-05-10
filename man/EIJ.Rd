@@ -5,7 +5,7 @@
 \title{Emissivity from atmosphere}
 \usage{
 EIJ(data, func = "-", coef1 = 0.261, coef2 = 7e-04, coef3 = 0.22,
-  coef4 = 1, adjust = FALSE)
+  coef4 = 1, adjust = FALSE, forced = TRUE)
 }
 \arguments{
 \item{data}{a data frame with all atmospherics variables}
@@ -15,6 +15,8 @@ EIJ(data, func = "-", coef1 = 0.261, coef2 = 7e-04, coef3 = 0.22,
 \item{coef1, coef2, coef3, coef4}{Scheme coeficients}
 
 \item{adjust}{FALSE, TRUE if nonlinear least square adjusting wanted}
+
+\item{forced}{Forced adjust, default TRUE}
 }
 \value{
 a vector with emissivity estimatives
@@ -26,4 +28,3 @@ Emissivity from atmosphere
 Idso SB, Jackson RD (1969) Thermal radiation from the atmosphere.
 J Geophys Res 74:5397–5403
 }
-

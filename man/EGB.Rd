@@ -5,7 +5,7 @@
 \title{Effective emissivity from atmosphere with cloud atenuation}
 \usage{
 EGB(data, func = "-", coef1 = 0.84, coef2 = 21, coef3 = 0.22,
-  coef4 = 1, adjust = FALSE)
+  coef4 = 1, adjust = FALSE, forced = TRUE)
 }
 \arguments{
 \item{data}{a data frame with all atmospherics variables}
@@ -15,6 +15,8 @@ EGB(data, func = "-", coef1 = 0.84, coef2 = 21, coef3 = 0.22,
 \item{coef1, coef2, coef3, coef4}{Scheme coeficients}
 
 \item{adjust}{FALSE, TRUE if nonlinear least square adjusting wanted}
+
+\item{forced}{Forced adjust, default TRUE}
 }
 \value{
 a vector with emissivity estimatives
@@ -27,4 +29,3 @@ Gabathuler M, Marty CA, Hanselmann KW (2001) Parameterization
 of incoming longwave radiation in high-mountain environments.
 Phys Geogr 22,99–114
 }
-

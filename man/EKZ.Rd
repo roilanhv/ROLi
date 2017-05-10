@@ -5,7 +5,7 @@
 \title{Emissivity from atmosphere}
 \usage{
 EKZ(data, func = "-", coef1 = 0.23, coef2 = 0.484, coef3 = 1/8,
-  coef4 = 0.22, coef5 = 1, adjust = FALSE)
+  coef4 = 0.22, coef5 = 1, adjust = FALSE, forced = TRUE)
 }
 \arguments{
 \item{data}{a data frame with all atmospherics variables}
@@ -15,6 +15,8 @@ EKZ(data, func = "-", coef1 = 0.23, coef2 = 0.484, coef3 = 1/8,
 \item{coef1, coef2, coef3, coef4, coef5}{Scheme coeficients}
 
 \item{adjust}{FALSE, TRUE if nonlinear least square adjusting wanted}
+
+\item{forced}{Forced adjust, default TRUE}
 }
 \value{
 a vector with emissivity estimatives
@@ -28,4 +30,3 @@ EAC, Abe-Ouchi A (1994) Parameterization of global and
 longwave incoming radiation for the Greenland Ice Sheet. Glob
 Planet Chang 9:143–164
 }
-

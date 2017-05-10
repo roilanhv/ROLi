@@ -5,7 +5,7 @@
 \title{Emissivity from atmosphere}
 \usage{
 ESW(data, func = "-", coef1 = 9.2e-06, coef2 = 0.22, coef3 = 1,
-  adjust = FALSE)
+  adjust = FALSE, forced = TRUE)
 }
 \arguments{
 \item{data}{a data frame with all atmospherics variables}
@@ -15,6 +15,8 @@ ESW(data, func = "-", coef1 = 9.2e-06, coef2 = 0.22, coef3 = 1,
 \item{coef1, coef2, coef3}{Scheme coeficients}
 
 \item{adjust}{FALSE, TRUE if nonlinear least square adjusting wanted}
+
+\item{forced}{Forced adjust, default TRUE}
 }
 \value{
 a vector with emissivity estimatives
@@ -26,4 +28,3 @@ Emissivity from atmosphere
 Swinbank WC (1963) Long-wave radiation from clear skies. Q J Roy
 Meteor Soc 89:339–348
 }
-

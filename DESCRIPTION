@@ -18,8 +18,8 @@ Imports:
     zoo,
     parallel,
     minpack.lm
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.1
 Suggests: knitr,
     rmarkdown
 URL: http://github.com/roylanhv/longwaveR
-BugReports:	http://github.com/roylanhv/longwaveR/issues
+BugReports: http://github.com/roylanhv/longwaveR/issues

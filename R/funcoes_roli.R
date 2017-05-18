@@ -14,11 +14,11 @@
 ##' @references Black JN (1956) The distribution of solar radiation over the Earth's surface.
 ##' Arch Meteor Geophy B 7:165–189
 ##' 
-    CQB <- function(data){
-        a <- maxlim(with(data,0.34^2 + 4 * 0.458 * (0.803-K)),max_ = Inf)
-        a <- ifelse(is.infinite(a),NA,a)
-        maxlim( ( 0.34-sqrt(a) ) / (-2 * 0.458))
-    }  # Quadratic regression of Black(1956)
+CQB <- function(data){
+    a <- maxlim(with(data,0.34^2 + 4 * 0.458 * (0.803-K)),max_ = Inf)
+    a <- ifelse(is.infinite(a),NA,a)
+    maxlim( ( 0.34-sqrt(a) ) / (-2 * 0.458))
+}  # Quadratic regression of Black(1956)
     
 ##' Amount of cloud estimatives functions.
 ##' @param data a data frame with all atmospherics variables
@@ -1337,7 +1337,6 @@ epr <- function(es,Ta,rh,cp,
 EST <- function(data,
                 func = "-",
                 coef1 = 1.08,
-                coef2 = 2016, 
                 coef3 = 0.22, 
                 coef4 = 1.0, 
                 adjust = FALSE,
@@ -1346,17 +1345,17 @@ EST <- function(data,
     
     if(func != "-"){
         data$cp <- do.call(func , args = list(data = data)) 
-        start.coefs <- c(c1 = coef1,c2 = coef2, ct = coef3, ce= coef4)
+        start.coefs <- c(c1 = coef1, ct = coef3, ce= coef4)
     } else { 
         data$cp <- 0
-        start.coefs <- c(c1 = coef1,c2 = coef2)
+        start.coefs <- c(c1 = coef1)
     }
     
     if(adjust){
         
         if(func != "-"){
             
-            nls.out <- try(nls( Ofun(Li,Ta) ~ est(es,Ta,rh,cp,c1,c2,ct,ce),
+            nls.out <- try(nls( Ofun(Li,Ta) ~ est(es,Ta,rh,cp,c1,ct,ce),
                                 data = data,  start = start.coefs ),silent = TRUE)
             
             if(forced){
@@ -1364,7 +1363,7 @@ EST <- function(data,
                     
                     resEOfun <- function(par , idata = data) {
                         idata <- cbind(idata,data.frame(t(par)))
-                        out <- with(idata, Ofun(Li,Ta) - est(es,Ta,rh,cp,c1,c2,ct,ce))
+                        out <- with(idata, Ofun(Li,Ta) - est(es,Ta,rh,cp,c1,ct,ce))
                         out[!is.na(out)]  }
                     
                     nls.out <- 
@@ -1375,7 +1374,7 @@ EST <- function(data,
                 }
             }
         } else {
-            nls.out <- try(nls( Ofun(Li,Ta) ~ est(es,Ta,rh,cp,c1,c2),
+            nls.out <- try(nls( Ofun(Li,Ta) ~ est(es,Ta,rh,cp,c1),
                                 data = data, 
                                 start = start.coefs ),silent = TRUE)
             
@@ -1384,7 +1383,7 @@ EST <- function(data,
                     
                     resEOfun <- function(par , idata = data) {
                         idata <- cbind(idata,data.frame(t(par)))
-                        out <- with(idata, Ofun(Li,Ta) - est(es,Ta,rh,cp,c1,c2))
+                        out <- with(idata, Ofun(Li,Ta) - est(es,Ta,rh,cp,c1))
                         out[!is.na(out)]  }
                     
                     nls.out <- 
@@ -1414,7 +1413,7 @@ EST <- function(data,
         }
     } else {
         
-        return( with(data,est(es,Ta,rh,cp,c1 = coef1,c2 = coef2, ct = coef3, ce = coef4)) )    
+        return( with(data,est(es,Ta,rh,cp,c1 = coef1, ct = coef3, ce = coef4)) )    
         
     }
     
@@ -1422,11 +1421,10 @@ EST <- function(data,
 
 est <- function(es,Ta,rh,cp,
                 c1 = 1.08, 
-                c2 = 2016,
                 ct = 0.22,
                 ce = 1.0){
     
-    maxlim(c1*(1.-exp(-es^(Ta/c2)))*(1.0+ct*cp^ce))
+    maxlim(c1*(1.-exp(-es^(Ta/2016)))*(1.0+ct*cp^ce))
     
 }
 

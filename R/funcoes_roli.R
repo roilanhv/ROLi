@@ -1324,7 +1324,7 @@ epr <- function(es,Ta,rh,cp,
 ##' Emissivity from atmosphere
 ##' @param data a data frame with all atmospherics variables
 ##' @param func a function for amount of cloud 
-##' @param coef1,coef2,coef3,coef4 Scheme coeficients 
+##' @param coef1,coef3,coef4 Scheme coeficients 
 ##' @param adjust FALSE, TRUE if nonlinear least square adjusting wanted
 ##' @param forced Forced adjust, default TRUE
 ##' @return a vector with emissivity estimatives

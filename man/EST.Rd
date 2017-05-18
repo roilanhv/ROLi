@@ -4,15 +4,15 @@
 \alias{EST}
 \title{Emissivity from atmosphere}
 \usage{
-EST(data, func = "-", coef1 = 1.08, coef2 = 2016, coef3 = 0.22,
-  coef4 = 1, adjust = FALSE, forced = TRUE)
+EST(data, func = "-", coef1 = 1.08, coef3 = 0.22, coef4 = 1,
+  adjust = FALSE, forced = TRUE)
 }
 \arguments{
 \item{data}{a data frame with all atmospherics variables}
 
 \item{func}{a function for amount of cloud}
 
-\item{coef1, coef2, coef3, coef4}{Scheme coeficients}
+\item{coef1, coef3, coef4}{Scheme coeficients}
 
 \item{adjust}{FALSE, TRUE if nonlinear least square adjusting wanted}
 

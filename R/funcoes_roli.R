@@ -1324,7 +1324,7 @@ epr <- function(es,Ta,rh,cp,
 ##' Emissivity from atmosphere
 ##' @param data a data frame with all atmospherics variables
 ##' @param func a function for amount of cloud 
-##' @param coef1,coef3,coef4 Scheme coeficients 
+##' @param coef1,coef2,coef3 Scheme coeficients 
 ##' @param adjust FALSE, TRUE if nonlinear least square adjusting wanted
 ##' @param forced Forced adjust, default TRUE
 ##' @return a vector with emissivity estimatives
@@ -1337,15 +1337,14 @@ epr <- function(es,Ta,rh,cp,
 EST <- function(data,
                 func = "-",
                 coef1 = 1.08,
-                coef3 = 0.22, 
-                coef4 = 1.0, 
+                coef2 = 0.22, 
+                coef3 = 1.0, 
                 adjust = FALSE,
                 forced = TRUE){ 
     
-    
     if(func != "-"){
         data$cp <- do.call(func , args = list(data = data)) 
-        start.coefs <- c(c1 = coef1, ct = coef3, ce= coef4)
+        start.coefs <- c(c1 = coef1, ct = coef2, ce= coef3)
     } else { 
         data$cp <- 0
         start.coefs <- c(c1 = coef1)
@@ -1373,7 +1372,9 @@ EST <- function(data,
                                control = nls.lm.control(nprint = 1,maxiter = 75))
                 }
             }
+            
         } else {
+            
             nls.out <- try(nls( Ofun(Li,Ta) ~ est(es,Ta,rh,cp,c1),
                                 data = data, 
                                 start = start.coefs ),silent = TRUE)
@@ -1396,7 +1397,7 @@ EST <- function(data,
             
         }   
         
-        if(class(nls.out) == "try-error"){
+        if(class(nls.out) != "try-error"){
             new.coefs <- coef(nls.out) %>%
                 setNames(paste0("coef",1:length(.)))
             
@@ -1413,7 +1414,7 @@ EST <- function(data,
         }
     } else {
         
-        return( with(data,est(es,Ta,rh,cp,c1 = coef1, ct = coef3, ce = coef4)) )    
+        return( with(data,est(es,Ta,rh,cp,c1=coef1,ct=coef2,ce=coef3)) )    
         
     }
     

@@ -576,7 +576,7 @@ edo <- function(es, Ta,rh,cp,
 ##' of incoming longwave radiation in high-mountain environments.
 ##' Phys Geogr 22,99–114
 EGB <- function(data,
-                func = "-",
+                func = "-",#func = "CQB"
                 coef1 = 0.84, 
                 coef2 = 21.,
                 coef3 = 0.22, 
@@ -587,10 +587,10 @@ EGB <- function(data,
     
     if(func != "-"){
         data$cp <- do.call(func , args = list(data = data)) 
-        start.coefs <- list(c1 = coef1, c2 = coef2, ct = coef3, ce = coef4)
+        start.coefs <- c(c1 = coef1, c2 = coef2, ct = coef3, ce = coef4)
     } else { 
         data$cp <- 0
-        start.coefs <- list(c1 = coef1, c2 = coef2)
+        start.coefs <- c(c1 = coef1, c2 = coef2)
     }
     
     if(adjust){
@@ -665,10 +665,15 @@ egb <- function(es,Ta,rh,cp,K,
                 c2 = 0.066,
                 ct = 0.22,
                 ce = 1.0){
-    sigma <- 5.67051*10^(-8)
-    a <- (c1*(rh-68))/(sigma*Ta^4)
+    
+    sigmaT <- 5.67051*10^(-8)
+    
+    a <- (c1*(rh-68))/(sigmaT*(Ta^4))
+    
     b <- (1.- c2*K/Ta)^4
+    
     return( maxlim( (a+b)*(1.+ct*cp^ce)) )
+    
 }
 
 ##' Emissivity from atmosphere

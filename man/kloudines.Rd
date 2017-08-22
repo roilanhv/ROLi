@@ -26,4 +26,3 @@ Incoming solar radiation atenuattion (K)
 \author{
 Roilan Hernandez
 }
-

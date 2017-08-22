@@ -5,8 +5,7 @@
 \title{Emissivity from atmosphere}
 \usage{
 EDO(data, func = "-", coef1 = 59.38, coef2 = 113.7, coef3 = 96.96,
-  coef4 = 0.22, coef5 = 1, adjust = FALSE, method = "non-linear",
-  nsample = 100, max_iter = 10, stats = "rmse")
+  coef4 = 0.22, coef5 = 1, adjust = FALSE, forced = TRUE)
 }
 \arguments{
 \item{data}{a data frame with all atmospherics variables}
@@ -17,18 +16,7 @@ EDO(data, func = "-", coef1 = 59.38, coef2 = 113.7, coef3 = 96.96,
 
 \item{adjust}{FALSE, TRUE if nonlinear least square adjusting wanted}
 
-\item{method}{"non-linear" (default) for Non linear Least Square adjust, 
-"montecarlo" for MonteCarlo optimization. Later be usseful when a NLS can't 
-adjust observed data allowing optimization.}
-
-\item{nsample}{population number evaluated in each iteration 
-(only when method = "montecarlo").}
-
-\item{max_iter}{maximun number of iterations (only when method = "montecarlo").}
-
-\item{stats}{statistical function to be minimized (only when method = "montecarlo"),
-NOTE: the best result should be 0.0 (ex., if stats = r (correlation), then transform to 
-rMod = 1.0 - r, so the best result is when r== 1.0, so rMod == 0.0)}
+\item{forced}{Forced adjust, default TRUE}
 }
 \value{
 a vector with emissivity estimatives
@@ -41,4 +29,3 @@ Dilley , A. C. (1998) Estimating downward clear-sky long-wave
 irradiance at the surface from screen temperature and precpitable water. 
 Q. J. R. Meteorol. Soc., 96, 313-319.
 }
-

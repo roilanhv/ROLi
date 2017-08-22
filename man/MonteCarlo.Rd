@@ -37,4 +37,3 @@ if its performance is better than a half of total combinations 'stats' value. Fi
 combination with best performance prevales and is considered the optimization. Furthermore, 
 a 'nsample', 'max_iter' and 'stats' will define a result.
 }
-

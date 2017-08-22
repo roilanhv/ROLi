@@ -17,4 +17,3 @@ data_li
 Downward longwave radiation observed and calculated
 }
 \keyword{datasets}
-

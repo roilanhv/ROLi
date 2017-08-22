@@ -20,4 +20,3 @@ NRMSE(sim, obs, na.rm = TRUE, norm = "maxmin")
 \description{
 Normalized Root Mean Square Error
 }
-

@@ -16,4 +16,3 @@ maxlim(i, max_ = 1, min_ = 0)
 \description{
 Limits vector values between interval
 }
-

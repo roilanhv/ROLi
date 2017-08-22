@@ -21,6 +21,9 @@
 ##' NOTE: the best result should be 0.0 (ex., if stats = r (correlation), then transform to 
 ##' rMod = 1.0 - r, so the best result is when r== 1.0, so rMod == 0.0)
 ##' @param log_file path to a log file
+##' @param ret_coefs Return coeficients from adjusting, in this case a list contein both information:
+##' estimated Li and coeficients used or determined.
+##' @param forced Forced adjust, default TRUE
 ##' @return Vector with Downward Longwave Radiation time series
 ##' @export
 ##' @import readr
@@ -32,54 +35,17 @@ get.Li <- function(data_,
                    nsample = 1000,
                    max_iter = 10,
                    stats = "rmse",
-                   log_file = NULL){
+                   log_file = NULL, 
+                   ret_coefs = FALSE,
+                   forced = TRUE){
     
     sigma <- 5.67051*10^(-8) # W m^(-2) T^(-4)
     
         message("Combining emissivity: ", E_fun, ", whith cloud from: ", C_fun)
     
-        if(adjust){
-            message("      Making adjusting.")
-            
-            if( method[1] == "non-linear" ){
-                message("           Non-Linear Adjusting")
-                emis_ <- try( do.call(E_fun,list(data=data_, func = C_fun, adjust = adjust)),
+            emis_ <- try( do.call(E_fun,list(data=data_, func = C_fun, adjust = adjust,forced = forced)),
                               silent = TRUE)
                 
-            } else if ( method[1] == "montecarlo" ){ 
-                
-                message("           MonteCarlo Adjusting")
-                emis_ <- do.call(E_fun,list(data=data_, 
-                                            func = C_fun, 
-                                            adjust = adjust,
-                                            nsample = nsample,
-                                            method = "montecarlo",
-                                            max_iter = max_iter,
-                                            stats = stats))
-                
-            }
-            
-            
-            if(class(emis_) == "try-error" & !is.na(method[2] == "montecarlo") ){
-                
-                message("           Error in NLS, passing to MonteCarlo approach >")
-                emis_ <- do.call(E_fun,list(data=data_, 
-                                            func = C_fun, 
-                                            adjust = adjust,
-                                            nsample = nsample,
-                                            method = "montecarlo",
-                                            max_iter = max_iter,
-                                            stats = stats))
-                
-            }
-            
-        } else {
-            
-            emis_ <- try( do.call(E_fun,list(data=data_, func = C_fun)), silent = TRUE)
-            
-        }
-        
-        
         if(class(emis_) == "try-error") {
             emis_ <- list(emiss = NA,coefs = NA)
             roli_est <-  with(data_, emis_$emiss*sigma*Ta^4)
@@ -100,7 +66,14 @@ get.Li <- function(data_,
     
     out_rol <- data.frame(ROL = roli_est) 
     names(out_rol) <- paste(E_fun,C_fun,sep = "_")
-    out_rol
+    
+    if(ret_coefs){
+        return(list(EMISS = out_rol,
+                    COEFS = emis_$coefs))
+    } else {
+        return(out_rol)   
+    }
+    
 }
 
 
@@ -224,6 +197,7 @@ CalcStats <- function(data_li,
 ##' @param stats statistical function to be minimized (only when method = "montecarlo"),
 ##' NOTE: the best result should be 0.0 (ex., if stats = r (correlation), then transform to 
 ##' rMod = 1.0 - r, so the best result is when r== 1.0, so rMod == 0.0)
+##' @param forced Forced adjust, default TRUE
 #' @return Data frame with Li observed and all combintions of schemes for calculations of Li
 #' @author Roilan Hernandez
 #' @export
@@ -232,13 +206,14 @@ CalcStats <- function(data_li,
 get.AllSchems <- function(data,
                           Ovrcst_sch = c("CQB","CKC","CCB","CKZ","CWU","CJG", "CLM", "CFG"),
                           Emiss_sch  = c("EAN","EBR","EBT","EDO","EGR","EIJ","EID","EKZ","ENM",
-                                         "EPR","EST","ESW"),
+                                         "EPR","EST","ESW","EAI"),
                           adjust = FALSE,
                           method = "non-linear",
                           nsample = 1000,
                           max_iter = 10,
                           stats = "rmse",
-                          log_file = NULL){
+                          log_file = NULL,
+                          forced = TRUE){
     
     roli_comb <- rbind(expand.grid(Emiss_sch,"-"), expand.grid(Emiss_sch, Ovrcst_sch) )
     
@@ -267,7 +242,8 @@ get.AllSchems <- function(data,
                    nsample = nsample,
                    max_iter = max_iter,
                    stats = stats,
-                   log_file = log_file)
+                   log_file = log_file,
+                   forced = forced)
             
             return(tmp.Li)
             
@@ -363,6 +339,7 @@ run_fun <- function(E_fun,data, func,new.coefs){
 ##' @param stats qkbf
 ##' @param obs ADKVN
 ##' @param sim SLKDJhvb
+##' @param ... Other argument for stats, see HydroGOF package
 ##' @import hydroGOF
 ##' @export
 run_stats <- function(stats,obs,sim, ...){

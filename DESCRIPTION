@@ -16,9 +16,10 @@ Imports:
     readr,
     openair,
     zoo,
-    parallel
-RoxygenNote: 5.0.1
+    parallel,
+    minpack.lm
+RoxygenNote: 6.0.1
 Suggests: knitr,
     rmarkdown
-URL: http://github.com/roylanhv/ROLi
-BugReports:	http://github.com/roylanhv/ROLi/issues
+URL: http://github.com/roylanhv/longwaveR
+BugReports: http://github.com/roylanhv/longwaveR/issues

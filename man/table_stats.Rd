@@ -16,4 +16,3 @@ table_stats(data_, statistic = "rmse", round = 2)
 \description{
 Calculate statistical index
 }
-

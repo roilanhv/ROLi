@@ -19,4 +19,3 @@ Amount of cloud estimatives functions.
 Kasten, F.  Czeplak, G. (1980) Solar and terrestrial radiation
 dependent on the amount and type of cloud. Sol Energy 24:177–189
 }
-

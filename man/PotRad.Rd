@@ -24,4 +24,3 @@ Potencial Radiation from date vector
 \author{
 Roilan Hernandez
 }
-

@@ -5,8 +5,7 @@
 \title{Emissivity from atmosphere}
 \usage{
 EBR(data, func = "-", coef1 = 0.51, coef2 = 0.066, coef3 = 0.22,
-  coef4 = 1, adjust = FALSE, method = "non-linear", nsample = 100,
-  max_iter = 10, stats = "rmse")
+  coef4 = 1, adjust = FALSE, forced = TRUE)
 }
 \arguments{
 \item{data}{a data frame with all atmospherics variables}
@@ -17,18 +16,7 @@ EBR(data, func = "-", coef1 = 0.51, coef2 = 0.066, coef3 = 0.22,
 
 \item{adjust}{FALSE, TRUE if nonlinear least square adjusting wanted}
 
-\item{method}{"non-linear" (default) for Non linear Least Square adjust, 
-"montecarlo" for MonteCarlo optimization. Later be usseful when a NLS can't 
-adjust observed data allowing optimization.}
-
-\item{nsample}{population number evaluated in each iteration 
-(only when method = "montecarlo").}
-
-\item{max_iter}{maximun number of iterations (only when method = "montecarlo").}
-
-\item{stats}{statistical function to be minimized (only when method = "montecarlo"),
-NOTE: the best result should be 0.0 (ex., if stats = r (correlation), then transform to 
-rMod = 1.0 - r, so the best result is when r== 1.0, so rMod == 0.0)}
+\item{forced}{Forced adjust, default TRUE}
 }
 \value{
 a vector with emissivity estimatives
@@ -40,4 +28,3 @@ Emissivity from atmosphere
 Brunt D (1932) Notes on radiation in the atmosphere I. Q J Roy
 Meteor Soc 58:389–420
 }
-

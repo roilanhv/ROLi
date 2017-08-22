@@ -29,4 +29,3 @@ smooth clearness index
 \author{
 Roilan Hernandez
 }
-

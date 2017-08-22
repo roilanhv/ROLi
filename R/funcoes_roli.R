@@ -152,11 +152,27 @@ EAN <- function(data,
         
     if(adjust & method == "non-linear"){
 
-    tmp.nls <-
         nls( Li/(sigma*Ta^4) ~ 
                  maxlim( (coef1 - coef2*( 10^(-coef3*es)))*(1+ coef4 * cp^coef5)  ),
              data = data, 
-             start =  start.coefs)
+        tmp.nls <- try(
+                 start =  start.coefs) )
+        
+        if(class(tmp.nls) == "try-error"){
+            
+            resid_fun <-  function(data_=data,par = unlist(start.coefs) ){
+                with(data_, maxlim(Li/(sigma*Ta^4)) -
+                         maxlim( (par[1]- par[2]*( 10^(-par[3]*es))) ))
+            }
+            
+            nls.out <- minpack.lm::nls.lm(par = unlist(start.coefs), 
+                                          fn = resid_fun, 
+                                          obs = data$emiss, #0.316275121 -0.798840841  0.004250773
+                                          # obs = sim_dnoisy,  #0.903110335 0.081342546 0.001172852
+                                          ea = data$es, 
+                                          control = minpack.lm::nls.lm.control(nprint=1, maxiter = 1000))
+            
+        }
         
         new.coefs <- coef(tmp.nls) 
         new.emiss <-
